@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { z } from 'zod';
 
 type StoreRow = {
   id: string;
@@ -57,24 +58,32 @@ export async function POST(req: Request) {
 
   const body = await req.json().catch(() => ({} as unknown));
   const payload = typeof body === 'object' && body !== null ? body as Record<string, unknown> : {};
-  const name = typeof payload.name === 'string' ? payload.name.trim() : '';
 
-  if (!name) {
-    return NextResponse.json({ error: 'Missing name' }, { status: 400 });
+  const StoreSchema = z.object({
+    name: z.string().min(1, 'Missing name'),
+    slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).optional().nullable().or(z.literal('')).optional(),
+    status: z.string().optional().transform((s) => (typeof s === 'string' ? s.trim().toLowerCase() : 'draft')),
+    meta: z.record(z.string(), z.unknown()).optional(),
+  });
+
+  const parsed = StoreSchema.safeParse(payload);
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid payload', details: parsed.error.flatten() }, { status: 400 });
   }
 
-  const slug = normalizeSlug(typeof payload.slug === 'string' ? payload.slug : null);
-  if (payload.slug && !slug) {
+  const { name } = parsed.data;
+  const slug = normalizeSlug(typeof parsed.data.slug === 'string' ? parsed.data.slug : null);
+  if (parsed.data.slug && !slug) {
     return NextResponse.json({ error: 'Invalid slug format' }, { status: 400 });
   }
 
-  const status = typeof payload.status === 'string' ? payload.status.trim().toLowerCase() : 'draft';
+  const status = typeof parsed.data.status === 'string' ? parsed.data.status : 'draft';
   if (!STORE_STATUSES.has(status)) {
     return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
   }
 
-  const meta = payload.meta ? asRecord(payload.meta) : null;
-  if (payload.meta && !meta) {
+  const meta = parsed.data.meta ? asRecord(parsed.data.meta) : null;
+  if (parsed.data.meta && !meta) {
     return NextResponse.json({ error: 'Invalid meta' }, { status: 400 });
   }
 

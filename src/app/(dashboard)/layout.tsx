@@ -27,11 +27,42 @@ function cn(...inputs: (string | undefined | null | false)[]) {
   return twMerge(clsx(inputs));
 }
 
-const sidebarItems = [
+const sidebarItemsUser = [
   {
     title: "Chat IA",
     href: "/chat",
     icon: MessageSquare,
+    description: "Guía paso a paso con IA",
+  },
+  {
+    title: "Mis Investigaciones",
+    href: "/research-history",
+    icon: LayoutDashboard,
+    description: "Historial de investigaciones",
+  },
+  {
+    title: "Mis Creaciones",
+    href: "/creations",
+    icon: LayoutDashboard,
+    description: "Tiendas y landings creadas",
+  },
+  {
+    title: "Configuración",
+    href: "/settings",
+    icon: Settings,
+  },
+];
+
+const sidebarItemsAdmin = [
+  {
+    title: "Chat IA",
+    href: "/chat",
+    icon: MessageSquare,
+  },
+  {
+    title: "Mis Investigaciones",
+    href: "/research-history",
+    icon: LayoutDashboard,
   },
   {
     title: "Mis Tiendas",
@@ -103,7 +134,7 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-black overflow-hidden">
-      {/* Sidebar */}
+      {/* Desktop Sidebar */}
       <motion.aside
         initial={{ width: 280 }}
         animate={{ width: isSidebarOpen ? 280 : 80 }}
@@ -130,7 +161,7 @@ export default function DashboardLayout({
         </div>
 
         <nav className="flex-1 px-4 py-4 space-y-2">
-          {sidebarItems.filter((item) => !item.adminOnly || isAdmin).map((item) => {
+          {(isAdmin ? sidebarItemsAdmin : sidebarItemsUser).map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
               <Link
@@ -171,12 +202,78 @@ export default function DashboardLayout({
         </div>
       </motion.aside>
 
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 md:hidden z-30"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Mobile Sidebar */}
+      <motion.aside
+        initial={{ x: -280 }}
+        animate={{ x: isSidebarOpen ? 0 : -280 }}
+        className="fixed left-0 top-0 h-screen w-72 md:hidden flex flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 z-40"
+      >
+        <div className="flex items-center justify-between p-6 h-20">
+          <motion.span 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600"
+          >
+            EcomIA
+          </motion.span>
+          <button
+            onClick={() => setIsSidebarOpen(false)}
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition-colors"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <nav className="flex-1 px-4 py-4 space-y-2">
+          {(isAdmin ? sidebarItemsAdmin : sidebarItemsUser).map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setIsSidebarOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group",
+                  isActive 
+                    ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 font-medium" 
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                )}
+              >
+                <item.icon size={22} className={cn(isActive ? "text-indigo-600 dark:text-indigo-400" : "group-hover:text-gray-900 dark:group-hover:text-white")} />
+                <span>{item.title}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="p-4 border-t border-gray-200 dark:border-gray-800">
+          <button
+            onClick={handleSignOut}
+            className="flex items-center gap-3 px-3 py-3 w-full rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+          >
+            <LogOut size={22} />
+            <span>Cerrar Sesión</span>
+          </button>
+        </div>
+      </motion.aside>
+
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden h-16 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex items-center justify-between px-4 z-10">
           <span className="text-xl font-bold text-indigo-600">EcomIA</span>
-          <button className="p-2 text-gray-600">
+          <button 
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="p-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+          >
             <Menu size={24} />
           </button>
         </div>

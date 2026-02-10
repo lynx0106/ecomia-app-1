@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { resolve4, resolveCname } from 'node:dns/promises';
 import { encryptString } from '@/lib/crypto';
 import { createClient } from '@/lib/supabase/server';
+import { isUserAdmin, hasActiveResearchSession } from '@/lib/auth/server';
 
 type StoreRow = {
   id: string;
@@ -132,6 +133,17 @@ export async function createStore(input: {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) return { error: 'Unauthorized' } as const;
+
+  // Validación: usuarios finales solo pueden crear a través de Chat (con sesión de investigación)
+  const isAdmin = await isUserAdmin(user.id, user.email);
+  if (!isAdmin) {
+    const hasSession = await hasActiveResearchSession(user.id);
+    if (!hasSession) {
+      return {
+        error: 'Debes completar una investigación en Chat IA primero. Los formularios directos son solo para administradores.',
+      } as const;
+    }
+  }
 
   const name = input.name.trim();
   if (!name) return { error: 'Missing name' } as const;

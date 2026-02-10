@@ -17,6 +17,7 @@ type LandingCardProps = {
     created_at: string;
   };
   stores: Array<{ id: string; name: string }>;
+  readOnly?: boolean;
 };
 
 const initialState: LandingFormState = { ok: false, error: undefined };
@@ -47,7 +48,7 @@ function DeleteButton() {
   );
 }
 
-export default function LandingCard({ landing, stores }: LandingCardProps) {
+export default function LandingCard({ landing, stores, readOnly }: LandingCardProps) {
   const [updateState, updateAction] = useActionState(updateLandingFromForm, initialState);
   const [deleteState, deleteAction] = useActionState(deleteLandingFromForm, initialState);
   const { toast } = useToast();
@@ -75,6 +76,27 @@ export default function LandingCard({ landing, stores }: LandingCardProps) {
       lastDeleteRef.current.ok = true;
     }
   }, [toast, deleteState]);
+
+  if (readOnly) {
+    return (
+      <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 space-y-4">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{landing.title}</h3>
+          <p className="text-xs text-gray-500">{landing.slug ? `/l/${landing.slug}` : 'Sin slug'}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
+          <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-2 py-1">{landing.status}</span>
+          {landing.store_id && <span>Store: {landing.store_id}</span>}
+          <span>Creada: {new Date(landing.created_at).toLocaleDateString()}</span>
+          {landing.slug && (
+            <PillLink href={`/l/${landing.slug}`} variant="indigo" size="xs">
+              🌐 Ver en público
+            </PillLink>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 space-y-4">

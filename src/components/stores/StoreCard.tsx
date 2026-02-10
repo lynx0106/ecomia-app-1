@@ -15,6 +15,7 @@ type StoreCardProps = {
     status: string;
     created_at: string;
   };
+  readOnly?: boolean;
 };
 
 const initialState: StoreFormState = { ok: false, error: undefined };
@@ -45,7 +46,7 @@ function DeleteButton() {
   );
 }
 
-export default function StoreCard({ store }: StoreCardProps) {
+export default function StoreCard({ store, readOnly }: StoreCardProps) {
   const [updateState, updateAction] = useActionState(updateStoreFromForm, initialState);
   const [deleteState, deleteAction] = useActionState(deleteStoreFromForm, initialState);
   const { toast } = useToast();
@@ -73,6 +74,24 @@ export default function StoreCard({ store }: StoreCardProps) {
       lastDeleteRef.current.ok = true;
     }
   }, [toast, deleteState]);
+
+  if (readOnly) {
+    return (
+      <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 space-y-4">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{store.name}</h3>
+          <p className="text-xs text-gray-500">{store.slug ? `/${store.slug}` : 'Sin slug'}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
+          <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-2 py-1">{store.status}</span>
+          <span>Creada: {new Date(store.created_at).toLocaleDateString()}</span>
+          <PillLink href={`/s/${store.slug}`} variant="indigo" size="xs">
+            🌐 Ver en público
+          </PillLink>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 space-y-4">

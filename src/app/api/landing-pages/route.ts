@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { z } from 'zod';
 
 type LandingPageRow = {
   id: string;
@@ -58,29 +59,38 @@ export async function POST(req: Request) {
 
   const body = await req.json().catch(() => ({} as unknown));
   const payload = typeof body === 'object' && body !== null ? body as Record<string, unknown> : {};
-  const title = typeof payload.title === 'string' ? payload.title.trim() : '';
 
-  if (!title) {
-    return NextResponse.json({ error: 'Missing title' }, { status: 400 });
+  const LandingSchema = z.object({
+    title: z.string().min(1, 'Missing title'),
+    slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).optional().nullable().or(z.literal('')).optional(),
+    status: z.string().optional().transform((s) => (typeof s === 'string' ? s.trim().toLowerCase() : 'draft')),
+    content: z.record(z.string(), z.unknown()).optional(),
+    store_id: z.string().optional().nullable(),
+  });
+
+  const parsed = LandingSchema.safeParse(payload);
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid payload', details: parsed.error.flatten() }, { status: 400 });
   }
 
-  const slug = normalizeSlug(typeof payload.slug === 'string' ? payload.slug : null);
-  if (payload.slug && !slug) {
+  const title = parsed.data.title;
+  const slug = normalizeSlug(typeof parsed.data.slug === 'string' ? parsed.data.slug : null);
+  if (parsed.data.slug && !slug) {
     return NextResponse.json({ error: 'Invalid slug format' }, { status: 400 });
   }
 
-  const status = typeof payload.status === 'string' ? payload.status.trim().toLowerCase() : 'draft';
+  const status = typeof parsed.data.status === 'string' ? parsed.data.status : 'draft';
   if (!LANDING_STATUSES.has(status)) {
     return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
   }
 
-  const content = payload.content ? asRecord(payload.content) : null;
-  if (payload.content && !content) {
+  const content = parsed.data.content ? asRecord(parsed.data.content) : null;
+  if (parsed.data.content && !content) {
     return NextResponse.json({ error: 'Invalid content' }, { status: 400 });
   }
 
-  const storeId = typeof payload.store_id === 'string' && payload.store_id.trim()
-    ? payload.store_id.trim()
+  const storeId = typeof parsed.data.store_id === 'string' && parsed.data.store_id.trim()
+    ? parsed.data.store_id.trim()
     : null;
   if (storeId) {
     const { data: store, error: storeError } = await supabase

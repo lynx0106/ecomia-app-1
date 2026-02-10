@@ -105,6 +105,30 @@ export async function POST(req: Request) {
     );
   }
 
+  // Basic rate limiting per user (in-memory, best-effort)
+  try {
+    const uid = user.id;
+    const WINDOW_MS = 60 * 1000; // 1 minute
+    const MAX_REQUESTS = 12; // max requests per window
+    // global rate store
+    const storeKey = '__ECOMIA_RATE_STORE__';
+    if (!(globalThis as any)[storeKey]) {
+      (globalThis as any)[storeKey] = new Map<string, number[]>();
+    }
+    const rateStore: Map<string, number[]> = (globalThis as any)[storeKey];
+    const now = Date.now();
+    const timestamps = rateStore.get(uid) || [];
+    const recent = timestamps.filter((t) => now - t < WINDOW_MS);
+    if (recent.length >= MAX_REQUESTS) {
+      return new Response(JSON.stringify({ error: 'Rate limit exceeded' }), { status: 429, headers: { 'Content-Type': 'application/json' } });
+    }
+    recent.push(now);
+    rateStore.set(uid, recent);
+  } catch (e) {
+    // ignore rate limiter errors to avoid breaking chat
+    console.warn('Rate limiter error', e);
+  }
+
   const effectiveUserId = user.id;
   const writeClient = supabase;
   const isDev = process.env.NODE_ENV !== 'production';

@@ -54,14 +54,14 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider value={value}>
       {children}
       <div
-        className="fixed right-6 top-6 z-50 flex flex-col gap-3"
+        className="fixed inset-x-4 md:right-6 md:left-auto top-6 z-50 flex flex-col gap-3"
         role="status"
         aria-live="polite"
       >
         {toasts.map((item) => (
           <div
             key={item.id}
-            className={`w-80 rounded-xl border px-4 py-3 shadow-lg backdrop-blur-sm ${
+            className={`rounded-xl border px-4 py-3 shadow-lg backdrop-blur-sm max-w-sm md:w-80 ${
               item.tone === 'success'
                 ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
                 : item.tone === 'error'
@@ -78,7 +78,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               </div>
               <button
                 type="button"
-                className="text-xs text-gray-500 hover:text-gray-700"
+                className="text-xs text-gray-500 hover:text-gray-700 flex-shrink-0"
                 onClick={() => dismiss(item.id)}
               >
                 x
