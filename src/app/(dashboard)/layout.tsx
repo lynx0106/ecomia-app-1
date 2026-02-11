@@ -23,6 +23,7 @@ import { twMerge } from "tailwind-merge";
 import { ToastProvider } from "@/components/ui/ToastProvider";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import PillLink from "@/components/ui/PillLink";
+import { InteractiveTour } from "@/components/onboarding/InteractiveTour";
 import { logger } from "@/lib/logging";
 
 function cn(...inputs: (string | undefined | null | false)[]) {
@@ -162,13 +163,22 @@ export default function DashboardLayout({
           </button>
         </div>
 
-        <nav className="flex-1 px-4 py-4 space-y-2">
+        <nav className="flex-1 px-4 py-4 space-y-2" data-tour="sidebar">
           {(isAdmin ? sidebarItemsAdmin : sidebarItemsUser).map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            
+            // Map hrefs to tour attributes
+            let tourAttribute = '';
+            if (item.href === '/chat') tourAttribute = 'chat';
+            else if (item.href === '/stores') tourAttribute = 'stores';
+            else if (item.href === '/landing') tourAttribute = 'landing';
+            else if (item.href === '/research-history' || item.href === '/research') tourAttribute = 'research';
+            
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                data-tour={tourAttribute}
                 className={cn(
                   "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group",
                   isActive 
@@ -237,11 +247,20 @@ export default function DashboardLayout({
         <nav className="flex-1 px-4 py-4 space-y-2">
           {(isAdmin ? sidebarItemsAdmin : sidebarItemsUser).map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            
+            // Map hrefs to tour attributes
+            let tourAttribute = '';
+            if (item.href === '/chat') tourAttribute = 'chat';
+            else if (item.href === '/stores') tourAttribute = 'stores';
+            else if (item.href === '/landing') tourAttribute = 'landing';
+            else if (item.href === '/research-history' || item.href === '/research') tourAttribute = 'research';
+            
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsSidebarOpen(false)}
+                data-tour={tourAttribute}
                 className={cn(
                   "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group",
                   isActive 
@@ -288,6 +307,9 @@ export default function DashboardLayout({
             });
           }}
         >
+          {/* Interactive Tour - Onboarding */}
+          <InteractiveTour />
+          
           <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-black p-4 md:p-8">
             <div className="max-w-7xl mx-auto">
             {pathname !== "/dashboard" && (
