@@ -86,36 +86,45 @@ Resultado Actual: ❌ Sigue mostrando "Comenzar Ahora"
 ```
 **Conclusión**: Vercel NO está recompilando.
 
-## Causa Probable
+## ✅ Causa Raíz Identificada
 
-1. **Vercel No Detecta Commits**: La conexión GitHub-Vercel podría estar rota
-2. **Build Status Cached**: Vercel podría tener un build anterior cacheado y lo está sirviendo
-3. **Rama Incorrecta**: Vercel podría estar usando una rama diferente (no main)
-4. **Deploy Infrastructure Issue**: Problema en la infraestructura de Vercel
+**Vercel está conectado al repositorio EQUIVOCADO:**
+- ✅ Tú haces push a: `https://github.com/lynx0106/ecomia-app-1` (origin)
+- ❌ Vercel sigue a: `https://github.com/lynxia25-hub/ecomia-app` (upstream)
+- ❌ No tienes permisos de push en upstream
 
-## Próximas Acciones Requeridas
+**Prueba realizada:**
+```bash
+git remote -v
+# origin   https://github.com/lynx0106/ecomia-app-1.git (tu repositorio)
+# upstream https://github.com/lynxia25-hub/ecomia-app (donde Vercel apunta)
 
-### Opción 1: Dashboard de Vercel (Recomendado)
-1. Ir a https://vercel.com/dashboard
-2. Ir a proyecto "ecomia-app"
-3. Ir a "Project Settings" → "Build & Deployment"
-4. Verificar que:
-   - "Git Repository" está conectado a `main` branch
-   - "Auto Deploy On Push" está habilitado
-   - Logs del último build NO muestran errores
-5. Hacer click "Redeploy" en la última deployment
+git log origin/main --oneline | head -1
+# 38540c1 docs: Add Vercel reconnection guide
 
-### Opción 2: Force Clean Rebuild
-Si Opción 1 no funciona:
-1. En Vercel Dashboard
-2. Variables de entorno → Agregar `VERCEL_FORCE_REBUILD=true`
-3. Hacer push de un commit pequeño
-4. Eliminar la variable de entorno
+git log upstream/main --oneline | head -1
+# 6ec24fb fix: elimina línea duplicada (MUCHO MÁS VIEJO)
+```
 
-### Opción 3: Reconectar Repositorio
-Si Opción 2 no funciona:
-1. Ir a Project Settings → Git
-2. Reconectar el repositorio GitHub
+Esto explica perfectamente por qué Vercel nunca actualiza - está watching a un repositorio diferente.
+
+## ✅ Solución - Pasos a Seguir
+
+**Ver [VERCEL_RECONNECT_GUIDE.md](VERCEL_RECONNECT_GUIDE.md) para instrucciones detalladas.**
+
+En resumen:
+1. Ve a https://vercel.com/dashboard
+2. Abre proyecto "ecomia-app" > Settings > Git
+3. Haz click "Disconnect" en el repositorio actual
+4. Haz click "Connect Repository"
+5. Busca y conecta: `lynx0106/ecomia-app-1`
+6. Selecciona rama `main`
+7. Haz click "Deploy"
+
+**Después de reconectar**, Vercel debería:
+- ✅ Detectar tus commits
+- ✅ Disparar un nuevo build
+- ✅ Desplegar los cambios en 2-3 minutos
 
 ## Código Listo Para Desplegar
 
