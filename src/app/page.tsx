@@ -22,7 +22,7 @@ export default function Home() {
             className="flex items-center justify-center gap-2 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 rounded-full font-semibold text-lg transition-all hover:scale-105 shadow-lg shadow-indigo-600/50"
           >
             <UserPlus size={22} />
-            VERCEL_TEST_PLACEHOLDER_BUTTON_1
+            Crear Cuenta
           </Link>
           
           {/* Iniciar Sesión - Secondary CTA */}
