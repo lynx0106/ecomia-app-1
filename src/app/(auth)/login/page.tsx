@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { motion } from "framer-motion";
 import { Loader2, Mail, ArrowRight, CheckCircle2, Lock } from "lucide-react";
@@ -9,6 +10,7 @@ import { EcomAgentLogo } from "@/components/ui/EcomAgentLogo";
 import Image from "next/image";
 
 export default function LoginPage() {
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
@@ -16,6 +18,18 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Read mode from URL parameters (signup or signin)
+  useEffect(() => {
+    const mode = searchParams?.get('mode');
+    if (mode === 'signup') {
+      setIsSignUp(true);
+      setUsePassword(true);
+    } else if (mode === 'signin') {
+      setIsSignUp(false);
+      setUsePassword(true);
+    }
+  }, [searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

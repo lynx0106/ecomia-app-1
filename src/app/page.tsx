@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, UserPlus, LogIn } from "lucide-react";
 
 export default function Home() {
   return (
@@ -10,25 +10,35 @@ export default function Home() {
         <h1 className="text-6xl font-bold mb-6 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">
           EcomIA
         </h1>
-        <p className="text-xl text-gray-300 mb-8 leading-relaxed">
+        <p className="text-xl text-gray-300 mb-12 leading-relaxed">
           Tu socio inteligente para el comercio electrónico. 
           Crea, gestiona y escala tu negocio con el poder de la IA Generativa.
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          {/* Crear Cuenta - Primary CTA */}
           <Link 
-            href="/login" 
-            className="flex items-center justify-center gap-2 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 rounded-full font-medium transition-all hover:scale-105"
+            href="/login?mode=signup" 
+            className="flex items-center justify-center gap-2 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 rounded-full font-semibold text-lg transition-all hover:scale-105 shadow-lg shadow-indigo-600/50"
           >
-            Comenzar Ahora <ArrowRight size={20} />
+            <UserPlus size={22} />
+            Crear Cuenta
           </Link>
+          
+          {/* Iniciar Sesión - Secondary CTA */}
           <Link 
-            href="/login" 
-            className="flex items-center justify-center px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full font-medium transition-all"
+            href="/login?mode=signin" 
+            className="flex items-center justify-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full font-semibold text-lg transition-all border border-white/30 hover:border-white/50"
           >
+            <LogIn size={22} />
             Iniciar Sesión
           </Link>
         </div>
+
+        {/* Helper text */}
+        <p className="text-sm text-gray-400 mt-8">
+          ¿Nuevo en EcomIA? Comienza gratis. ¿Ya tienes cuenta? Inicia sesión.
+        </p>
       </div>
     </div>
   );
