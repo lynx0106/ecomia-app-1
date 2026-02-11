@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, UserPlus, LogIn } from "lucide-react";
 
-// BUILD_TEST_MARKER_2025_FIX_v1
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white p-4 relative overflow-hidden">
@@ -23,7 +22,7 @@ export default function Home() {
             className="flex items-center justify-center gap-2 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 rounded-full font-semibold text-lg transition-all hover:scale-105 shadow-lg shadow-indigo-600/50"
           >
             <UserPlus size={22} />
-            Crear Cuenta
+            VERCEL_TEST_PLACEHOLDER_BUTTON_1
           </Link>
           
           {/* Iniciar Sesión - Secondary CTA */}
