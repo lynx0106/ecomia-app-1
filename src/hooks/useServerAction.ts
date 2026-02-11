@@ -2,7 +2,7 @@
  * Hook for using server actions with error handling and retry logic
  */
 
-import { useCallback, useTransition, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useToast } from '@/components/ui/ToastProvider';
 import { logger, withRetry } from '@/lib/logging';
 
@@ -26,42 +26,43 @@ export function useServerAction<T, R>(
   options?: UseActionOptions
 ) {
   const { toast, toastError } = useToast();
-  const [isLoading, setIsLoading] = useTransition();
+  const [isLoading, setIsLoading] = useState(false);
 
   const execute = useCallback(
     async (args: T) => {
-      setIsLoading(async () => {
-        try {
-          let result: R;
+      setIsLoading(true);
+      try {
+        let result: R;
 
-          if (options?.retryOptions) {
-            result = await withRetry(() => actionFn(args), options.retryOptions);
-          } else {
-            result = await actionFn(args);
-          }
-
-          if (options?.showSuccessToast !== false) {
-            toast({
-              title: 'Éxito',
-              description: options?.successMessage || 'Operación completada',
-              tone: 'success',
-            });
-          }
-
-          options?.onSuccess?.(result);
-          return result;
-        } catch (error) {
-          logger.error('Server action failed', error instanceof Error ? error : undefined, {
-            action: actionFn.name,
-          });
-
-          toastError(error, actionFn.name);
-          options?.onError?.(error instanceof Error ? error : new Error(String(error)));
-          throw error;
+        if (options?.retryOptions) {
+          result = await withRetry(() => actionFn(args), options.retryOptions);
+        } else {
+          result = await actionFn(args);
         }
-      });
+
+        if (options?.showSuccessToast !== false) {
+          toast({
+            title: 'Éxito',
+            description: options?.successMessage || 'Operación completada',
+            tone: 'success',
+          });
+        }
+
+        options?.onSuccess?.(result);
+        return result;
+      } catch (error) {
+        logger.error('Server action failed', error instanceof Error ? error : undefined, {
+          action: actionFn.name,
+        });
+
+        toastError(error, actionFn.name);
+        options?.onError?.(error instanceof Error ? error : new Error(String(error)));
+        throw error;
+      } finally {
+        setIsLoading(false);
+      }
     },
-    [actionFn, options, setIsLoading, toast, toastError]
+    [actionFn, options, toast, toastError]
   );
 
   return [execute, { isLoading }] as const;
