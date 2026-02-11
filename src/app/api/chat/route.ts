@@ -12,7 +12,7 @@ const groq = createGroq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
-const tvly = tavily({ apiKey: process.env.TAVILY_API_KEY });
+const tvly = tavily({ apiKey: process.env.TAVILY_API_KEY || 'dummy-key-for-build' });
 
 
 type ParsedTable = {
