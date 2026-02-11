@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { getErrorMessage, logger } from '@/lib/logging';
 
 type ToastTone = 'success' | 'error' | 'info';
 
@@ -17,6 +18,7 @@ type ToastItem = ToastInput & {
 
 type ToastContextValue = {
   toast: (input: ToastInput) => void;
+  toastError: (error: unknown, context?: string) => void;
 };
 
 const ToastContext = createContext<ToastContextValue | null>(null);
@@ -48,7 +50,17 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     }
   }, [dismiss]);
 
-  const value = useMemo(() => ({ toast }), [toast]);
+  const toastError = useCallback((error: unknown, context?: string) => {
+    const message = getErrorMessage(error, context);
+    logger.error(message, error instanceof Error ? error : undefined, { context });
+    toast({
+      title: 'Error',
+      description: message,
+      tone: 'error',
+    });
+  }, [toast]);
+
+  const value = useMemo(() => ({ toast, toastError }), [toast, toastError]);
 
   return (
     <ToastContext.Provider value={value}>

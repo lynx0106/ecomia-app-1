@@ -21,7 +21,9 @@ import { useRouter } from "next/navigation";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { ToastProvider } from "@/components/ui/ToastProvider";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import PillLink from "@/components/ui/PillLink";
+import { logger } from "@/lib/logging";
 
 function cn(...inputs: (string | undefined | null | false)[]) {
   return twMerge(clsx(inputs));
@@ -279,8 +281,15 @@ export default function DashboardLayout({
         </div>
 
         {/* Content Scroll Area */}
-        <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-black p-4 md:p-8">
-          <div className="max-w-7xl mx-auto">
+        <ErrorBoundary
+          onError={(error, errorInfo) => {
+            logger.error('Dashboard component error', error, {
+              componentStack: errorInfo.componentStack,
+            });
+          }}
+        >
+          <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-black p-4 md:p-8">
+            <div className="max-w-7xl mx-auto">
             {pathname !== "/dashboard" && (
               <div className="mb-4">
                 <PillLink
@@ -300,6 +309,7 @@ export default function DashboardLayout({
             <ToastProvider>{children}</ToastProvider>
           </div>
         </div>
+        </ErrorBoundary>
       </main>
     </div>
   );
