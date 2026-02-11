@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, UserPlus, LogIn } from "lucide-react";
 
+// BUILD_TEST_MARKER_2025_FIX_v1
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white p-4 relative overflow-hidden">
