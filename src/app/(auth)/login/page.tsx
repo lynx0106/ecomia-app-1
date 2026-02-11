@@ -113,11 +113,45 @@ export default function LoginPage() {
           {!sent ? (
             <>
               <div className="text-center">
-                <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Bienvenido</h2>
+                <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+                  {isSignUp && usePassword ? "Crear Cuenta" : "Bienvenido"}
+                </h2>
                 <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                  Ingresa tu correo para acceder a tu panel de control
+                  {isSignUp && usePassword
+                    ? "Regístrate para comenzar tu viaje en e-commerce con IA"
+                    : "Ingresa tu correo para acceder a tu panel de control"}
                 </p>
               </div>
+
+              {/* Toggle: Iniciar Sesión vs Crear Cuenta */}
+              {usePassword && (
+                <div className="flex gap-3 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                  <button
+                    type="button"
+                    onClick={() => setIsSignUp(false)}
+                    className={cn(
+                      "flex-1 py-2 px-4 rounded-md font-medium transition-all",
+                      !isSignUp
+                        ? "bg-white dark:bg-gray-900 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                        : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                    )}
+                  >
+                    Iniciar Sesión
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsSignUp(true)}
+                    className={cn(
+                      "flex-1 py-2 px-4 rounded-md font-medium transition-all",
+                      isSignUp
+                        ? "bg-white dark:bg-gray-900 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                        : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                    )}
+                  >
+                    Crear Cuenta
+                  </button>
+                </div>
+              )}
 
               <form onSubmit={handleLogin} className="mt-8 space-y-6">
                 <div className="space-y-4">
@@ -176,19 +210,6 @@ export default function LoginPage() {
                   >
                     {usePassword ? "Usar Magic Link" : "Usar contraseña"}
                   </button>
-
-                  {usePassword && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsSignUp(!isSignUp);
-                        setError(null);
-                      }}
-                      className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                    >
-                      {isSignUp ? "¿Ya tienes cuenta?" : "Crear cuenta nueva"}
-                    </button>
-                  )}
                 </div>
 
                 {error && (
