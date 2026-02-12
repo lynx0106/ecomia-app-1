@@ -39,7 +39,7 @@ export function InteractiveTour() {
   // Tour steps configuration - MEMOIZED to prevent recreating on every render
   const steps = [
     {
-      target: 'body',  // Fallback if sidebar not found
+      target: '[data-tour="sidebar"]',
       content: (
         <div>
           <h3 className="font-bold text-lg mb-2">👋 ¡Bienvenido a EcomIA!</h3>
@@ -49,11 +49,11 @@ export function InteractiveTour() {
           </p>
         </div>
       ),
-      placement: 'center' as const,
+      placement: 'right' as const,
       disableBeacon: true,
     },
     {
-      target: 'body',  // Fallback - will display centered
+      target: '[data-tour="chat"]',
       content: (
         <div>
           <h3 className="font-bold text-lg mb-2">💬 Tu Asistente IA</h3>
@@ -63,10 +63,10 @@ export function InteractiveTour() {
           </p>
         </div>
       ),
-      placement: 'center' as const,
+      placement: 'right' as const,
     },
     {
-      target: 'body',  // Fallback
+      target: '[data-tour="stores"]',
       content: (
         <div>
           <h3 className="font-bold text-lg mb-2">🏪 Crea tu Tienda</h3>
@@ -76,10 +76,10 @@ export function InteractiveTour() {
           </p>
         </div>
       ),
-      placement: 'center' as const,
+      placement: 'right' as const,
     },
     {
-      target: 'body',  // Fallback
+      target: '[data-tour="landing"]',
       content: (
         <div>
           <h3 className="font-bold text-lg mb-2">📄 Landing Pages</h3>
@@ -89,10 +89,10 @@ export function InteractiveTour() {
           </p>
         </div>
       ),
-      placement: 'center' as const,
+      placement: 'right' as const,
     },
     {
-      target: 'body',  // Fallback
+      target: '[data-tour="research"]',
       content: (
         <div>
           <h3 className="font-bold text-lg mb-2">🔍 Investiga Mercados</h3>
@@ -102,7 +102,7 @@ export function InteractiveTour() {
           </p>
         </div>
       ),
-      placement: 'center' as const,
+      placement: 'right' as const,
     },
   ];
 
@@ -211,51 +211,56 @@ export function InteractiveTour() {
     async (data: any) => {
       const { action, index, status, type } = data;
 
-      logger.debug(`Joyride callback - Type: ${type}, Status: ${status}, Index: ${index}`, {
-        action,
-      });
+      logger.debug(`Joyride callback - Type: ${type}, Status: ${status}, Index: ${index}, Action: ${action}`, {});
 
       // ⚠️ CRITICAL: Handle when Joyride can't find the target element
-      if (type === 'error') {
-        logger.warn(`🚨 Tour error at step ${index}:`, {
-          action,
+      if (type === 'error' || status === 'error') {
+        logger.warn(`🚨 Tour error at step ${index}: Element not found or inaccessible`, {
           status,
-          message: 'Could not find element, trying to continue...',
+          type,
+          message: 'Continuing to next step...',
         });
         
-        // Try to skip this step and continue to next
+        // Skip this step and move to next
         if (index < steps.length - 1) {
-          logger.info(`→ Skipping problematic step, moving to ${index + 1}`);
-          setStepIndex(index + 1);
+          logger.info(`→ Skipping step ${index}, moving to step ${index + 1}`);
+          // Use a small delay to ensure DOM is ready
+          setTimeout(() => {
+            setStepIndex(index + 1);
+          }, 300);
         } else {
-          // Last step failed, end tour
-          logger.info('⏭️ Last step failed, ending tour');
+          // Last step, complete tour
+          logger.info('✅ Last step skipped, tour complete');
           setRunTour(false);
           await updateOnboardingProgress(true, false, steps.length);
         }
         return;
       }
 
-      // Track events
+      // Track normal events
       if (type === EVENTS.STEP_AFTER) {
-        logger.debug(`✓ Step ${index} completed, moving to ${index + 1}`, {});
-        setStepIndex(index + 1);
+        logger.debug(`✓ Step ${index} completed, advancing to ${index + 1}`);
+        // Small delay to ensure smooth transition
+        setTimeout(() => {
+          setStepIndex(index + 1);
+        }, 100);
       } else if (type === EVENTS.STEP_BEFORE) {
-        logger.debug(`→ Transitioning to step ${index}`, {});
+        logger.debug(`→ Transitioning to step ${index}`);
         setStepIndex(index);
       } else if (type === EVENTS.TOOLTIP) {
-        logger.debug(`💬 Tooltip shown for step ${index}`, {});
+        logger.debug(`💬 Tooltip shown for step ${index}`);
       }
 
       // Handle tour completion or skip
-      if (status === STATUS.FINISHED) {
+      if (status === STATUS.FINISHED && index === steps.length - 1) {
         logger.info('✅ Tour completed successfully!', {
           totalSteps: steps.length,
+          finalStep: index,
         });
         setRunTour(false);
         await updateOnboardingProgress(true, false, steps.length);
       } else if (status === STATUS.SKIPPED) {
-        logger.info('⏭️ Tour skipped by user', {
+        logger.info('⏭️ User skipped tour', {
           stepsCompleted: index,
         });
         setRunTour(false);
@@ -335,6 +340,8 @@ export function InteractiveTour() {
       disableCloseOnEsc={false}
       scrollToFirstStep={true}
       scrollOffset={-100}
+      spotlightPadding={8}
+      disableOverlay={false}
       locale={{
         back: 'Atrás',
         close: 'Cerrar',
