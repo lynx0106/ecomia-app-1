@@ -16,6 +16,20 @@ Una plataforma de IA para ayudar a emprendedores a validar ideas de negocio y cr
 
 ---
 
+## 🚨 IMPORTANTE: Los Cambios No Se Ven en Producción
+
+**¿Hicimos fixes pero siguen los bugs?**
+
+👉 **[COMO_DEPLOYAR_LOS_FIXES.md](./COMO_DEPLOYAR_LOS_FIXES.md)** - Por qué sigue igual y cómo solucionarlo
+
+👉 **[ACLARACIONES_IMPORTANTES.md](./ACLARACIONES_IMPORTANTES.md)** - Resolviendo confusiones comunes
+
+👉 **[PASOS_SIGUIENTES.md](./PASOS_SIGUIENTES.md)** - Qué hacer ahora (3 pasos simples)
+
+**Respuesta rápida:** Los fixes están en el código pero NO desplegados. Necesitas hacer **MERGE del PR** y esperar que Vercel lo despliegue (3-5 min).
+
+---
+
 ## 📍 ¿Dónde Están Los Archivos?
 
 **¿Buscando la documentación?** 👉 **[DONDE_ESTAN_LOS_ARCHIVOS.md](./DONDE_ESTAN_LOS_ARCHIVOS.md)** - Mapa completo 🗺️
