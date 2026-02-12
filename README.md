@@ -6,6 +6,16 @@ Una plataforma de IA para ayudar a emprendedores a validar ideas de negocio y cr
 
 ---
 
+## 🌐 Sitio en Producción
+
+**🚀 El proyecto está ACTIVO en:** [https://ecom-ia.online](https://ecom-ia.online)
+
+**¿Quieres probar el sitio?** 👉 [GUIA_DE_PRUEBAS.md](./GUIA_DE_PRUEBAS.md)
+
+**¿Encontraste un bug?** 👉 [TEMPLATES_REPORTE.md](./TEMPLATES_REPORTE.md)
+
+---
+
 ## 🌟 ¿No Eres Técnico? ¡No Hay Problema!
 
 **Si Git, commits y pull requests te abruman**, tenemos una guía especial para ti:
@@ -263,6 +273,11 @@ Asegúrate de:
 - [VERCEL_STATUS_CHECK.md](./VERCEL_STATUS_CHECK.md) — Checklist de verificación de Vercel
 - [VERCEL_RECONNECT_GUIDE.md](./VERCEL_RECONNECT_GUIDE.md) — Guía para reconectar repositorio
 - [scripts/verify-vercel-deployment.sh](./scripts/verify-vercel-deployment.sh) — Script de verificación automática
+
+### Para Testing y QA 🧪
+- [GUIA_DE_PRUEBAS.md](./GUIA_DE_PRUEBAS.md) — **Guía completa para probar el sitio en producción** ⭐
+- [TEMPLATES_REPORTE.md](./TEMPLATES_REPORTE.md) — Templates para reportar bugs y problemas
+- [REPORTE_VERIFICACION.md](./REPORTE_VERIFICACION.md) — Último reporte de verificación del proyecto
 
 ## 📚 Recursos Externos
 
