@@ -6,6 +6,18 @@ Una plataforma de IA para ayudar a emprendedores a validar ideas de negocio y cr
 
 ---
 
+## 🔴🔴🔴 EL PR DICE "OPEN" - HAZ EL MERGE AHORA
+
+**Usuario confirmó: El PR dice "Open" (NO está mergeado)**
+
+👉 **[MERGE_AHORA.md](./MERGE_AHORA.md)** ⚡⚡⚡ **¡HAZ ESTO AHORA!**
+
+**ESE es el problema. Los fixes NO están en main.**
+
+**Solución:** 3 clicks para mergear + 5 minutos de espera = ¡Funciona! ✅
+
+---
+
 ## 🆘 "YA HICE TODO Y SIGUE IGUAL"
 
 **Si seguiste todas las guías pero aún no funciona:**
