@@ -8,6 +8,24 @@
 
 ## 🎯 INICIA AQUÍ
 
+### ⚡ DEPLOYMENT & SINCRONIZACIÓN (CRÍTICO)
+👉 **[DEPLOYMENT_SYNC_GUIDE.md](./DEPLOYMENT_SYNC_GUIDE.md)** - Guía profesional completa
+- ✅ Cómo deployar cambios a producción
+- ✅ Por qué a veces los cambios no se ven
+- ✅ Checklist antes y después de deployar
+- **Léelo PRIMERO si haces cambios en código**
+
+👉 **[DEPLOY_CHECKLIST.md](./DEPLOY_CHECKLIST.md)** - Checklist rápido (JSON/visual)
+- Pre-deployment checks
+- Post-deployment verification
+- Troubleshooting rapido
+
+👉 **[VERCEL_TECHNICAL_CONFIG.md](./VERCEL_TECHNICAL_CONFIG.md)** - Configuración técnica
+- Detalles de implementación Vercel
+- Variables de entorno
+- GitHub Actions CI/CD
+- Performance & debugging
+
 ### Para Testing Inmediato (5 min)
 👉 **[QUICK_START_TESTING.md](./QUICK_START_TESTING.md)** - Acceso rápido a credenciales y comandos
 
@@ -61,6 +79,21 @@ URL:        http://localhost:3000/login
 - **[ROADMAP.md](./ROADMAP.md)** - Próximos pasos priorizados
 - **[ROADMAP.md#Estado-Completado](./ROADMAP.md)** - Lo que ya se hizo
 - **[ROADMAP.md#Próximos-Pasos](./ROADMAP.md)** - Lo que falta
+
+### 🚀 PRODUCCIÓN & DEPLOYMENT (Feb 12, 2026)
+- **[DEPLOYMENT_SYNC_GUIDE.md](./DEPLOYMENT_SYNC_GUIDE.md)** ⭐ NUEVO
+  - Guía profesional de deployment
+  - Sincronización Vercel automática
+  - Solución a cambios no visibles
+- **[DEPLOY_CHECKLIST.md](./DEPLOY_CHECKLIST.md)** ⭐ NUEVO
+  - Checklist Pre-deployment & Post-deployment
+  - Troubleshooting visual
+  - Verificación rápida
+- **[VERCEL_TECHNICAL_CONFIG.md](./VERCEL_TECHNICAL_CONFIG.md)** ⭐ NUEVO
+  - Configuración técnica Vercel
+  - GitHub Actions CI/CD
+  - Troubleshooting técnico
+  - Monitoreo y scaling
 
 ### Estado Actual
 - **[SERVER_STATUS.md](./SERVER_STATUS.md)** - Estado en vivo del servidor
