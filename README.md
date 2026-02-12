@@ -106,7 +106,7 @@ src/
     └── ui/                # Componentes genéricos
 ```
 
-## 🔐 Autenticacion & Seguridad
+## 🔐 Autenticación & Seguridad
 
 - **Supabase OAuth** — Inicio de sesión con email/redes sociales
 - **Middleware protección** — Las rutas privadas requieren autenticación
@@ -195,5 +195,5 @@ Si encuentras bugs o tienes mejoras, abre un issue o PR.
 
 ---
 
-**Ultima actualizacion:** Febrero 12, 2026  
+**Última actualización:** Febrero 12, 2026  
 **Status:** ✅ Listo para Testing & Producción

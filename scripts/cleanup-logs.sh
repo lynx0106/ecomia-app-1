@@ -90,7 +90,7 @@ fi
 echo ""
 echo -e "${YELLOW}[3/3] Limpiando logs de npm/node...${NC}"
 
-NPM_LOGS=$(find . -maxdepth 1 -name "npm-debug.log*" -o -name "yarn-error.log*" 2>/dev/null | wc -l)
+NPM_LOGS=$(find . -maxdepth 1 \( -name "npm-debug.log*" -o -name "yarn-error.log*" \) 2>/dev/null | wc -l)
 if [ "$NPM_LOGS" -gt 0 ]; then
     echo "  → Eliminando $NPM_LOGS logs de npm/yarn"
     find . -maxdepth 1 \( -name "npm-debug.log*" -o -name "yarn-error.log*" \) -delete
