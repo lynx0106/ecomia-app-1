@@ -16,9 +16,25 @@ Una plataforma de IA para ayudar a emprendedores a validar ideas de negocio y cr
 
 ---
 
+## 🔴 URGENTE: ¿Vercel Conectado a Cuenta Incorrecta?
+
+**¿Tienes el código en `lynx0106` pero Vercel conectado a `lynxia25-hub`?**
+
+### 🎯 Este ES el problema de por qué no funcionan los deployments
+
+👉 **[SOLUCION_URGENTE_VERCEL.md](./SOLUCION_URGENTE_VERCEL.md)** ⚠️ - Guía paso a paso para reconectar
+
+👉 **[CHECKLIST_RECONEXION.md](./CHECKLIST_RECONEXION.md)** - Checklist para no perderte
+
+👉 **[VERCEL_CUENTAS_PROBLEMA.md](./VERCEL_CUENTAS_PROBLEMA.md)** - Por qué pasa esto
+
+**Respuesta rápida:** Vercel está mirando el repo viejo. Necesitas reconectarlo a `lynx0106/ecomia-app-1` (10 minutos).
+
+---
+
 ## 🚨 IMPORTANTE: Los Cambios No Se Ven en Producción
 
-**¿Hicimos fixes pero siguen los bugs?**
+**¿Hicimos fixes pero siguen los bugs?** (Después de reconectar Vercel)
 
 👉 **[COMO_DEPLOYAR_LOS_FIXES.md](./COMO_DEPLOYAR_LOS_FIXES.md)** - Por qué sigue igual y cómo solucionarlo
 
