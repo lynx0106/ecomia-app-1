@@ -16,6 +16,14 @@ Una plataforma de IA para ayudar a emprendedores a validar ideas de negocio y cr
 
 ---
 
+## 📍 ¿Dónde Están Los Archivos?
+
+**¿Buscando la documentación?** 👉 **[DONDE_ESTAN_LOS_ARCHIVOS.md](./DONDE_ESTAN_LOS_ARCHIVOS.md)** - Mapa completo 🗺️
+
+**Mapa rápido:** [MAPA_RAPIDO.md](./MAPA_RAPIDO.md) - Los 5 archivos esenciales ⚡
+
+---
+
 ## 🌟 ¿No Eres Técnico? ¡No Hay Problema!
 
 **Si Git, commits y pull requests te abruman**, tenemos una guía especial para ti:
