@@ -70,13 +70,16 @@ export default function ChatPage() {
       }
 
       const data = await res.json();
-      const rawAssistantText = data?.content ? String(data.content) : '';
+      if (!data || !data.content) {
+        throw new Error('Respuesta vacía del servidor. Intenta de nuevo.');
+      }
+      const rawAssistantText = String(data.content);
       const assistantText = rawAssistantText
         .replace(/<function=\w+>[^]*?<\/function>/g, '')
         .replace(/<function=\w+>[^]*$/g, '')
         .trim();
       if (!assistantText.trim()) {
-        throw new Error('No hubo respuesta del asistente.');
+        throw new Error('El asistente no pudo generar una respuesta. Intenta con un mensaje diferente.');
       }
 
       const assistantMessage: Message = {

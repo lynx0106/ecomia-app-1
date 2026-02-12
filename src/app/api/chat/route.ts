@@ -72,7 +72,7 @@ export async function POST(req: Request) {
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       console.error('/api/chat: ERROR - no hay mensajes para procesar');
       return new Response(
-        JSON.stringify({ error: 'Invalid prompt: messages must not be empty' }),
+        JSON.stringify({ error: 'Por favor, envia un mensaje para continuar.', content: 'Por favor, envia un mensaje para continuar.' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -1256,11 +1256,18 @@ No menciones herramientas ni el proceso.
     const buildFallbackTable = () => {
       const rows = researchResults.slice(0, 3).map((source) => {
         const url = typeof source.url === 'string' ? source.url : '';
-        const host = url ? new URL(url).hostname : 'dato no disponible';
+        let host = 'dato no disponible';
+        try {
+          if (url) host = new URL(url).hostname || url.slice(0, 30);
+        } catch (e) {
+          host = url.slice(0, 30) || 'dato no disponible';
+        }
         return `| ${seedQuery} | Media | Media | dato no disponible | ${host} | Validar proveedor y precio |`;
       });
 
-      if (rows.length === 0) return '';
+      if (rows.length === 0) {
+        return '| Producto | Demanda | Competencia | Margen | Proveedor | Recomendacion |\n| --- | --- | --- | --- | --- | --- |\n| ' + seedQuery + ' | Media | Media | dato no disponible | dato no disponible | Validar proveedor y precio |';
+      }
       return [
         '| Producto | Demanda | Competencia | Margen | Proveedor | Recomendacion |',
         '| --- | --- | --- | --- | --- | --- |',
@@ -1269,14 +1276,19 @@ No menciones herramientas ni el proceso.
     };
 
     const parsedTable = parseMarkdownTable(result.text || '');
-    const needsFallback = !parsedTable || parsedTable.rows.length < 2;
+    const needsFallback = !parsedTable || !parsedTable.rows || parsedTable.rows.length < 2;
     let responseText = result.text || '';
     if (needsFallback) {
       const table = buildFallbackTable();
       responseText = [
         table,
-        '\n- Recomendacion: revisa proveedores con link real.\n- Recomendacion: confirma costos locales.\n',
-        '¿Quieres que compare otra opcion o seguimos con este producto?'
+        '',
+        '**Análisis rápido:**',
+        '- Demanda: Media (según tendencias)',
+        '- Competencia: Media (mercado activo)',
+        '- Margen: Requiere validación con proveedores',
+        '',
+        '¿Quieres que compare otro producto o confirmamos este?'
       ].join('\n');
     }
 

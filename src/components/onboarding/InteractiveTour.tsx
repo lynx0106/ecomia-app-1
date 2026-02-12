@@ -299,8 +299,8 @@ export function InteractiveTour() {
       callback={handleJoyrideCallback}
       showSkipButton
       continuous
-      scrollToFirstStep
-      scrollOffset={100}
+      scrollToFirstStep={false}
+      scrollOffset={0}
       locale={{
         back: 'Atrás',
         close: 'Cerrar',
