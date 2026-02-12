@@ -1,0 +1,76 @@
+{
+  "name": "EcomIA Development Environment",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-18-bullseye",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "installDirectlyFromGitHubRelease": true,
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "configureZshAsDefaultShell": true,
+      "installOhMyZsh": true,
+      "upgradePackages": true
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "Prisma.prisma",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "ms-vscode.vscode-typescript-next",
+        "streetsidesoftware.code-spell-checker",
+        "streetsidesoftware.code-spell-checker-spanish"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        },
+        "typescript.tsdk": "node_modules/typescript/lib",
+        "typescript.enablePromptUseWorkspaceTsdk": true,
+        "files.exclude": {
+          "**/.git": true,
+          "**/.next": true,
+          "**/node_modules": true
+        },
+        "search.exclude": {
+          "**/.next": true,
+          "**/node_modules": true,
+          "**/coverage": true
+        }
+      }
+    }
+  },
+
+  "forwardPorts": [3000, 5432],
+  
+  "portsAttributes": {
+    "3000": {
+      "label": "Next.js App",
+      "onAutoForward": "notify"
+    },
+    "5432": {
+      "label": "PostgreSQL (Supabase)",
+      "onAutoForward": "silent"
+    }
+  },
+
+  "postCreateCommand": "npm ci && echo '✅ Dependencias instaladas. Lee SESSION_CONTEXT.md para empezar.'",
+
+  "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
+
+  "remoteUser": "node",
+
+  "containerEnv": {
+    "NODE_ENV": "development"
+  }
+}
