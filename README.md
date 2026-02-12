@@ -6,6 +6,18 @@ Una plataforma de IA para ayudar a emprendedores a validar ideas de negocio y cr
 
 ---
 
+## 🆘 "YA HICE TODO Y SIGUE IGUAL"
+
+**Si seguiste todas las guías pero aún no funciona:**
+
+👉 **[DIAGNOSTICO_FINAL.md](./DIAGNOSTICO_FINAL.md)** 🔍 **¡LEE ESTO AHORA!**
+
+**Responde las 10 preguntas específicas para diagnosticar el problema.**
+
+**Causa más común (90%):** El PR aún NO está mergeado a `main`.
+
+---
+
 ## 🌐 Sitio en Producción
 
 **🚀 El proyecto está ACTIVO en:** [https://ecom-ia.online](https://ecom-ia.online)
