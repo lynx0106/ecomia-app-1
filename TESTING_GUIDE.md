@@ -1,8 +1,37 @@
-# 🧪 Guía Completa de Testing Manual - EcomIA
+# 🧪 Guía Completa de Testing - EcomIA
 
-**Fecha:** Febrero 4, 2026  
-**Status:** Listo para Testing  
-**Servidor:** http://localhost:3000
+**Última actualización:** Febrero 12, 2026  
+**Status:** ✅ Listo para Testing  
+**Servidor Local:** http://localhost:3000  
+**Producción:** https://ecom-ia.online
+
+---
+
+## ⚡ QUICK START (5 minutos)
+
+### Para empezar AHORA
+```bash
+# 1. Arranca el servidor
+npm run dev
+
+# 2. Ve a login
+http://localhost:3000/login
+
+# 3. Usa credenciales reales (Supabase Auth)
+Email: tu_email@ejemplo.com
+Contraseña: tu_contraseña
+
+# 4. ¡Listo! Estás en /chat
+```
+
+### Scripts de Testing
+```bash
+npm test              # Ejecuta tests (13/13 passing)
+npm run test:watch    # Watch mode
+npm run test:coverage # Coverage report
+npm run build         # Verifica compilación
+npm run lint          # ESLint check
+```
 
 ---
 

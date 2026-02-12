@@ -1,46 +1,234 @@
-# 📚 Índice Maestro de Documentación
+# 📚 Índice maestro de Documentación - EcomIA
 
-**Proyecto:** EcomIA  
-**Fecha:** Febrero 4, 2026  
-**Estado:** ✅ Completo y Listo para Testing
-
----
-
-## 🎯 INICIA AQUÍ
-
-### ⚡ DEPLOYMENT & SINCRONIZACIÓN (CRÍTICO)
-👉 **[DEPLOYMENT_SYNC_GUIDE.md](./DEPLOYMENT_SYNC_GUIDE.md)** - Guía profesional completa
-- ✅ Cómo deployar cambios a producción
-- ✅ Por qué a veces los cambios no se ven
-- ✅ Checklist antes y después de deployar
-- **Léelo PRIMERO si haces cambios en código**
-
-👉 **[DEPLOY_CHECKLIST.md](./DEPLOY_CHECKLIST.md)** - Checklist rápido (JSON/visual)
-- Pre-deployment checks
-- Post-deployment verification
-- Troubleshooting rapido
-
-👉 **[VERCEL_TECHNICAL_CONFIG.md](./VERCEL_TECHNICAL_CONFIG.md)** - Configuración técnica
-- Detalles de implementación Vercel
-- Variables de entorno
-- GitHub Actions CI/CD
-- Performance & debugging
-
-### Para Testing Inmediato (5 min)
-👉 **[QUICK_START_TESTING.md](./QUICK_START_TESTING.md)** - Acceso rápido a credenciales y comandos
-
-```
-Email:      (usuario real)
-Contraseña: (tu contraseña)
-URL:        http://localhost:3000/login
-```
-
-### Para Resumen Ejecutivo
-👉 **[TESTING_SUMMARY.md](./TESTING_SUMMARY.md)** - Checklist y próximos pasos
+**Última actualización:** Febrero 12, 2026  
+**Total de documentos:** 11 archivos (optimizado y consolidado)  
+**Estado:** ✅ Limpio y organizado
 
 ---
 
-## 📖 GUÍAS DE TESTING COMPLETAS
+## 🎯 INICIA AQUÍ (Según tu necesidad)
+
+### 🚀 Si vas a hacer cambios en código
+👉 **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** - Todo lo que necesitas saber
+- 3 pasos para deployar a producción
+- Checklist pre/post deployment
+- Troubleshooting completo
+- FAQ
+
+### 🏪 Si es la primera vez usando EcomIA
+👉 **[GUIA_DE_USUARIO.md](./GUIA_DE_USUARIO.md)** - Manual completo para usuarios
+- Primeros pasos
+- Cómo usar cada feature
+- Solución de problemas
+
+### 🛠️ Si estás configurando el proyecto local
+👉 **[SETUP_LOCAL.md](./SETUP_LOCAL.md)** - Setup de desarrollo
+- Instalar dependencias
+- Configurar variables
+- Arrancar servidor
+
+### 💡 Si quieres entender la arquitectura
+👉 **[README.md](./README.md)** - Documentación principal
+- Descripción del proyecto
+- Stack tecnológico
+- Estructura de carpetas
+
+---
+
+## 📂 ESTRUCTURA DE DOCUMENTACIÓN
+
+### **Core Documentation** (Documentos activos)
+
+| Documento | Propósito | Lectura |
+|-----------|----------|---------|
+| **README.md** | Descripción general del proyecto | 5 min |
+| **SETUP_LOCAL.md** | Setup local para desarrollo | 10 min |
+| **DEPLOYMENT_GUIDE.md** ⭐ | Todo sobre deployar a producción | 10 min |
+| **TESTING_GUIDE.md** | Guía de testing y validación | 15 min |
+| **SCRIPTS.md** | Scripts disponibles y comandos | 5 min |
+
+### **Feature & Workflow Documentation**
+
+| Documento | Contenido |
+|-----------|----------|
+| **ROADMAP.md** | Próximos pasos y mejoras planeadas |
+| **AGENTS_WORKFLOW.md** | Arquitectura de agentes IA |
+| **PROMPTS.md** | Configuración de prompts LLM |
+| **ANALISIS_MANUAL_INTERACTIVO.md** | Onboarding: análisis + estado actual |
+| **GUIA_DE_USUARIO.md** | Manual completo para usuarios finales |
+
+### **Quick Reference**
+
+| Documento | Para |
+|-----------|------|
+| **CHEAT_SHEET.md** | Referencia rápida de comandos |
+| **DOCUMENTATION_INDEX.md** | Este archivo (navegación) |
+
+---
+
+## 🎯 Por caso de uso
+
+### **Soy Desarrollador**
+1. **Primero:** [README.md](./README.md) - Entiende el proyecto
+2. **Setup:** [SETUP_LOCAL.md](./SETUP_LOCAL.md) - Configura local
+3. **Código:** [SCRIPTS.md](./SCRIPTS.md) - Comandos útiles
+4. **Deploy:** [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) - ⭐ MAS IMPORTANTE
+5. **Validar:** [TESTING_GUIDE.md](./TESTING_GUIDE.md) - Tests
+
+### **Soy Usuario Final**
+1. **Aprende:** [GUIA_DE_USUARIO.md](./GUIA_DE_USUARIO.md) - Todo sobre usar la app
+2. **Problemas:** [GUIA_DE_USUARIO.md#solución-de-problemas](./GUIA_DE_USUARIO.md) - Troubleshooting
+
+### **Soy Product Manager / Stakeholder**
+1. **Overview:** [README.md](./README.md) - Qué es EcomIA
+2. **Roadmap:** [ROADMAP.md](./ROADMAP.md) - Próximas features
+3. **Architecture:** [AGENTS_WORKFLOW.md](./AGENTS_WORKFLOW.md) - Cómo funciona
+
+### **Tengo un Problema**
+
+| Problema | Documento |
+|----------|-----------|
+| "El code no compila" | [SETUP_LOCAL.md](./SETUP_LOCAL.md) |
+| "Cambios no se ven en producción" | [DEPLOYMENT_GUIDE.md#troubleshooting](./DEPLOYMENT_GUIDE.md#-troubleshooting) |
+| "No sé qué scripts usar" | [SCRIPTS.md](./SCRIPTS.md) |
+| "Los tests fallan" | [TESTING_GUIDE.md](./TESTING_GUIDE.md) |
+| "¿Cómo deployar?" | [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) |
+
+---
+
+## 📋 QUICK LINKS
+
+### Configuración
+- [Variables de Entorno](./SETUP_LOCAL.md#-variables-de-entorno)
+- [Instalar Dependencias](./SETUP_LOCAL.md#-instalar-dependencias)
+- [Iniciar Servidor](./SETUP_LOCAL.md#-arrancar-servidor-de-desarrollo)
+
+### Deployment
+- [3 Pasos para Deployar](./DEPLOYMENT_GUIDE.md#3-pasos-para-deployar)
+- [Checklist Pre-Deployment](./DEPLOYMENT_GUIDE.md#-checklist-pre-deployment)
+- [Troubleshooting](./DEPLOYMENT_GUIDE.md#-troubleshooting)
+
+### Testing
+- [Guía de Testing](./TESTING_GUIDE.md)
+- [Comandos de Test](./SCRIPTS.md#-scripts-de-testing)
+
+### Scripts
+- [Ver todos los scripts](./SCRIPTS.md)
+- [Desarrollo: `npm run dev`](./SCRIPTS.md#desarrollo)
+- [Producción: `npm run build`](./SCRIPTS.md#producción)
+
+---
+
+## 🗂️ ESTRUCTURA DE CARPETAS DEL PROYECTO
+
+```
+ecomia-app/
+├── 📄 README.md                      (Overview principal)
+├── 📄 SETUP_LOCAL.md                 (Setup de desarrollo)
+├── 📄 DEPLOYMENT_GUIDE.md            (Deploy a producción) ⭐
+├── 📄 TESTING_GUIDE.md               (Testing y validación)
+├── 📄 SCRIPTS.md                     (Comandos disponibles)
+├── 📄 ROADMAP.md                     (Próximos pasos)
+├── 📄 AGENTS_WORKFLOW.md             (Arquitectura IA)
+├── 📄 PROMPTS.md                     (Config de LLM)
+├── 📄 ANALISIS_MANUAL_INTERACTIVO.md (Onboarding)
+├── 📄 GUIA_DE_USUARIO.md             (Manual usuarios)
+├── 📄 CHEAT_SHEET.md                 (Quick reference)
+├── 📄 DOCUMENTATION_INDEX.md          (Este archivo)
+│
+├── 📁 src/
+│   ├── app/
+│   ├── components/
+│   ├── lib/
+│   └── ...
+│
+├── 📁 public/
+├── 📁 database/
+├── package.json
+├── tsconfig.json
+└── next.config.ts
+```
+
+---
+
+## ✅ INFORMACIÓN IMPORTANTE
+
+### Deployment
+- **URL productiva:** https://ecom-ia.online
+- **Repository:** https://github.com/lynx0106/ecomia-app-1
+- **Auto-deploy:** ✅ ACTIVO (desde Vercel)
+- **Tiempo:** 2-5 minutos desde `git push origin main`
+
+### Onboarding  
+- **Status:** ✅ IMPLEMENTADO EN PRODUCCIÓN
+- **Componente:** `src/components/onboarding/InteractiveTour.tsx`
+- **Librería:** react-joyride
+- **5 pasos:** Sidebar → Chat → Tiendas → Landing → Research
+
+### Stack Tecnológico
+- **Frontend:** Next.js 16 + React 19
+- **Styling:** Tailwind CSS
+- **Backend:** Supabase (PostgreSQL)
+- **AI:** Groq LLM + Tavily API
+- **Analytics:** react-joyride + custom logging
+
+---
+
+## 📞 PREGUNTAS FRECUENTES
+
+**P: ¿Por dónde empiezo?**
+R: Depende: [Usuario](./GUIA_DE_USUARIO.md) | [Dev Local](./SETUP_LOCAL.md) | [Deploy](./DEPLOYMENT_GUIDE.md)
+
+**P: ¿Cómo deployar?**
+R: Ver [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) - 3 pasos simples
+
+**P: ¿Qué documentos necesito?**
+R: Máximo 3-5 según tu rol (ver tablas arriba)
+
+**P: ¿Está todo actualizado?**
+R: Sí, última actualización: Febrero 12, 2026
+
+---
+
+## 🎓 MEJOR PRÁCTICA
+
+### Para Desarrolladores (CRÍTICO)
+
+**Antes de hacer CUALQUIER cambio:**
+```bash
+1. Leer: SETUP_LOCAL.md (si es primer setup)
+2. Código: Haz tus cambios
+3. Test: npm run build && npm test
+4. Deploy: DEPLOYMENT_GUIDE.md (paso a paso)
+```
+
+### Para Nuevos Usuarios
+
+**Primeras 10 minutos:**
+```
+1. Leer: GUIA_DE_USUARIO.md (primeros pasos)
+2. Explorar: Dashboard y features
+3. Preguntar: Chat IA > "¿Qué puedo hacer aquí?"
+4. Crear: Tu primera tienda/investigación
+```
+
+---
+
+## 🔄 REVISIÓN REGULAR
+
+Este índice se actualiza cada vez que:
+- [ ] Se agregan nuevos documentos
+- [ ] Se elimina documentación obsoleta
+- [ ] Cambios significativos en workflow
+- [ ] Actualización de links o referencias
+
+**Última revisión:** Febrero 12, 2026  
+**Próxima revisión:** TBD
+
+---
+
+**Mantenedor:** GitHub Copilot  
+**Status:** ✅ Actualizado y Limpio
 
 | # | Documento | Duración | Mejor Para |
 |---|-----------|----------|-----------|
