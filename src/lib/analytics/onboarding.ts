@@ -107,17 +107,17 @@ export async function getOnboardingSummary(userId: string) {
 
     const summary = {
       totalEvents: events.length,
-      tourStarted: events.some((e) => e.event_type === 'tour_started'),
-      tourCompleted: events.some((e) => e.event_type === 'tour_completed'),
-      tourSkipped: events.some((e) => e.event_type === 'tour_skipped'),
+      tourStarted: events.some((e: OnboardingEvent) => e.event_type === 'tour_started'),
+      tourCompleted: events.some((e: OnboardingEvent) => e.event_type === 'tour_completed'),
+      tourSkipped: events.some((e: OnboardingEvent) => e.event_type === 'tour_skipped'),
       storeCreated: events.some(
-        (e) => e.event_type === 'first_store_created'
+        (e: OnboardingEvent) => e.event_type === 'first_store_created'
       ),
       productAdded: events.some(
-        (e) => e.event_type === 'first_product_added'
+        (e: OnboardingEvent) => e.event_type === 'first_product_added'
       ),
       questionAsked: events.some(
-        (e) => e.event_type === 'first_question_asked'
+        (e: OnboardingEvent) => e.event_type === 'first_question_asked'
       ),
       firstEventTime: events.length > 0 ? events[0].timestamp : null,
       lastEventTime:
