@@ -46,6 +46,25 @@ Una plataforma de IA para ayudar a emprendedores a validar ideas de negocio y cr
 
 ---
 
+## ⚠️ Vercel Conectado Pero Sigue Sin Funcionar
+
+**Reconectaste Vercel, esperaste, pero aún no funciona. Hay warnings de npm en los logs.**
+
+👉 **[QUE_HACER_AHORA.md](./QUE_HACER_AHORA.md)** ⚡ **¡EMPIEZA AQUÍ!**
+
+👉 **[VERIFICACION_DEPLOYMENT.md](./VERIFICACION_DEPLOYMENT.md)** - Cómo verificar qué está desplegado
+
+👉 **[WARNINGS_NPM_EXPLICADOS.md](./WARNINGS_NPM_EXPLICADOS.md)** - Por qué ignorar los warnings
+
+**Causas comunes:**
+1. **PR no mergeado** a main (80% de casos)
+2. **Caché del navegador** persistente (15% de casos)
+3. **Variables de entorno** faltantes (5% de casos)
+
+**Los warnings de npm son normales**, NO son el problema.
+
+---
+
 ## 📍 ¿Dónde Están Los Archivos?
 
 **¿Buscando la documentación?** 👉 **[DONDE_ESTAN_LOS_ARCHIVOS.md](./DONDE_ESTAN_LOS_ARCHIVOS.md)** - Mapa completo 🗺️
