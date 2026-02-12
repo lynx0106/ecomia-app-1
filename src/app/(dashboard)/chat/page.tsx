@@ -2,8 +2,10 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
+import { createClient } from '@/lib/supabase/client';
+import { logger } from '@/lib/logging';
 
 // Lazy load ResearchDisplay to optimize memory usage
 const ResearchDisplay = dynamic(
@@ -26,6 +28,72 @@ export default function ChatPage() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasLoadedWelcome, setHasLoadedWelcome] = useState(false);
+
+  // Load welcome message for new users
+  useEffect(() => {
+    async function loadWelcomeMessage() {
+      if (hasLoadedWelcome || messages.length > 0) return;
+
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) return;
+
+        // Check if user is new
+        const { data: onboarding } = await supabase
+          .from('onboarding_status')
+          .select('completed_tour, tour_skipped, created_at')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        // Determine welcome message based on user status
+        let welcomeMessage = '';
+        const isNewUser = !onboarding?.completed_tour && !onboarding?.tour_skipped;
+
+        if (isNewUser) {
+          welcomeMessage = `¡Hola! 👋 Soy tu asesor de e-commerce impulsado por IA.
+
+**Aquí puedo ayudarte con:**
+• 🔍 **Investigación de Mercado** - Busca productos rentables y analiza la competencia
+• 📄 **Landing Pages** - Crea páginas para promover tus productos
+• 💬 **Copys para Redes** - Genera contenido persuasivo para Instagram, TikTok y Facebook
+• 🏪 **Tiendas Online** - Construye tu ecommerce paso a paso
+• 💡 **Estrategia** - Consejos sobre e-commerce y emprendimiento
+
+**¿En qué te puedo ayudar hoy?** Describeme tu idea o producto y yo te guío en cada paso. 
+
+Recuerda: puedes hacer clic en el botón **?** (Ayuda) si necesitas ver nuevamente la guía de bienvenida.`;
+        } else {
+          welcomeMessage = `¡Bienvenido de vuelta! 👋 
+
+¿Qué te traes hoy? 
+• 🔍 ¿Buscas un nuevo producto?
+• 📄 ¿Necesitas crear una landing?
+• 💬 ¿Quieres copys para redes?
+• 🏪 ¿Trabajamos en tu tienda?
+
+Cuéntame tu idea y yo me encargo del resto.`;
+        }
+
+        const welcomeMsg: Message = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: welcomeMessage,
+        };
+
+        setMessages([welcomeMsg]);
+        setHasLoadedWelcome(true);
+        logger.info('Welcome message loaded', { isNewUser });
+      } catch (err) {
+        logger.error('Error loading welcome message', err as Error);
+        setHasLoadedWelcome(true);
+      }
+    }
+
+    loadWelcomeMessage();
+  }, [hasLoadedWelcome, messages.length]);
 
   const toolInvocations = useMemo<ToolInvocation[]>(() => [], []);
 

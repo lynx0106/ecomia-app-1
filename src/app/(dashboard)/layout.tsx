@@ -23,8 +23,9 @@ import { twMerge } from "tailwind-merge";
 import { ToastProvider } from "@/components/ui/ToastProvider";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import PillLink from "@/components/ui/PillLink";
-import { InteractiveTour } from "@/components/onboarding/InteractiveTour";
+import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
 import { logger } from "@/lib/logging";
+import { HelpCircle } from "lucide-react";
 
 function cn(...inputs: (string | undefined | null | false)[]) {
   return twMerge(clsx(inputs));
@@ -113,6 +114,7 @@ export default function DashboardLayout({
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -155,12 +157,21 @@ export default function DashboardLayout({
           ) : (
             <span className="text-2xl font-bold text-indigo-600">E</span>
           )}
-          <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition-colors"
-          >
-            {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowOnboardingModal(true)}
+              title="Ver guía de bienvenida"
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 hover:text-indigo-600 transition-colors"
+            >
+              <HelpCircle size={20} />
+            </button>
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition-colors"
+            >
+              {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
         </div>
 
         <nav className="flex-1 px-4 py-4 space-y-2" data-tour="sidebar">
@@ -307,8 +318,8 @@ export default function DashboardLayout({
             });
           }}
         >
-          {/* Interactive Tour - Onboarding */}
-          <InteractiveTour />
+          {/* Onboarding Modal */}
+          <OnboardingModal isOpen={showOnboardingModal} onClose={() => setShowOnboardingModal(false)} />
           
           <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-black p-4 md:p-8">
             <div className="max-w-7xl mx-auto">
