@@ -4,6 +4,20 @@ Una plataforma de IA para ayudar a emprendedores a validar ideas de negocio y cr
 
 **Stack:** Next.js 16 • React 19 • Supabase • Groq LLM • Tavily API • Tailwind CSS
 
+---
+
+## 🌟 ¿No Eres Técnico? ¡No Hay Problema!
+
+**Si Git, commits y pull requests te abruman**, tenemos una guía especial para ti:
+
+👉 **[GUIA_PARA_NO_TECNICOS.md](./GUIA_PARA_NO_TECNICOS.md)** - ¡Empieza aquí!
+
+**Puedes trabajar en este proyecto sin saber programación.** Solo describe lo que necesitas en lenguaje normal y GitHub Copilot lo hará por ti. 
+
+📖 **También lee:** [EJEMPLOS_PRACTICOS.md](./EJEMPLOS_PRACTICOS.md) - Conversaciones reales
+
+---
+
 ## 💻 Desarrollo con GitHub Codespaces
 
 ¿Quieres empezar rápidamente sin instalar nada?
@@ -232,11 +246,20 @@ Asegúrate de:
 
 ## 📖 Documentación Adicional
 
-- [CODESPACES_GUIDE.md](./CODESPACES_GUIDE.md) — Guía completa de GitHub Codespaces ⭐
+### Para Usuarios No Técnicos 🌟
+- [GUIA_PARA_NO_TECNICOS.md](./GUIA_PARA_NO_TECNICOS.md) — **¡Empieza aquí si Git te abruma!** ⭐⭐⭐
+- [EJEMPLOS_PRACTICOS.md](./EJEMPLOS_PRACTICOS.md) — Conversaciones reales de cómo trabajar sin ser técnico
+- [COMO_CONTINUAR.md](./COMO_CONTINUAR.md) — Cómo continuar tu trabajo fácilmente
+
+### Para Desarrollo
+- [CODESPACES_GUIDE.md](./CODESPACES_GUIDE.md) — Guía completa de GitHub Codespaces
 - [SESSION_CONTEXT.md](./SESSION_CONTEXT.md) — Estado actual del proyecto y próximos pasos
 - [ROADMAP.md](./ROADMAP.md) — Próximos pasos y mejoras
 - [.github/GITHUB_ACTIONS_SETUP.md](./.github/GITHUB_ACTIONS_SETUP.md) — Setup de CI/CD
 - [.env.local.example](./.env.local.example) — Variables de entorno requeridas
+
+### Para Vercel/Deployment
+- [VERCEL_RESUMEN_ESPANOL.md](./VERCEL_RESUMEN_ESPANOL.md) — Resumen en español de Vercel
 - [VERCEL_STATUS_CHECK.md](./VERCEL_STATUS_CHECK.md) — Checklist de verificación de Vercel
 - [VERCEL_RECONNECT_GUIDE.md](./VERCEL_RECONNECT_GUIDE.md) — Guía para reconectar repositorio
 - [scripts/verify-vercel-deployment.sh](./scripts/verify-vercel-deployment.sh) — Script de verificación automática
