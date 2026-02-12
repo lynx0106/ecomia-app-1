@@ -39,7 +39,7 @@ export function InteractiveTour() {
   // Tour steps configuration - MEMOIZED to prevent recreating on every render
   const steps = [
     {
-      target: '[data-tour="sidebar"]',
+      target: 'body',  // Fallback if sidebar not found
       content: (
         <div>
           <h3 className="font-bold text-lg mb-2">👋 ¡Bienvenido a EcomIA!</h3>
@@ -49,11 +49,11 @@ export function InteractiveTour() {
           </p>
         </div>
       ),
-      placement: 'right' as const,
+      placement: 'center' as const,
       disableBeacon: true,
     },
     {
-      target: '[data-tour="chat"]',
+      target: 'body',  // Fallback - will display centered
       content: (
         <div>
           <h3 className="font-bold text-lg mb-2">💬 Tu Asistente IA</h3>
@@ -63,10 +63,10 @@ export function InteractiveTour() {
           </p>
         </div>
       ),
-      placement: 'right' as const,
+      placement: 'center' as const,
     },
     {
-      target: '[data-tour="stores"]',
+      target: 'body',  // Fallback
       content: (
         <div>
           <h3 className="font-bold text-lg mb-2">🏪 Crea tu Tienda</h3>
@@ -76,10 +76,10 @@ export function InteractiveTour() {
           </p>
         </div>
       ),
-      placement: 'right' as const,
+      placement: 'center' as const,
     },
     {
-      target: '[data-tour="landing"]',
+      target: 'body',  // Fallback
       content: (
         <div>
           <h3 className="font-bold text-lg mb-2">📄 Landing Pages</h3>
@@ -89,10 +89,10 @@ export function InteractiveTour() {
           </p>
         </div>
       ),
-      placement: 'right' as const,
+      placement: 'center' as const,
     },
     {
-      target: '[data-tour="research"]',
+      target: 'body',  // Fallback
       content: (
         <div>
           <h3 className="font-bold text-lg mb-2">🔍 Investiga Mercados</h3>
@@ -102,7 +102,7 @@ export function InteractiveTour() {
           </p>
         </div>
       ),
-      placement: 'right' as const,
+      placement: 'center' as const,
     },
   ];
 
@@ -215,6 +215,27 @@ export function InteractiveTour() {
         action,
       });
 
+      // ⚠️ CRITICAL: Handle when Joyride can't find the target element
+      if (type === 'error') {
+        logger.warn(`🚨 Tour error at step ${index}:`, {
+          action,
+          status,
+          message: 'Could not find element, trying to continue...',
+        });
+        
+        // Try to skip this step and continue to next
+        if (index < steps.length - 1) {
+          logger.info(`→ Skipping problematic step, moving to ${index + 1}`);
+          setStepIndex(index + 1);
+        } else {
+          // Last step failed, end tour
+          logger.info('⏭️ Last step failed, ending tour');
+          setRunTour(false);
+          await updateOnboardingProgress(true, false, steps.length);
+        }
+        return;
+      }
+
       // Track events
       if (type === EVENTS.STEP_AFTER) {
         logger.debug(`✓ Step ${index} completed, moving to ${index + 1}`, {});
@@ -222,6 +243,8 @@ export function InteractiveTour() {
       } else if (type === EVENTS.STEP_BEFORE) {
         logger.debug(`→ Transitioning to step ${index}`, {});
         setStepIndex(index);
+      } else if (type === EVENTS.TOOLTIP) {
+        logger.debug(`💬 Tooltip shown for step ${index}`, {});
       }
 
       // Handle tour completion or skip
