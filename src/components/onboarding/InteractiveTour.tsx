@@ -155,9 +155,12 @@ export function InteractiveTour() {
         setRunTour(false);
         await updateOnboardingProgress(true, false, steps.length);
       } else if (status === STATUS.SKIPPED) {
-        logger.info('Tour skipped by user', {});
+        logger.info('Tour skipped by user', {
+          stepsCurrent: index,
+        });
         setRunTour(false);
-        await updateOnboardingProgress(false, true, stepIndex);
+        // Use the current index from the callback data, not from state
+        await updateOnboardingProgress(false, true, index);
       }
     },
     [updateOnboardingProgress]

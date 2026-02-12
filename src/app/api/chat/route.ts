@@ -8,6 +8,15 @@ import { AGENT_CONFIGS, type AgentKey } from '@/lib/agents/config';
 // Allow streaming responses up to 60 seconds (research takes time)
 export const maxDuration = 60;
 
+// Validate required environment variables
+if (!process.env.GROQ_API_KEY) {
+  console.error('❌ GROQ_API_KEY is not configured in environment variables');
+}
+
+if (!process.env.TAVILY_API_KEY) {
+  console.error('⚠️ TAVILY_API_KEY is not configured (market research will be limited)');
+}
+
 const groq = createGroq({
   apiKey: process.env.GROQ_API_KEY,
 });
@@ -62,6 +71,17 @@ function parseMarkdownTable(text: string): ParsedTable | null {
 
 export async function POST(req: Request) {
   try {
+    // Validate API keys first
+    if (!process.env.GROQ_API_KEY) {
+      console.error('/api/chat: ERROR - GROQ_API_KEY not configured');
+      return new Response(
+        JSON.stringify({ 
+          error: 'El servicio de IA no está configurado. Por favor contacta al administrador.' 
+        }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     let { messages } = await req.json();
     const url = new URL(req.url);
     const sync = url.searchParams.get('sync') === 'true';
