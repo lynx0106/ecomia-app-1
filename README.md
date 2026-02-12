@@ -140,17 +140,18 @@ npm run lint             # Ejecuta ESLint
 npm test                 # Ejecuta Jest tests
 npm run test:watch       # Jest en modo watch
 npm run test:coverage    # Reporte de cobertura
+npm run verify:vercel    # Verifica deployment en Vercel
 ```
 
 ## 🚀 Deployment
 
-### Vercel (Recomendado)
+### Vercel (Recomendado) ⭐
 
-**Una vez que los tests pasen:**
+**Deployment automático vía GitHub:**
 
 ```bash
 # 1. Commit cambios
-git add . && git commit -m "Ready for Vercel: all tests pass"
+git add . && git commit -m "feat: new feature"
 
 # 2. Push a main
 git push origin main
@@ -158,28 +159,68 @@ git push origin main
 # 3. GitHub Actions corre automáticamente (CI/CD pipeline)
 # Ve a GitHub → Actions para ver progreso
 
-# 4. Deploy a Vercel
+# 4. Vercel detecta el push y deploys automáticamente
+# Espera 2-3 minutos para que complete
+```
+
+**Configuración en Vercel Dashboard:**
+
+1. **Conectar repositorio correcto**: `lynx0106/ecomia-app-1`
+2. **Configurar variables de entorno** (Settings → Environment Variables):
+   ```
+   NEXT_PUBLIC_SUPABASE_URL
+   NEXT_PUBLIC_SUPABASE_ANON_KEY
+   GROQ_API_KEY
+   TAVILY_API_KEY
+   ```
+3. **Build settings** (automático para Next.js):
+   - Framework: Next.js
+   - Build Command: `npm run build`
+   - Output Directory: `.next`
+   - Node Version: 18.x o superior
+
+**Deployment manual con CLI:**
+```bash
+# Instalar CLI de Vercel
 npm install -g vercel
+
+# Primer deployment
+vercel
+
+# Deployment a producción
 vercel --prod
 ```
 
-**Vercel configurará automáticamente:**
-- Build & Deploy automático en cada push a main
-- Variables de entorno vía Vercel Project Settings
-- SSL automático
-- CDN global
+**Verificación post-deployment:**
+```bash
+# Ejecutar script de verificación
+./scripts/verify-vercel-deployment.sh
+
+# O manualmente
+curl -I https://tu-dominio.vercel.app
+```
+
+**⚠️ Problemas comunes:**
+- Ver [VERCEL_STATUS_CHECK.md](./VERCEL_STATUS_CHECK.md) para checklist completo
+- Ver [VERCEL_RECONNECT_GUIDE.md](./VERCEL_RECONNECT_GUIDE.md) si el repositorio está desconectado
+- Ver [VERCEL_DEPLOYMENT_ISSUE.md](./VERCEL_DEPLOYMENT_ISSUE.md) para troubleshooting
 
 ### Otros Deployment (Docker, Self-hosted)
 Asegúrate de:
 1. Compilar con `npm run build`
 2. Setupear variables de entorno en tu plataforma
 3. No exponer `generate-env.js` ni `.env.local`
+4. Configurar SSL/HTTPS
+5. Configurar reverse proxy (nginx, Caddy, etc.)
 
 ## 📖 Documentación Adicional
 
 - [ROADMAP.md](./ROADMAP.md) — Próximos pasos y mejoras
 - [.github/GITHUB_ACTIONS_SETUP.md](./.github/GITHUB_ACTIONS_SETUP.md) — Setup de CI/CD
 - [.env.local.example](./.env.local.example) — Variables de entorno requeridas
+- [VERCEL_STATUS_CHECK.md](./VERCEL_STATUS_CHECK.md) — Checklist de verificación de Vercel
+- [VERCEL_RECONNECT_GUIDE.md](./VERCEL_RECONNECT_GUIDE.md) — Guía para reconectar repositorio
+- [scripts/verify-vercel-deployment.sh](./scripts/verify-vercel-deployment.sh) — Script de verificación automática
 
 ## 📚 Recursos Externos
 
