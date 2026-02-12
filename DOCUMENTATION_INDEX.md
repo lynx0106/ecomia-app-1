@@ -1,7 +1,7 @@
 # 📚 Índice maestro de Documentación - EcomIA
 
 **Última actualización:** Febrero 12, 2026  
-**Total de documentos:** 11 archivos (optimizado y consolidado)  
+**Total de documentos:** 12 archivos (optimizado y consolidado)  
 **Estado:** ✅ Limpio y organizado
 
 ---
@@ -45,6 +45,7 @@
 | **SETUP_LOCAL.md** | Setup local para desarrollo | 10 min |
 | **DEPLOYMENT_GUIDE.md** ⭐ | Todo sobre deployar a producción | 10 min |
 | **TESTING_GUIDE.md** | Guía de testing y validación | 15 min |
+| **ONBOARDING_SYSTEM_V2.md** ✨ | Sistema de onboarding profesional (Modal + Help) | 8 min |
 | **SCRIPTS.md** | Scripts disponibles y comandos | 5 min |
 
 ### **Feature & Workflow Documentation**
