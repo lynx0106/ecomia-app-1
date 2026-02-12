@@ -4,7 +4,24 @@ Una plataforma de IA para ayudar a emprendedores a validar ideas de negocio y cr
 
 **Stack:** Next.js 16 • React 19 • Supabase • Groq LLM • Tavily API • Tailwind CSS
 
-## 🚀 Inicio Rápido
+## 💻 Desarrollo con GitHub Codespaces
+
+¿Quieres empezar rápidamente sin instalar nada?
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=lynx0106/ecomia-app-1)
+
+**O sigue la guía completa:** [CODESPACES_GUIDE.md](./CODESPACES_GUIDE.md) 🚀
+
+El Codespace incluye:
+- ✅ Node.js 18 preinstalado
+- ✅ Extensiones de VS Code configuradas
+- ✅ Dependencias instaladas automáticamente
+- ✅ GitHub Copilot listo para usar
+- ✅ Puerto 3000 forwarding automático
+
+---
+
+## 🚀 Inicio Rápido (Local)
 
 ### 1. **Instalar dependencias**
 ```bash
@@ -215,6 +232,8 @@ Asegúrate de:
 
 ## 📖 Documentación Adicional
 
+- [CODESPACES_GUIDE.md](./CODESPACES_GUIDE.md) — Guía completa de GitHub Codespaces ⭐
+- [SESSION_CONTEXT.md](./SESSION_CONTEXT.md) — Estado actual del proyecto y próximos pasos
 - [ROADMAP.md](./ROADMAP.md) — Próximos pasos y mejoras
 - [.github/GITHUB_ACTIONS_SETUP.md](./.github/GITHUB_ACTIONS_SETUP.md) — Setup de CI/CD
 - [.env.local.example](./.env.local.example) — Variables de entorno requeridas
