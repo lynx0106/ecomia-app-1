@@ -13,10 +13,15 @@ npm ci
 
 ### 2. **Configurar variables de entorno**
 
-Copia `.env.local.example` a `.env.local` y completa los valores:
+Genera archivo `.env.local` con variables de entorno:
 
 ```bash
+# Opción A: Usar script de generación (solo desarrollo)
+node generate-env.js
+
+# Opción B: Copiar plantilla y completar manualmente
 cp .env.local.example .env.local
+# Edita .env.local con tus valores
 ```
 
 **Variables requeridas:**
@@ -40,6 +45,49 @@ npm run build
 npm run start
 ```
 
+---
+
+## 🧪 Testing Antes de Producción
+
+### ⚡ Setup Rápido (2 minutos)
+```bash
+npm ci                  # Instalar deps
+node generate-env.js    # Generar .env.local
+npm run dev             # Arranca servidor
+```
+
+Luego abre: **http://localhost:3000**
+
+### 🔑 Credenciales de Prueba
+
+Usa un usuario real creado en Supabase Auth (email + contraseña o magic link).
+
+### 📚 Guías de Testing Disponibles
+
+**Tres opciones según tu preferencia:**
+
+| Guía | Duración | Contenido | Para Quién |
+|------|----------|-----------|-----------|
+| [🎯 Quick Start Testing](./QUICK_START_TESTING.md) | 5 min | Credenciales + Setup básico | Testing rápido |
+| [🎥 Testing Paso a Paso](./TESTING_STEPS.md) | 30 min | 9 pasos visuales detallados | Visual/Paso a paso |
+| [🧪 Guía Completa](./TESTING_GUIDE.md) | 45 min | 7 fases exhaustivas + troubleshooting | Testing profundo |
+
+### ✅ Checklist de Testing
+
+```
+✅ FASE 1: Navegación & Rutas
+✅ FASE 2: Autenticación (Login/Logout)
+✅ FASE 3: Rutas Protegidas
+✅ FASE 4: Chat & IA (mensajes, herramientas)
+✅ FASE 5: UI/Responsividad
+✅ FASE 6: Performance (< 4 seg)
+✅ FASE 7: Console Limpia (sin errores)
+
+→ Ver guías arriba para detalles de cada fase
+```
+
+---
+
 ## 📁 Estructura del Proyecto
 
 ```
@@ -58,7 +106,7 @@ src/
     └── ui/                # Componentes genéricos
 ```
 
-## 🔐 Autenticación & Seguridad
+## 🔐 Autenticacion & Seguridad
 
 - **Supabase OAuth** — Inicio de sesión con email/redes sociales
 - **Middleware protección** — Las rutas privadas requieren autenticación
@@ -79,52 +127,67 @@ src/
 ```
 
 **Herramientas disponibles:**
-- `searchMarket` — Investiga tendencias y competencia en tiempo real
-- `createStore` — Crea una tienda en la base de datos
+- `searchMarket` — Investiga tendencias y competencia en tiempo real (Tavily)
+- `createStore` — Crea una tienda en la base de datos (Supabase)
 
 ## 📊 Scripts Disponibles
 
 ```bash
-npm run dev       # Servidor de desarrollo
-npm run build     # Build para producción
-npm run start     # Inicia servidor de producción
-npm run lint      # Ejecuta ESLint
+npm run dev              # Servidor de desarrollo
+npm run build            # Build para producción
+npm run start            # Inicia servidor de producción
+npm run lint             # Ejecuta ESLint
+npm test                 # Ejecuta Jest tests
+npm run test:watch       # Jest en modo watch
+npm run test:coverage    # Reporte de cobertura
 ```
-
-## ⚠️ Problemas Conocidos & Próximos Pasos
-
-### Actuales:
-- [ ] Actualizar `ai` SDK a versión con mejor type-safety
-- [ ] Remover casteos `as any` del código
-- [x] Migrar `middleware.ts` a recomendacion de Next.js (`proxy`)
-- [ ] Añadir tests automatizados (Jest/Vitest)
-- [ ] Configurar CI/CD (GitHub Actions)
-- [ ] Mejorar manejo de errores en API
-
-### En Progreso:
-- Optimización de performance de chat
-- Soporte multi-idioma
-- Implementar rastreo de conversaciones
 
 ## 🚀 Deployment
 
 ### Vercel (Recomendado)
+
+**Una vez que los tests pasen:**
+
 ```bash
-vercel
+# 1. Commit cambios
+git add . && git commit -m "Ready for Vercel: all tests pass"
+
+# 2. Push a main
+git push origin main
+
+# 3. GitHub Actions corre automáticamente (CI/CD pipeline)
+# Ve a GitHub → Actions para ver progreso
+
+# 4. Deploy a Vercel
+npm install -g vercel
+vercel --prod
 ```
 
-### Otros (Docker, etc.)
+**Vercel configurará automáticamente:**
+- Build & Deploy automático en cada push a main
+- Variables de entorno vía Vercel Project Settings
+- SSL automático
+- CDN global
+
+### Otros Deployment (Docker, Self-hosted)
 Asegúrate de:
 1. Compilar con `npm run build`
 2. Setupear variables de entorno en tu plataforma
 3. No exponer `generate-env.js` ni `.env.local`
 
-## 📚 Recursos
+## 📖 Documentación Adicional
 
-- [Next.js Docs](https://nextjs.org/docs)
-- [Supabase Docs](https://supabase.com/docs)
+- [ROADMAP.md](./ROADMAP.md) — Próximos pasos y mejoras
+- [.github/GITHUB_ACTIONS_SETUP.md](./.github/GITHUB_ACTIONS_SETUP.md) — Setup de CI/CD
+- [.env.local.example](./.env.local.example) — Variables de entorno requeridas
+
+## 📚 Recursos Externos
+
+- [Next.js 16 Documentation](https://nextjs.org/docs)
+- [Supabase Auth Guide](https://supabase.com/docs/guides/auth)
 - [Groq API Reference](https://console.groq.com/docs)
 - [Tavily Search API](https://tavily.com/api)
+- [Tailwind CSS](https://tailwindcss.com/docs)
 
 ## 💡 Contribuciones
 
@@ -132,4 +195,5 @@ Si encuentras bugs o tienes mejoras, abre un issue o PR.
 
 ---
 
-**Última actualización:** Febrero 4, 2025
+**Ultima actualizacion:** Febrero 12, 2026  
+**Status:** ✅ Listo para Testing & Producción

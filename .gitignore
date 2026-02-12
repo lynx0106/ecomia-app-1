@@ -12,6 +12,7 @@
 
 # testing
 /coverage
+coverage/
 
 # next.js
 /.next/
@@ -32,8 +33,13 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.local.example
 # .env.local - Ignorado por seguridad, usar generate-env.js en cloud
 
+# logs
+logs/
+*.log
+startup.log
 
 # vercel
 .vercel

@@ -22,6 +22,14 @@ const customJestConfig = {
     '!src/**/*.stories.{js,jsx,ts,tsx}',
     '!src/**/__tests__/**',
   ],
+  coverageThresholds: {
+    global: {
+      statements: 1,
+      branches: 0,
+      functions: 0,
+      lines: 1,
+    },
+  },
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
