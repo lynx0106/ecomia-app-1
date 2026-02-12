@@ -278,6 +278,11 @@ Asegúrate de:
 - [GUIA_DE_PRUEBAS.md](./GUIA_DE_PRUEBAS.md) — **Guía completa para probar el sitio en producción** ⭐
 - [TEMPLATES_REPORTE.md](./TEMPLATES_REPORTE.md) — Templates para reportar bugs y problemas
 - [REPORTE_VERIFICACION.md](./REPORTE_VERIFICACION.md) — Último reporte de verificación del proyecto
+- [BUGS_RESUELTOS.md](./BUGS_RESUELTOS.md) — Bugs arreglados y sus soluciones
+
+### Para Troubleshooting 🔧
+- [TROUBLESHOOTING_CONSOLA.md](./TROUBLESHOOTING_CONSOLA.md) — **Cómo distinguir errores de extensión vs app** ⭐
+- [CHECKLIST_ERRORES.md](./CHECKLIST_ERRORES.md) — Checklist rápido para identificar tipo de error
 
 ## 📚 Recursos Externos
 
