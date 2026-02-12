@@ -36,6 +36,76 @@ export function InteractiveTour() {
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
 
+  // Tour steps configuration - MEMOIZED to prevent recreating on every render
+  const steps = [
+    {
+      target: '[data-tour="sidebar"]',
+      content: (
+        <div>
+          <h3 className="font-bold text-lg mb-2">👋 ¡Bienvenido a EcomIA!</h3>
+          <p className="text-sm">
+            Este es tu menú principal. Aquí accedes a todas las funciones de la
+            plataforma.
+          </p>
+        </div>
+      ),
+      placement: 'right' as const,
+      disableBeacon: true,
+    },
+    {
+      target: '[data-tour="chat"]',
+      content: (
+        <div>
+          <h3 className="font-bold text-lg mb-2">💬 Tu Asistente IA</h3>
+          <p className="text-sm">
+            Aquí hablas con tu asesor inteligente. Pregunta lo que sea sobre
+            e-commerce: productos, precios, estrategia, etc.
+          </p>
+        </div>
+      ),
+      placement: 'right' as const,
+    },
+    {
+      target: '[data-tour="stores"]',
+      content: (
+        <div>
+          <h3 className="font-bold text-lg mb-2">🏪 Crea tu Tienda</h3>
+          <p className="text-sm">
+            Aquí creas tu tienda online para vender productos. Solo necesitas un
+            nombre y ya puedes empezar.
+          </p>
+        </div>
+      ),
+      placement: 'right' as const,
+    },
+    {
+      target: '[data-tour="landing"]',
+      content: (
+        <div>
+          <h3 className="font-bold text-lg mb-2">📄 Landing Pages</h3>
+          <p className="text-sm">
+            Crea páginas especiales para promover productos específicos. Perfectas
+            para campañas publicitarias.
+          </p>
+        </div>
+      ),
+      placement: 'right' as const,
+    },
+    {
+      target: '[data-tour="research"]',
+      content: (
+        <div>
+          <h3 className="font-bold text-lg mb-2">🔍 Investiga Mercados</h3>
+          <p className="text-sm">
+            Investiga si tus ideas de negocio funcionan antes de invertir dinero.
+            Obtén datos del mercado, competencia y precios.
+          </p>
+        </div>
+      ),
+      placement: 'right' as const,
+    },
+  ];
+
   // Check if user has completed onboarding
   useEffect(() => {
     async function checkOnboardingStatus() {
@@ -141,97 +211,36 @@ export function InteractiveTour() {
     async (data: any) => {
       const { action, index, status, type } = data;
 
+      logger.debug(`Joyride callback - Type: ${type}, Status: ${status}, Index: ${index}`, {
+        action,
+      });
+
       // Track events
-      if (type === EVENTS.STEP_AFTER || type === EVENTS.STEP_BEFORE) {
+      if (type === EVENTS.STEP_AFTER) {
+        logger.debug(`✓ Step ${index} completed, moving to ${index + 1}`, {});
+        setStepIndex(index + 1);
+      } else if (type === EVENTS.STEP_BEFORE) {
+        logger.debug(`→ Transitioning to step ${index}`, {});
         setStepIndex(index);
-        logger.debug(`Tour step ${index} - ${type}`, {});
       }
 
       // Handle tour completion or skip
       if (status === STATUS.FINISHED) {
-        logger.info('Tour completed successfully', {
+        logger.info('✅ Tour completed successfully!', {
           totalSteps: steps.length,
         });
         setRunTour(false);
         await updateOnboardingProgress(true, false, steps.length);
       } else if (status === STATUS.SKIPPED) {
-        logger.info('Tour skipped by user', {});
+        logger.info('⏭️ Tour skipped by user', {
+          stepsCompleted: index,
+        });
         setRunTour(false);
-        await updateOnboardingProgress(false, true, stepIndex);
+        await updateOnboardingProgress(false, true, index);
       }
     },
-    [updateOnboardingProgress]
+    [updateOnboardingProgress, steps.length]
   );
-
-  // Tour steps configuration
-  const steps = [
-    {
-      target: '[data-tour="sidebar"]',
-      content: (
-        <div>
-          <h3 className="font-bold text-lg mb-2">👋 ¡Bienvenido a EcomIA!</h3>
-          <p className="text-sm">
-            Este es tu menú principal. Aquí accedes a todas las funciones de la
-            plataforma.
-          </p>
-        </div>
-      ),
-      placement: 'right' as const,
-      disableBeacon: true,
-    },
-    {
-      target: '[data-tour="chat"]',
-      content: (
-        <div>
-          <h3 className="font-bold text-lg mb-2">💬 Tu Asistente IA</h3>
-          <p className="text-sm">
-            Aquí hablas con tu asesor inteligente. Pregunta lo que sea sobre
-            e-commerce: productos, precios, estrategia, etc.
-          </p>
-        </div>
-      ),
-      placement: 'right' as const,
-    },
-    {
-      target: '[data-tour="stores"]',
-      content: (
-        <div>
-          <h3 className="font-bold text-lg mb-2">🏪 Crea tu Tienda</h3>
-          <p className="text-sm">
-            Aquí creas tu tienda online para vender productos. Solo necesitas un
-            nombre y ya puedes empezar.
-          </p>
-        </div>
-      ),
-      placement: 'right' as const,
-    },
-    {
-      target: '[data-tour="landing"]',
-      content: (
-        <div>
-          <h3 className="font-bold text-lg mb-2">📄 Landing Pages</h3>
-          <p className="text-sm">
-            Crea páginas especiales para promover productos específicos. Perfectas
-            para campañas publicitarias.
-          </p>
-        </div>
-      ),
-      placement: 'right' as const,
-    },
-    {
-      target: '[data-tour="research"]',
-      content: (
-        <div>
-          <h3 className="font-bold text-lg mb-2">🔍 Investiga Mercados</h3>
-          <p className="text-sm">
-            Investiga si tus ideas de negocio funcionan antes de invertir dinero.
-            Obtén datos del mercado, competencia y precios.
-          </p>
-        </div>
-      ),
-      placement: 'right' as const,
-    },
-  ];
 
   const tourstyled = {
     options: {
@@ -298,9 +307,11 @@ export function InteractiveTour() {
       stepIndex={stepIndex}
       callback={handleJoyrideCallback}
       showSkipButton
-      continuous
-      scrollToFirstStep={false}
-      scrollOffset={0}
+      showProgress
+      continuous={true}
+      disableCloseOnEsc={false}
+      scrollToFirstStep={true}
+      scrollOffset={-100}
       locale={{
         back: 'Atrás',
         close: 'Cerrar',
