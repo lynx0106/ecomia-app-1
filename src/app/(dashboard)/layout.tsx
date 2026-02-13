@@ -16,7 +16,8 @@ import {
   LogOut, 
   User,
   BookOpen,
-  LifeBuoy
+  LifeBuoy,
+  Search
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -115,6 +116,12 @@ const sidebarItemsAdmin = [
     title: "Tickets",
     href: "/admin/tickets",
     icon: LifeBuoy,
+    adminOnly: true,
+  },
+  {
+    title: "Búsquedas Asignadas",
+    href: "/admin/searches",
+    icon: Search,
     adminOnly: true,
   },
   {

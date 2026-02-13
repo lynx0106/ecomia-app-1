@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { tavily } from '@tavily/core';
 import { AGENT_CONFIGS, type AgentKey } from '@/lib/agents/config';
 import { executeSupportAgent } from '@/lib/agents/support-agent';
+import { isSuperAdmin } from '@/lib/agents/admin';
 
 // Allow streaming responses up to 60 seconds (research takes time)
 export const maxDuration = 60;
@@ -111,6 +112,43 @@ export async function POST(req: Request) {
       JSON.stringify({ error: 'Unauthorized' }),
       { status: 401, headers: { 'Content-Type': 'application/json' } }
     );
+  }
+
+  // SEARCH QUOTA: Verificar búsquedas asignadas (solo para usuarios no-admin)
+  const isUserAdmin = isSuperAdmin(user.email);
+  const { data: roleData } = await supabase
+    .from('user_roles')
+    .select('role')
+    .or(`user_id.eq.${user.id},email.eq.${user.email}`)
+    .limit(1)
+    .maybeSingle();
+  
+  const hasAdminRole = roleData?.role === 'admin' || isUserAdmin;
+
+  if (!hasAdminRole) {
+    // Usuario regular: validar búsquedas asignadas
+    const { data: allocation } = await supabase
+      .from('user_allocated_searches')
+      .select('allocated_count, used_count')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    const allocated = allocation?.allocated_count || 0;
+    const used = allocation?.used_count || 0;
+    const remaining = Math.max(0, allocated - used);
+
+    if (remaining <= 0) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Sin búsquedas disponibles',
+          message: 'Has agotado tus búsquedas asignadas. Contacta al administrador o configura tu propia API key en Configuración.',
+          remaining: 0
+        }),
+        { status: 403, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log(`[Chat] Usuario ${user.email} tiene ${remaining} búsquedas restantes (${used}/${allocated} usadas)`);
   }
 
   // ROUTING: Detectar modo support vs main
@@ -495,6 +533,31 @@ IMPORTANTE: El orquestador detectará tu intención. Responde coherentemente.
         if (error) {
           console.error('Error updating session:', error);
           return 'Error: No se pudo actualizar la sesion.';
+        }
+
+        // QUOTA: Incrementar búsquedas usadas cuando se completa una investigación (solo usuarios no-admin)
+        if (update.status === 'completed' && !hasAdminRole) {
+          // Primero obtener el contador actual
+          const { data: currentAllocation } = await writeClient
+            .from('user_allocated_searches')
+            .select('used_count')
+            .eq('user_id', effectiveUserId)
+            .maybeSingle();
+
+          const currentUsed = currentAllocation?.used_count || 0;
+          
+          // Incrementar el contador
+          const { error: quotaError } = await writeClient
+            .from('user_allocated_searches')
+            .update({ used_count: currentUsed + 1 })
+            .eq('user_id', effectiveUserId);
+
+          if (quotaError) {
+            console.error('[Chat] Error incrementando búsquedas usadas:', quotaError);
+            // No bloqueamos la operación si falla el incremento
+          } else {
+            console.log(`[Chat] Búsqueda completada - incrementado contador para user ${effectiveUserId} (${currentUsed} -> ${currentUsed + 1})`);
+          }
         }
 
         return 'OK';

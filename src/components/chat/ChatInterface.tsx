@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from "react";
+import { useToast } from '@/components/ui/ToastProvider';
 
 type Message = { id: string; role: "user" | "assistant"; content: string };
 
@@ -9,6 +10,7 @@ export function ChatInterface() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,6 +29,18 @@ export function ChatInterface() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
+        
+        // Manejo especial para error de búsquedas agotadas
+        if (res.status === 403 && data.remaining === 0) {
+          toast({
+            title: '❌ Sin búsquedas disponibles',
+            description: data.message || 'Has agotado tus búsquedas asignadas. Contacta al administrador.',
+            variant: 'error',
+            duration: 8000,
+          });
+          throw new Error('Sin búsquedas disponibles');
+        }
+        
         throw new Error(data.error || "Error en el chat");
       }
       const text = await res.text();

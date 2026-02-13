@@ -25,6 +25,9 @@ interface UserStats {
   landings: number;
   tickets: number;
   unreadTickets: number;
+  allocatedSearches: number;
+  usedSearches: number;
+  remainingSearches: number;
 }
 
 interface DashCard {
@@ -47,6 +50,9 @@ export function DashboardHub() {
     landings: 0,
     tickets: 0,
     unreadTickets: 0,
+    allocatedSearches: 0,
+    usedSearches: 0,
+    remainingSearches: 0,
   });
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -102,6 +108,19 @@ export function DashboardHub() {
       statsData.tickets = tickets?.length || 0;
       statsData.unreadTickets = tickets?.filter((t: any) => t.status === 'open').length || 0;
 
+      // Search allocations (solo para usuarios no-admin)
+      if (!adminData?.isAdmin) {
+        const { data: allocation } = await supabase
+          .from('user_allocated_searches')
+          .select('allocated_count, used_count')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        statsData.allocatedSearches = allocation?.allocated_count || 0;
+        statsData.usedSearches = allocation?.used_count || 0;
+        statsData.remainingSearches = Math.max(0, (allocation?.allocated_count || 0) - (allocation?.used_count || 0));
+      }
+
       setStats(statsData);
     } catch (error) {
       console.error('Error loading dashboard stats:', error);
@@ -116,7 +135,12 @@ export function DashboardHub() {
       title: 'Chat IA',
       icon: <MessageSquare size={32} />,
       href: '/chat',
-      description: 'Investiga productos y crea contenido',
+      stat: isAdmin ? undefined : stats.remainingSearches,
+      description: isAdmin 
+        ? 'Investiga productos y crea contenido' 
+        : stats.allocatedSearches > 0 
+          ? `${stats.remainingSearches} búsquedas disponibles`
+          : 'Investiga productos y crea contenido',
       color: 'text-indigo-600',
       bgColor: 'bg-indigo-50 dark:bg-indigo-900/20',
       priority: 'high',
@@ -240,6 +264,44 @@ export function DashboardHub() {
             </p>
             <p className="text-sm text-red-800 dark:text-red-300">
               Revisa el estado de tus solicitudes de soporte
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Alert for low search quota */}
+      {!isAdmin && stats.allocatedSearches > 0 && stats.remainingSearches <= 3 && (
+        <div className={`${
+          stats.remainingSearches === 0 
+            ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' 
+            : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+        } border p-4 rounded-lg flex items-start gap-3`}>
+          <AlertCircle 
+            size={20} 
+            className={`${
+              stats.remainingSearches === 0 ? 'text-red-600' : 'text-yellow-600'
+            } flex-shrink-0 mt-0.5`} 
+          />
+          <div>
+            <p className={`font-medium ${
+              stats.remainingSearches === 0 
+                ? 'text-red-900 dark:text-red-200' 
+                : 'text-yellow-900 dark:text-yellow-200'
+            }`}>
+              {stats.remainingSearches === 0 
+                ? '❌ Sin búsquedas disponibles' 
+                : `⚠️ Pocas búsquedas restantes: ${stats.remainingSearches}/${stats.allocatedSearches}`
+              }
+            </p>
+            <p className={`text-sm ${
+              stats.remainingSearches === 0 
+                ? 'text-red-800 dark:text-red-300' 
+                : 'text-yellow-800 dark:text-yellow-300'
+            }`}>
+              {stats.remainingSearches === 0 
+                ? 'Contacta al administrador para asignar más búsquedas'
+                : 'Considera contactar al administrador o configurar tu propia API key en Configuración'
+              }
             </p>
           </div>
         </div>
