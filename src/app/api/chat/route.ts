@@ -1,4 +1,4 @@
-import { createGroq } from '@ai-sdk/groq';
+import { createOpenAI } from '@ai-sdk/openai';
 import { generateText, streamText, tool } from 'ai';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
@@ -9,16 +9,18 @@ import { AGENT_CONFIGS, type AgentKey } from '@/lib/agents/config';
 export const maxDuration = 60;
 
 // Validate required environment variables
-if (!process.env.GROQ_API_KEY) {
-  console.error('❌ GROQ_API_KEY is not configured in environment variables');
+if (!process.env.XAI_API_KEY) {
+  console.error('❌ XAI_API_KEY is not configured in environment variables');
 }
 
 if (!process.env.TAVILY_API_KEY) {
   console.error('⚠️ TAVILY_API_KEY is not configured (market research will be limited)');
 }
 
-const groq = createGroq({
-  apiKey: process.env.GROQ_API_KEY,
+// Configure xAI Grok using OpenAI-compatible SDK
+const xai = createOpenAI({
+  apiKey: process.env.XAI_API_KEY,
+  baseURL: 'https://api.x.ai/v1',
 });
 
 const tvly = tavily({ apiKey: process.env.TAVILY_API_KEY || 'dummy-key-for-build' });
@@ -72,8 +74,8 @@ function parseMarkdownTable(text: string): ParsedTable | null {
 export async function POST(req: Request) {
   try {
     // Validate API keys first
-    if (!process.env.GROQ_API_KEY) {
-      console.error('/api/chat: ERROR - GROQ_API_KEY not configured');
+    if (!process.env.XAI_API_KEY) {
+      console.error('/api/chat: ERROR - XAI_API_KEY not configured');
       return new Response(
         JSON.stringify({ 
           error: 'El servicio de IA no está configurado. Por favor contacta al administrador.' 
@@ -875,7 +877,7 @@ No menciones herramientas ni el proceso. Responde solo con el contenido.
 `;
 
       const result = await generateText({
-        model: groq('llama-3.1-8b-instant'),
+        model: xai('grok-beta'),
         system: landingPrompt,
         messages,
       } as any);
@@ -1004,7 +1006,7 @@ Responde solo con la clave exacta.
 `;
 
       const routingResult = await generateText({
-        model: groq('llama-3.1-8b-instant'),
+        model: xai('grok-beta'),
         system: routingPrompt,
         messages: [],
       } as any);
@@ -1118,7 +1120,7 @@ No menciones herramientas ni el proceso. Responde solo con el contenido.
 `;
 
       const result = await generateText({
-        model: groq('llama-3.1-8b-instant'),
+        model: xai('grok-beta'),
         system: copyPrompt,
         messages,
       } as any);
@@ -1154,7 +1156,7 @@ No menciones herramientas ni el proceso. Responde solo con el contenido.
 `;
 
       const result = await generateText({
-        model: groq('llama-3.1-8b-instant'),
+        model: xai('grok-beta'),
         system: landingPrompt,
         messages,
       } as any);
@@ -1186,7 +1188,7 @@ No menciones herramientas ni el proceso. Responde solo con el contenido.
 `;
 
       const result = await generateText({
-        model: groq('llama-3.1-8b-instant'),
+        model: xai('grok-beta'),
         system: mediaPrompt,
         messages,
       } as any);
@@ -1218,7 +1220,7 @@ No menciones herramientas ni el proceso. Responde solo con el contenido.
 `;
 
       const result = await generateText({
-        model: groq('llama-3.1-8b-instant'),
+        model: xai('grok-beta'),
         system: fallbackPrompt,
         messages,
       } as any);
@@ -1268,7 +1270,7 @@ No menciones herramientas ni el proceso.
 `;
 
     const result = await generateText({
-      model: groq('llama-3.1-8b-instant'),
+      model: xai('grok-beta'),
       system: recommendationPrompt,
       messages,
     } as any);
@@ -1356,7 +1358,7 @@ No menciones herramientas ni el proceso.
   }
 
   const result = streamText({
-    model: groq('llama-3.1-8b-instant'),
+    model: xai('grok-beta'),
     system: systemPrompt,
     messages,
     tools,
@@ -1377,19 +1379,19 @@ No menciones herramientas ni el proceso.
       console.warn('/api/chat: toDataStreamResponse no disponible, usando fallback');
     }
 
-    // Fallback: petición sin stream al API de Groq (OpenAI-compatible)
+    // Fallback: petición sin stream al API de xAI Grok (OpenAI-compatible)
     try {
       const modelName = typeof (result as { model?: unknown }).model === 'string'
         ? (result as unknown as { model: string }).model
-        : 'llama-3.1-8b-instant';
+        : 'grok-beta';
       console.log('/api/chat: fallback usando modelo', modelName);
-      const apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
+      const apiUrl = 'https://api.x.ai/v1/chat/completions';
       const body = JSON.stringify({ model: modelName, messages });
       const r = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+          Authorization: `Bearer ${process.env.XAI_API_KEY}`,
         },
         body,
       });
