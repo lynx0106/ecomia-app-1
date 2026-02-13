@@ -1,7 +1,25 @@
+'use client';
+
 import Link from "next/link";
 import { ArrowRight, UserPlus, LogIn } from "lucide-react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 export default function Home() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        router.push("/dashboard");
+      }
+    };
+    checkAuth();
+  }, [router]);
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white p-4 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/40 via-purple-900/40 to-black z-0" />
