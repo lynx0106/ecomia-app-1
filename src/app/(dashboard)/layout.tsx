@@ -311,10 +311,10 @@ export default function DashboardLayout({
           <div className="flex items-center gap-2">
             <button
               onClick={handleSignOut}
-              className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition-colors"
+              className="rounded-full border border-gray-200 bg-white/80 p-2 text-gray-500 shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 dark:border-gray-800 dark:bg-gray-900/80 dark:text-gray-300 dark:hover:border-red-900/40 dark:hover:bg-red-900/10"
               aria-label="Cerrar sesion"
             >
-              <LogOut size={20} />
+              <LogOut size={18} />
             </button>
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -341,9 +341,11 @@ export default function DashboardLayout({
               <div className="hidden md:flex items-center justify-end mb-4">
                 <button
                   onClick={handleSignOut}
-                  className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 dark:border-red-900/40 dark:bg-gray-900 dark:text-red-300 dark:hover:bg-red-900/10"
+                  className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/80 px-4 py-2 text-xs font-semibold text-gray-600 shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 dark:border-gray-800 dark:bg-gray-900/80 dark:text-gray-300 dark:hover:border-red-900/40 dark:hover:bg-red-900/10"
                 >
-                  <LogOut size={14} />
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-300">
+                    <LogOut size={14} />
+                  </span>
                   Cerrar sesion
                 </button>
               </div>
