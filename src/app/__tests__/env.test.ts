@@ -10,7 +10,7 @@ describe('Environment Configuration', () => {
   })
 
   it('should document required API keys for production', () => {
-    const requiredApiKeys = ['GROQ_API_KEY', 'TAVILY_API_KEY']
+    const requiredApiKeys = ['XAI_API_KEY', 'TAVILY_API_KEY']
     expect(requiredApiKeys).toHaveLength(2)
   })
 

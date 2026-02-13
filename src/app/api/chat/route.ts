@@ -1,4 +1,4 @@
-import { createGroq } from '@ai-sdk/groq';
+import { createXai } from '@ai-sdk/xai';
 import { generateText, streamText, tool } from 'ai';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
@@ -8,8 +8,8 @@ import { AGENT_CONFIGS, type AgentKey } from '@/lib/agents/config';
 // Allow streaming responses up to 60 seconds (research takes time)
 export const maxDuration = 60;
 
-const groq = createGroq({
-  apiKey: process.env.GROQ_API_KEY,
+const xai = createXai({
+  apiKey: process.env.XAI_API_KEY,
 });
 
 const tvly = tavily({ apiKey: process.env.TAVILY_API_KEY || 'dummy-key-for-build' });
@@ -66,9 +66,9 @@ export async function POST(req: Request) {
     const url = new URL(req.url);
     const sync = url.searchParams.get('sync') === 'true';
 
-    if (!process.env.GROQ_API_KEY) {
+    if (!process.env.XAI_API_KEY) {
       return new Response(
-        JSON.stringify({ error: 'GROQ_API_KEY no configurada en el servidor.' }),
+        JSON.stringify({ error: 'XAI_API_KEY no configurada en el servidor.' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -862,7 +862,7 @@ No menciones herramientas ni el proceso. Responde solo con el contenido.
 `;
 
       const result = await generateText({
-        model: groq('llama-3.1-8b-instant'),
+        model: xai('grok-2'),
         system: landingPrompt,
         messages,
       } as any);
@@ -991,7 +991,7 @@ Responde solo con la clave exacta.
 `;
 
       const routingResult = await generateText({
-        model: groq('llama-3.1-8b-instant'),
+        model: xai('grok-2'),
         system: routingPrompt,
         messages: [],
       } as any);
@@ -1105,7 +1105,7 @@ No menciones herramientas ni el proceso. Responde solo con el contenido.
 `;
 
       const result = await generateText({
-        model: groq('llama-3.1-8b-instant'),
+        model: xai('grok-2'),
         system: copyPrompt,
         messages,
       } as any);
@@ -1141,7 +1141,7 @@ No menciones herramientas ni el proceso. Responde solo con el contenido.
 `;
 
       const result = await generateText({
-        model: groq('llama-3.1-8b-instant'),
+        model: xai('grok-2'),
         system: landingPrompt,
         messages,
       } as any);
@@ -1173,7 +1173,7 @@ No menciones herramientas ni el proceso. Responde solo con el contenido.
 `;
 
       const result = await generateText({
-        model: groq('llama-3.1-8b-instant'),
+        model: xai('grok-2'),
         system: mediaPrompt,
         messages,
       } as any);
@@ -1205,7 +1205,7 @@ No menciones herramientas ni el proceso. Responde solo con el contenido.
 `;
 
       const result = await generateText({
-        model: groq('llama-3.1-8b-instant'),
+        model: xai('grok-2'),
         system: fallbackPrompt,
         messages,
       } as any);
@@ -1255,7 +1255,7 @@ No menciones herramientas ni el proceso.
 `;
 
     const result = await generateText({
-      model: groq('llama-3.1-8b-instant'),
+      model: xai('grok-2'),
       system: recommendationPrompt,
       messages,
     } as any);
@@ -1355,7 +1355,7 @@ No menciones herramientas ni el proceso.
   }
 
   const result = streamText({
-    model: groq('llama-3.1-8b-instant'),
+    model: xai('grok-2'),
     system: systemPrompt,
     messages,
     tools,
@@ -1376,19 +1376,19 @@ No menciones herramientas ni el proceso.
       console.warn('/api/chat: toDataStreamResponse no disponible, usando fallback');
     }
 
-    // Fallback: petición sin stream al API de Groq (OpenAI-compatible)
+    // Fallback: petición sin stream al API de XAI (OpenAI-compatible)
     try {
       const modelName = typeof (result as { model?: unknown }).model === 'string'
         ? (result as unknown as { model: string }).model
-        : 'llama-3.1-8b-instant';
+        : 'grok-2';
       console.log('/api/chat: fallback usando modelo', modelName);
-      const apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
+      const apiUrl = 'https://api.x.ai/v1/chat/completions';
       const body = JSON.stringify({ model: modelName, messages });
       const r = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+          Authorization: `Bearer ${process.env.XAI_API_KEY}`,
         },
         body,
       });
