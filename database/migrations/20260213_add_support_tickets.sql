@@ -7,15 +7,17 @@ CREATE TABLE IF NOT EXISTS support_tickets (
   status VARCHAR(50) DEFAULT 'open' CHECK (status IN ('open', 'in_progress', 'resolved', 'closed')),
   priority VARCHAR(50) DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high', 'urgent')),
   category VARCHAR(100) DEFAULT 'general',
-  conversation_context JSONB, -- Store previous chat messages for context
+  conversation_context JSONB,
   assigned_admin UUID REFERENCES auth.users(id) ON DELETE SET NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  resolved_at TIMESTAMP,
-  INDEX idx_support_tickets_user_id (user_id),
-  INDEX idx_support_tickets_status (status),
-  INDEX idx_support_tickets_assigned_admin (assigned_admin)
+  resolved_at TIMESTAMP
 );
+
+-- Create indexes
+CREATE INDEX idx_support_tickets_user_id ON support_tickets(user_id);
+CREATE INDEX idx_support_tickets_status ON support_tickets(status);
+CREATE INDEX idx_support_tickets_assigned_admin ON support_tickets(assigned_admin);
 
 -- Enable RLS
 ALTER TABLE support_tickets ENABLE ROW LEVEL SECURITY;
