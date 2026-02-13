@@ -27,6 +27,7 @@ export async function POST() {
       .update({
         completed_tour: false,
         tour_completed_at: null,
+        tour_skipped_at: null,
         updated_at: new Date().toISOString(),
       })
       .eq('user_id', user.id);

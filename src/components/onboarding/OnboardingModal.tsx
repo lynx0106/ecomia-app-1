@@ -31,7 +31,7 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
         // Check onboarding_status
         const { data, error } = await supabase
           .from('onboarding_status')
-          .select('completed_tour, tour_skipped')
+          .select('completed_tour, tour_skipped_at')
           .eq('user_id', user.id)
           .maybeSingle();
 
@@ -51,7 +51,7 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
           if (createError) {
             logger.error('Failed to create onboarding record', createError);
           }
-        } else if (data && !data.completed_tour && !data.tour_skipped) {
+        } else if (data && !data.completed_tour && !data.tour_skipped_at) {
           // Tour not completed, show modal
           logger.info('Incomplete tour - showing onboarding modal');
           setIsVisible(true);

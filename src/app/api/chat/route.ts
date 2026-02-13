@@ -66,6 +66,13 @@ export async function POST(req: Request) {
     const url = new URL(req.url);
     const sync = url.searchParams.get('sync') === 'true';
 
+    if (!process.env.GROQ_API_KEY) {
+      return new Response(
+        JSON.stringify({ error: 'GROQ_API_KEY no configurada en el servidor.' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     console.log('/api/chat: mensajes recibidos (original):', JSON.stringify(messages, null, 2));
 
     // Validar que tenemos al menos un mensaje
@@ -1416,15 +1423,17 @@ No menciones herramientas ni el proceso.
       });
     } catch (err) {
       console.error('/api/chat: fallback error:', err);
-      return new Response('Error en fallback del chat', { status: 500 });
+      return new Response(
+        JSON.stringify({ error: 'Error en fallback del chat' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
     }
   } catch (error) {
     console.error('/api/chat: ERROR CRÍTICO:', error);
     const errorMessage = error instanceof Error ? error.message : String(error);
-    // Devolver un stream de error simple
-    return new Response(`Error en el chat: ${errorMessage}`, {
-      status: 500,
-      headers: { 'Content-Type': 'text/plain' },
-    });
+    return new Response(
+      JSON.stringify({ error: `Error en el chat: ${errorMessage}` }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 }

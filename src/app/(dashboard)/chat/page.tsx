@@ -44,13 +44,13 @@ export default function ChatPage() {
         // Check if user is new
         const { data: onboarding } = await supabase
           .from('onboarding_status')
-          .select('completed_tour, tour_skipped, created_at')
+          .select('completed_tour, tour_skipped_at, created_at')
           .eq('user_id', user.id)
           .maybeSingle();
 
         // Determine welcome message based on user status
         let welcomeMessage = '';
-        const isNewUser = !onboarding?.completed_tour && !onboarding?.tour_skipped;
+        const isNewUser = !onboarding?.completed_tour && !onboarding?.tour_skipped_at;
 
         if (isNewUser) {
           welcomeMessage = `¡Hola! 👋 Soy tu asesor de e-commerce impulsado por IA.

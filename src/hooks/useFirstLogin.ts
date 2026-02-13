@@ -40,7 +40,7 @@ export function useFirstLogin(): boolean {
         // Check onboarding_status table
         const { data, error } = await supabase
           .from('onboarding_status')
-          .select('completed_tour, tour_skipped')
+          .select('completed_tour, tour_skipped_at')
           .eq('user_id', user.id)
           .single();
 
@@ -59,11 +59,11 @@ export function useFirstLogin(): boolean {
           setIsFirstLogin(false);
         } else if (data) {
           // Check if completed tour
-          const completed = data.completed_tour || data.tour_skipped;
+          const completed = data.completed_tour || Boolean(data.tour_skipped_at);
           setIsFirstLogin(!completed);
           logger.debug(`First login: ${!completed}`, {
             completed_tour: data.completed_tour,
-            tour_skipped: data.tour_skipped,
+            tour_skipped_at: data.tour_skipped_at,
           });
         }
       } catch (err) {
@@ -93,11 +93,9 @@ export function useFirstLogin(): boolean {
 export interface OnboardingData {
   user_id: string;
   completed_tour: boolean;
-  tour_skipped: boolean;
-  tour_steps_completed: number;
-  total_tour_steps: number;
-  device_type: string | null;
-  browser: string | null;
+  tour_skipped_at: string | null;
+  tour_started_at: string | null;
+  tour_completed_at: string | null;
   created_at: string;
   updated_at: string;
 }

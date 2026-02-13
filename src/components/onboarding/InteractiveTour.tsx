@@ -23,8 +23,7 @@ import { logger } from '@/lib/logging';
 interface OnboardingStatus {
   user_id: string;
   completed_tour: boolean;
-  tour_skipped: boolean;
-  tour_steps_completed: number;
+  tour_skipped_at?: string | null;
 }
 
 export function InteractiveTour() {
@@ -149,7 +148,7 @@ export function InteractiveTour() {
           setRunTour(true); // First time, show tour
         } else if (error) {
           logger.error('Failed to fetch onboarding status', error);
-        } else if (data && !data.completed_tour && !data.tour_skipped) {
+        } else if (data && !data.completed_tour && !data.tour_skipped_at) {
           // Tour not completed, show it
           setOnboardingData(data);
           setRunTour(true);
@@ -182,11 +181,8 @@ export function InteractiveTour() {
           .from('onboarding_status')
           .update({
             completed_tour: completed,
-            tour_skipped: skipped,
-            tour_steps_completed: stepsCompleted,
             tour_completed_at: completed ? new Date().toISOString() : null,
-            device_type: getDeviceType(),
-            browser: getBrowserType(),
+            tour_skipped_at: skipped ? new Date().toISOString() : null,
           })
           .eq('user_id', userId);
 
