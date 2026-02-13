@@ -2,7 +2,29 @@
 
 Una plataforma de IA para ayudar a emprendedores a validar ideas de negocio y crear tiendas exitosas en LATAM.
 
-**Stack:** Next.js 16 • React 19 • Supabase • Groq LLM • Tavily API • Tailwind CSS
+**Stack:** Next.js 16 • React 19 • Supabase • **xAI Grok** • Tavily API • Tailwind CSS
+
+---
+
+## 🎉 NUEVO: Ahora con xAI Grok
+
+**¡Hemos migrado de Groq a xAI Grok!**
+
+👉 **[CAMBIO_A_XAI_RESUMEN.md](./CAMBIO_A_XAI_RESUMEN.md)** ⚡ **¡LEE ESTO PRIMERO!**
+
+**¿Qué significa?**
+- ✅ Modelo más actualizado (grok-beta de Elon Musk/xAI)
+- ✅ Mejor comprensión de conversaciones
+- ✅ Sin problemas de límite de tokens
+- ✅ Respuestas más precisas
+
+**¿Qué debes hacer?**
+1. Obtén tu API key en https://console.x.ai/team
+2. Configúrala en Vercel como `XAI_API_KEY`
+3. Redeploy
+4. ¡Listo! 🚀
+
+**Documentación técnica:** [MIGRACION_XAI.md](./MIGRACION_XAI.md)
 
 ---
 
