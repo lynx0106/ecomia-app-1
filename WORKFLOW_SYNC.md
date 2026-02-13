@@ -1,20 +1,19 @@
-# 🔄 Workflow de Sincronización de Repositorios
+# 🔄 Workflow de Desarrollo
 
 **Última actualización:** 13 de Febrero, 2026  
-**Versión:** 1.0
+**Versión:** 2.0
 
 ---
 
 ## 📌 Contexto
 
-El proyecto EcomIA usa **dos repositorios sincronizados**:
+El proyecto EcomIA ahora usa **un único repositorio principal**:
 
 | Repositorio | Dueño | Propósito | Vercel |
 |-------------|-------|----------|--------|
-| **ecomia-app-1** | lynx0106 | Rama de trabajo (desarrollo/staging) | ✅ Conectado |
-| **ecomia-app** | lynxia25-hub | Repo principal (producción) | ✅ Conectado |
+| **ecomia-app-1** | lynx0106 | Repo único (desarrollo + producción) | ✅ Conectado |
 
-Ambos están en Vercel pero **lynx0106/ecomia-app-1 es donde se trabaja** y los cambios se sincronizan a lynxia25-hub/ecomia-app.
+**Vercel deploya directamente desde `lynx0106/ecomia-app-1:main` a ecom-ia.online.**
 
 ---
 
@@ -31,29 +30,11 @@ git commit -m "feat: descripción del cambio"
 git push origin main
 ```
 
-### Paso 2: Crear Pull Request a lynxia25-hub
+### Paso 2: Vercel auto-deploya
 
-```bash
-cd /workspaces/ecomia-app-1
+Vercel detecta los cambios en `main` y auto-deploya a ecom-ia.online en 2-5 minutos.
 
-# Crear PR automático
-gh pr create \
-  --repo lynxia25-hub/ecomia-app \
-  --base main \
-  --head lynx0106:main \
-  --title "Sync: [descripción corta]" \
-  --body "Descripción de cambios y detalles"
-```
-
-O si ya existe PR #2, actualizar en GitHub:
-- Ir a https://github.com/lynxia25-hub/ecomia-app/pull/2
-- El PR se auto-actualiza con los nuevos commits
-
-### Paso 3: Merge en lynxia25-hub (producción)
-
-1. **lynxia25-hub owner** hace merge del PR en GitHub
-2. Vercel detecta cambios en lynxia25-hub/ecomia-app:main
-3. Auto-deploy a ecom-ia.online
+**Sin pasos adicionales requeridos.**
 
 ---
 
@@ -81,56 +62,34 @@ git remote -v
 # Output esperado:
 # origin     https://github.com/lynx0106/ecomia-app-1 (fetch)
 # origin     https://github.com/lynx0106/ecomia-app-1 (push)
-# upstream   https://github.com/lynxia25-hub/ecomia-app.git (fetch)
-# upstream   https://github.com/lynxia25-hub/ecomia-app.git (push)
 ```
 
-**origin** = rama de trabajo (lynx0106)  
-**upstream** = repo principal (lynxia25-hub)
+**origin** = único repositorio (lynx0106/ecomia-app-1)
 
 ---
 
 ## ⚠️ Si Algo Sale Mal
 
-### PR rechazado o conflictos
-
-```bash
-# Ver estado actual
-git log --oneline -5
-
-# Si hay conflictos:
-git pull upstream main
-# Resolver conflictos en archivos
-git add .
-git commit -m "chore: resolve conflicts"
-git push origin main
-
-# El PR se auto-actualiza
-```
-
 ### Build falla en Vercel
 
-Esperar a que lynxia25-hub/ecomia-app se recompile. Si persiste:
-
-1. Revisar logs de Vercel (lynxia25-hub dashboard)
+1. Ver logs de Vercel (dashboard de lynx0106)
 2. Hacer rollback con commit revert:
    ```bash
    git revert <hash-del-commit>
    git push origin main
-   # PR se actualiza
    ```
+3. Vercel se recompila automáticamente
 
-### Cambios duplicados o histórico confuso
+### Cambios no se ven en producción
 
 ```bash
-# Ver historia completa
-git log --all --graph --oneline
+# Verificar que están en main
+git log --oneline -5
 
-# Sincronizar todo si está muy desfasado
-git fetch origin
-git fetch upstream
-git merge upstream/main
-git push origin main
+# Forzar push (si es necesario)
+git push -f origin main
+
+# Esperar 2-5 min a que Vercel redeploy
 ```
 
 ---
@@ -147,21 +106,8 @@ git push origin main
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│       lynx0106/ecomia-app-1 (DESARROLLO)           │
+│    lynx0106/ecomia-app-1 (ÚNICO REPOSITORIO)       │
 │  ├─ git commit & push origin main                  │
-│  └─ (Vercel auto-deploy)                           │
-└────────────────────┬────────────────────────────────┘
-                     │
-                     ▼
-        ┌────────────────────────────┐
-        │   GitHub PR #2 (mostrado   │
-        │   en lynxia25-hub/ecomia-app)
-        └────────────────┬───────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────┐
-│  lynxia25-hub/ecomia-app (PRODUCCIÓN)              │
-│  ├─ Merge PR                                       │
 │  └─ Vercel auto-deploy → ecom-ia.online 🚀        │
 └─────────────────────────────────────────────────────┘
 ```
@@ -170,9 +116,8 @@ git push origin main
 
 ## 🔐 Permisos
 
-- **lynx0106:** puede hacer push a su propio repo
-- **lynxia25-hub:** hace merge de PRs en su repo principal
-- **Vercel:** mira ambos repos, deploya desde lynxia25-hub
+- **lynx0106:** Dueño del repo, puede hacer push directamente
+- **Vercel:** Mira lynx0106/ecomia-app-1, deploya automáticamente
 
 ---
 
