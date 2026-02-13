@@ -6,6 +6,24 @@
 
 **Status:** ✅ COMPLETADO Y DEPLOYADO - Listo para pruebas en vivo
 
+---
+
+## ✅ ACTUALIZACIONES RECIENTES (Feb 13, 2026)
+
+### Cambios funcionales
+- **Cuotas de busquedas asignadas:** validacion en `/api/chat`, bloqueo 403 cuando el usuario no tiene saldo, incremento automatico al completar investigacion, y alertas en dashboard.
+- **Notificaciones UI:** toast de error cuando se agotan las busquedas asignadas y banner de aviso en el dashboard.
+
+### Branding y estetica
+- **Nuevo logo limpio (sin fondo):** reemplazo de todos los logos por `logo-clean.png` con proporciones coherentes y centrado en sidebar, header movil, login y chat.
+- **Favicon actualizado:** `icon.png` y `apple-icon.png` actualizados desde el logo nuevo.
+
+### Commits recientes
+- `a5cc956` - feat: search allocation quota system with validation and notifications
+- `0012db5` - feat: integrate custom EcomIA logo and favicon across platform
+- `834e881` - fix: correct toast API usage in ChatInterface (tone/durationMs)
+- `PENDIENTE` - feat: refine logo proportions and centering (logo-clean)
+
 **Commits realizados:** 7 commits (ultimos 3 de hoy)
 - `cacd994` - Cleanup + Joyride removal
 - `ebef0b7` - Documentation updates

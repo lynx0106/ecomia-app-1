@@ -85,11 +85,11 @@ export function ChatSidebar({
       <div className="p-4 border-b border-gray-200 bg-gray-100 flex items-center justify-between dark:border-gray-800 dark:bg-gray-900">
         <div className="flex items-center gap-2">
           <Image
-            src="/logo.png"
+            src="/logo-clean.png"
             alt="EcomAgent"
-            width={32}
-            height={32}
-            className="object-contain"
+            width={40}
+            height={40}
+            className="object-contain h-9 w-auto"
           />
           <h3 className="font-bold text-gray-800 dark:text-white">EcomAgent</h3>
         </div>
@@ -108,11 +108,11 @@ export function ChatSidebar({
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center p-6 opacity-80">
             <Image
-              src="/logo.png"
+              src="/logo-clean.png"
               alt="EcomAgent"
-              width={80}
-              height={80}
-              className="object-contain mb-4 opacity-80"
+              width={112}
+              height={112}
+              className="object-contain h-24 w-auto mb-4 opacity-90"
             />
             <h4 className="text-lg font-medium text-gray-800 mb-2 dark:text-white">¡Hola! Soy EcomAgent</h4>
             <p className="text-sm text-gray-700 max-w-[200px] dark:text-gray-300">
@@ -131,11 +131,11 @@ export function ChatSidebar({
                 <div className="flex-shrink-0 mt-1">
                   <div className="bg-white p-1 rounded-full border border-gray-200 shadow-sm dark:bg-gray-900 dark:border-gray-700">
                     <Image
-                      src="/logo.png"
+                      src="/logo-clean.png"
                       alt="EcomAgent"
                       width={24}
                       height={24}
-                      className="object-contain"
+                      className="object-contain h-6 w-auto"
                     />
                   </div>
                 </div>
@@ -191,11 +191,11 @@ export function ChatSidebar({
             <div className="flex-shrink-0 mt-1">
               <div className="bg-white p-1 rounded-full border border-gray-200 shadow-sm dark:bg-gray-900 dark:border-gray-700">
                 <Image
-                  src="/logo.png"
+                  src="/logo-clean.png"
                   alt="EcomAgent"
                   width={24}
                   height={24}
-                  className="object-contain"
+                  className="object-contain h-6 w-auto"
                 />
               </div>
             </div>

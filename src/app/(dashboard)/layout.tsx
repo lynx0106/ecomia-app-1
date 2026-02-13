@@ -176,35 +176,37 @@ export default function DashboardLayout({
         animate={{ width: isSidebarOpen ? 280 : 80 }}
         className="hidden md:flex flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 z-20"
       >
-        <div className="flex items-center justify-between p-6 h-20">
-          {isSidebarOpen ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex items-center"
-            >
+        <div className="flex items-center gap-3 p-6 h-20">
+          <div className="flex-1 flex justify-center">
+            {isSidebarOpen ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex items-center justify-center"
+              >
+                <Image
+                  src="/logo-clean.png"
+                  alt="EcomIA Logo"
+                  width={176}
+                  height={48}
+                  className="object-contain h-10 w-auto"
+                  priority
+                />
+              </motion.div>
+            ) : (
               <Image
-                src="/logo.png"
-                alt="EcomIA Logo"
-                width={140}
+                src="/logo-clean.png"
+                alt="EcomIA"
+                width={40}
                 height={40}
-                className="object-contain"
+                className="object-contain h-9 w-auto"
                 priority
               />
-            </motion.div>
-          ) : (
-            <Image
-              src="/logo.png"
-              alt="EcomIA"
-              width={32}
-              height={32}
-              className="object-contain"
-              priority
-            />
-          )}
+            )}
+          </div>
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition-colors"
+            className="shrink-0 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition-colors"
           >
             {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -267,23 +269,23 @@ export default function DashboardLayout({
         animate={{ x: isSidebarOpen ? 0 : -280 }}
         className="fixed left-0 top-0 h-screen w-72 md:hidden flex flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 z-40"
       >
-        <div className="flex items-center justify-between p-6 h-20">
+        <div className="flex items-center gap-3 p-6 h-20">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="flex items-center"
+            className="flex-1 flex items-center justify-center"
           >
             <Image
-              src="/logo.png"
+              src="/logo-clean.png"
               alt="EcomIA"
-              width={120}
-              height={36}
-              className="object-contain"
+              width={160}
+              height={44}
+              className="object-contain h-9 w-auto"
             />
           </motion.div>
           <button
             onClick={() => setIsSidebarOpen(false)}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition-colors"
+            className="shrink-0 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition-colors"
           >
             <X size={20} />
           </button>
@@ -334,15 +336,18 @@ export default function DashboardLayout({
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
         {/* Mobile Header */}
-        <div className="md:hidden h-16 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex items-center justify-between px-4 z-10">
-          <Image
-            src="/logo.png"
-            alt="EcomIA"
-            width={100}
-            height={30}
-            className="object-contain"
-          />
-          <div className="flex items-center gap-2">
+        <div className="md:hidden h-16 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex items-center px-4 z-10 relative">
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+            <Image
+              src="/logo-clean.png"
+              alt="EcomIA"
+              width={144}
+              height={40}
+              className="object-contain h-8 w-auto"
+              priority
+            />
+          </div>
+          <div className="ml-auto flex items-center gap-2">
             <button
               onClick={handleSignOut}
               className="rounded-full border border-gray-200 bg-white/80 p-2 text-gray-500 shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 dark:border-gray-800 dark:bg-gray-900/80 dark:text-gray-300 dark:hover:border-red-900/40 dark:hover:bg-red-900/10"

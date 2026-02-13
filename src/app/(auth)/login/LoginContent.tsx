@@ -106,13 +106,13 @@ export function LoginContent() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <div className="mb-8">
+            <div className="mb-8 flex justify-center">
               <Image
-                src="/logo.png"
+                src="/logo-clean.png"
                 alt="EcomIA"
-                width={200}
-                height={60}
-                className="object-contain"
+                width={260}
+                height={78}
+                className="object-contain h-14 w-auto drop-shadow-sm"
                 priority
               />
             </div>
