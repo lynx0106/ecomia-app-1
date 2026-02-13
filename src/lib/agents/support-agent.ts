@@ -144,6 +144,8 @@ PERSONALIDAD:
   };
 
   try {
+    console.log('[Support Agent] Starting with', messages.length, 'messages');
+    
     const result = await generateText({
       model: xai('grok-4-1-fast-non-reasoning'),
       system: systemPrompt,
@@ -152,13 +154,23 @@ PERSONALIDAD:
       maxSteps: 5,
     } as any);
 
+    console.log('[Support Agent] Success:', result.text?.substring(0, 100));
+    
     return {
       content: result.text || 'Disculpa, no pude procesar tu pregunta. Intenta de nuevo.',
     };
-  } catch (err) {
-    console.error('Support agent error:', err);
+  } catch (err: any) {
+    console.error('[Support Agent] Error:', err);
+    console.error('[Support Agent] Error details:', {
+      message: err?.message,
+      cause: err?.cause,
+      stack: err?.stack?.split('\n').slice(0, 3),
+    });
+    
+    // Devolver un mensaje de error más descriptivo
+    const errorMsg = err?.message || 'Error desconocido';
     return {
-      content: 'Hubo un error procesando tu solicitud. Intenta de nuevo en un momento.',
+      content: `Hubo un problema al procesar tu solicitud: ${errorMsg}. Por favor, intenta de nuevo o espera unos minutos.`,
     };
   }
 }

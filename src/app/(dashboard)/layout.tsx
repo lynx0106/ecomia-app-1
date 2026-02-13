@@ -52,6 +52,12 @@ const sidebarItemsUser = [
     description: "Tiendas y landings creadas",
   },
   {
+    title: "Mis Tickets",
+    href: "/tickets",
+    icon: LifeBuoy,
+    description: "Solicitudes de soporte",
+  },
+  {
     title: "Tutoriales",
     href: "/tutorials",
     icon: BookOpen,

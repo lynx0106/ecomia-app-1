@@ -50,9 +50,14 @@ export function HelpBubble() {
         }),
       });
 
-      if (!response.ok) throw new Error('Error en soporte');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Error desconocido' }));
+        console.error('Support bubble error response:', response.status, errorData);
+        throw new Error(errorData.error || `Error ${response.status}`);
+      }
 
       const data = await response.json();
+      console.log('Support bubble response:', data);
       
       // Add assistant response
       const assistantMessage: Message = {
@@ -67,7 +72,9 @@ export function HelpBubble() {
       const errorMessage: Message = {
         id: `error-${Date.now()}`,
         role: 'assistant',
-        content: 'Hubo un error. Intenta de nuevo más tarde.',
+        content: err instanceof Error 
+          ? `Error: ${err.message}. Por favor, intenta de nuevo o contacta a soporte.`
+          : 'Hubo un error. Intenta de nuevo más tarde.',
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
