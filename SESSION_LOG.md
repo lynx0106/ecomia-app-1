@@ -331,8 +331,52 @@ Cuando Support Agent esté validado:
 
 ---
 
-**Última actualización:** Feb 13, 2026 02:45 UTC
-**Session hash:** 9a66624..cad728f
-**Status:** ✅ Ready for testing
+## 🔧 FIX APLICADO (Feb 13, 03:15 UTC)
+
+**Problema reportado:** Admin no veía enlace "Tickets" en sidebar
+
+**Solución:**
+- ✅ Agregado enlace "Tickets" con icono `LifeBuoy` en sidebar admin
+- ✅ Ubicación: Entre "Configuración" y "Admin Agentes"
+- ✅ Ruta: `/admin/tickets` (adminOnly: true)
+- ✅ Compilación exitosa sin errores
+- ✅ Commit: `1541a9f` - fix: agregar enlace Tickets en sidebar de admin
+
+---
+
+## 📌 CÓMO FUNCIONAN LOS TICKETS
+
+### Para USUARIOS (No hay formulario manual):
+1. Usuario abre **HelpBubble** (burbuja flotante en esquina inferior derecha)
+2. Usuario chatea con **Support Agent** sobre un problema
+3. Si Support Agent **NO PUEDE resolver** el problema:
+   - El AI detecta automáticamente que debe escalar
+   - Ejecuta el tool `escalate_support_ticket`
+   - Crea ticket en base de datos con prioridad y categoría
+   - Responde al usuario: "✅ Ticket creado. Admin te responderá pronto"
+4. Usuario ve confirmación en el chat
+
+**Ejemplos de conversaciones que crean tickets:**
+- "El chat no funciona desde hace 2 días" → Bug urgente
+- "Perdí mis datos de investigación" → Data loss alta prioridad
+- "No puedo acceder a mis tiendas" → Access issue
+- "La plataforma está muy lenta" → Performance issue
+
+### Para ADMINS:
+1. Admin ingresa a `/admin/tickets` (enlace ahora visible en sidebar con icono 🆘)
+2. Ve dashboard con:
+   - 📊 Stats: Tickets abiertos, en progreso, resueltos
+   - 🔍 Filtros por status
+   - 📋 Tabla con últimos tickets
+   - 📝 Panel lateral con detalles completos
+3. Admin puede cambiar status inline: open → in_progress → resolved → closed
+4. Ve contexto de conversación (últimos 5 mensajes del chat)
+
+---
+
+**Última actualización:** Feb 13, 2026 03:20 UTC
+**Session hash:** 9a66624..1541a9f (8 commits)
+**Status:** ✅ Ready for testing + Fix aplicado
 **Migration Status:** ✅ Applied to Supabase (Feb 13, 02:50 UTC)
-**Deploy Status:** ⏳ In progress (waiting for Vercel auto-deploy)
+**Deploy Status:** ✅ Deployed + Push automático en proceso (1541a9f)
+
