@@ -110,9 +110,9 @@ export function LoginContent() {
               <Image
                 src="/logo-clean.png"
                 alt="EcomIA"
-                width={520}
-                height={156}
-                className="object-contain h-40 w-auto drop-shadow-lg"
+                width={624}
+                height={187}
+                className="object-contain h-56 w-auto drop-shadow-lg"
                 priority
               />
             </div>

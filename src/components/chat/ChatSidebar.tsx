@@ -87,9 +87,9 @@ export function ChatSidebar({
           <Image
             src="/logo-clean.png"
             alt="EcomAgent"
-            width={48}
-            height={48}
-            className="object-contain h-11 w-auto"
+            width={64}
+            height={64}
+            className="object-contain h-16 w-auto"
           />
           <h3 className="font-bold text-gray-800 dark:text-white">EcomAgent</h3>
         </div>

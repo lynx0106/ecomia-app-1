@@ -15,14 +15,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "EcomIA - Plataforma de Comercio Electrónico con IA",
   description: "Plataforma inteligente para crear y gestionar tiendas online, landing pages y productos con inteligencia artificial para LATAM",
-  icons: {
-    icon: [
-      { url: '/favicon.ico?v=2' },
-      { url: '/icon.png?v=2', type: 'image/png', sizes: '512x512' },
-    ],
-    shortcut: ['/favicon.ico?v=2'],
-    apple: [{ url: '/apple-icon.png?v=2', sizes: '180x180' }],
-  },
 };
 
 export default function RootLayout({
