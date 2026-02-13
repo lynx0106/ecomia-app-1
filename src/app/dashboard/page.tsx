@@ -56,7 +56,7 @@ export default function DashboardHome() {
                 <ArrowRight size={16} />
               </div>
               <h3 className="font-semibold text-base mb-1">Tutoriales</h3>
-              <p className="text-gray-500 text-xs mb-3">Aprende a sacar el máximo provecho de EcomIA.</p>
+              <p className="text-gray-500 text-xs mb-3">Si tienes dudas, aquí están los tutoriales.</p>
               <PillLink
                 href="/tutorials"
                 variant="neutral"
