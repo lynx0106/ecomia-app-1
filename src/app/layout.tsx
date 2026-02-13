@@ -16,8 +16,12 @@ export const metadata: Metadata = {
   title: "EcomIA - Plataforma de Comercio Electrónico con IA",
   description: "Plataforma inteligente para crear y gestionar tiendas online, landing pages y productos con inteligencia artificial para LATAM",
   icons: {
-    icon: '/icon.png',
-    apple: '/apple-icon.png',
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/icon.png', type: 'image/png', sizes: '512x512' },
+    ],
+    shortcut: ['/favicon.ico'],
+    apple: [{ url: '/apple-icon.png', sizes: '180x180' }],
   },
 };
 
