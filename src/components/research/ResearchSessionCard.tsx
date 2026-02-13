@@ -7,6 +7,8 @@ import { listProductCandidates } from '@/app/actions/product-candidates';
 import { listProductSuppliers } from '@/app/actions/product-suppliers';
 import { useToast } from '@/components/ui/ToastProvider';
 import PillLink from '@/components/ui/PillLink';
+import { Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 type ProductCandidate = {
   id: string;
@@ -58,8 +60,11 @@ export default function ResearchSessionCard({ session, readOnly }: ResearchSessi
   const [editingNotes, setEditingNotes] = useState(session.notes || '');
   const [editingStatus, setEditingStatus] = useState(session.status);
   const [isUpdating, startUpdating] = useTransition();
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { toast } = useToast();
   const lastToastRef = useRef<string>('');
+  const router = useRouter();
 
   useEffect(() => {
     (async () => {
@@ -146,7 +151,39 @@ export default function ResearchSessionCard({ session, readOnly }: ResearchSessi
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `investigacion-${session.goal.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.txt`;
+    
+
+  const handleDeleteResearch = async () => {
+    if (!showDeleteConfirm) {
+      setShowDeleteConfirm(true);
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch('/api/research-sessions/delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: session.id }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        toast({ title: 'Error', description: error.error || 'No se pudo eliminar la investigación', tone: 'error' });
+        setShowDeleteConfirm(false);
+        return;
+      }
+
+      toast({ title: 'Investigación eliminada completamente', tone: 'success' });
+      router.refresh();
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast({ title: 'Error', description: 'Hubo un problema al eliminar', tone: 'error' });
+      setShowDeleteConfirm(false);
+    } finally {
+      setIsDeleting(false);
+    }
+  };a.download = `investigacion-${session.goal.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };
