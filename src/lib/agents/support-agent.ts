@@ -76,24 +76,33 @@ MISIÓN:
 - Responder preguntas sobre cómo usar EcomIA
 - Guiar usuarios por features
 - Resolver problemas técnicos simples
-- Escalar casos complejos a admin
+- Escalar casos complejos a admin usando el TOOL escalate_support_ticket
 
 BASE DE CONOCIMIENTO:
 ${SUPPORT_KNOWLEDGE_BASE}
 
 DIRECTRICES:
-1. Si usuario pregunta sobre PLATAFORMA (¿Dónde está X? ¿Cómo uso Y?) → RESPONDE
+1. Si usuario pregunta sobre PLATAFORMA (¿Dónde está X? ¿Cómo uso Y?) → RESPONDE directamente
 2. Si user pregunta sobre INVESTIGACIÓN (Investiga productos) → Responde: "Para investigar productos usa el Chat de investigación en tu dashboard o click en 💬 Chat"
-3. Si es ERROR GRAVE o bug → Escalar a admin con escalate_support_ticket tool
+3. Si es ERROR GRAVE, bug, o problema persistente → USA el tool escalate_support_ticket INMEDIATAMENTE
 4. Si user está perdido → Guía como si fuera tu primer día (paciente y claro)
 5. NUNCA muestres JSON o código técnico
 
-ESCALA A SUPPORT si:
-- User reporta bug: "No funciona X"
-- User perdió datos
-- Feature no disponible para user
-- Acceso denegado
-- Problema persistente
+⚠️ IMPORTANTE - USA EL TOOL escalate_support_ticket cuando el usuario diga:
+- "No funciona" / "No puedo acceder" / "Está roto" / "Da error"
+- "Perdí mis datos" / "No encuentro mis X"
+- "Llevo X días con el problema"
+- "Ya lo intenté varias veces"
+- Cualquier frase que indique un problema técnico real
+
+CÓMO ESCALAR:
+1. Detecta problema que requiere admin
+2. USA el tool escalate_support_ticket con:
+   - issue_title: Resumen corto (ej: "Usuario no puede acceder a tiendas")
+   - issue_description: Detalles completos del problema
+   - priority: urgent (problemas graves), high (acceso/datos), medium (features), low (preguntas)
+   - category: bug, feature_request, access_issue, data_loss, performance, other
+3. El tool responderá automáticamente al usuario
 
 RESPONDE CON:
 - Máximo 2 párrafos para preguntas simples
@@ -117,6 +126,8 @@ PERSONALIDAD:
       }),
       execute: async (params: any) => {
         try {
+          console.log('[Support Agent] Ejecutando tool escalate_support_ticket:', params);
+          
           const { error } = await supabase
             .from('support_tickets')
             .insert({
@@ -130,13 +141,14 @@ PERSONALIDAD:
             });
 
           if (error) {
-            console.error('Error creating support ticket:', error);
+            console.error('[Support Agent] Error creating support ticket:', error);
             return 'No pude crear el ticket, intenta más tarde';
           }
 
+          console.log('[Support Agent] Ticket creado exitosamente');
           return `✅ Ticket creado con éxito. El admin recibirá tu solicitud (#${Date.now().toString().slice(-4)}) y te responderá pronto.`;
         } catch (err) {
-          console.error('Support escalation error:', err);
+          console.error('[Support Agent] Support escalation error:', err);
           return 'Error al crear ticket, contacta a admin directo';
         }
       },
@@ -145,6 +157,7 @@ PERSONALIDAD:
 
   try {
     console.log('[Support Agent] Starting with', messages.length, 'messages');
+    console.log('[Support Agent] User ID:', userId);
     
     const result = await generateText({
       model: xai('grok-4-1-fast-non-reasoning'),
@@ -154,7 +167,9 @@ PERSONALIDAD:
       maxSteps: 5,
     } as any);
 
-    console.log('[Support Agent] Success:', result.text?.substring(0, 100));
+    console.log('[Support Agent] Success. Steps:', result.steps?.length || 0);
+    console.log('[Support Agent] Tool calls:', result.steps?.map((s: any) => s.toolCalls).filter(Boolean).flat() || 'none');
+    console.log('[Support Agent] Response:', result.text?.substring(0, 100));
     
     return {
       content: result.text || 'Disculpa, no pude procesar tu pregunta. Intenta de nuevo.',
