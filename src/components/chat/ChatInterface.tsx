@@ -35,8 +35,8 @@ export function ChatInterface() {
           toast({
             title: '❌ Sin búsquedas disponibles',
             description: data.message || 'Has agotado tus búsquedas asignadas. Contacta al administrador.',
-            variant: 'error',
-            duration: 8000,
+            tone: 'error',
+            durationMs: 8000,
           });
           throw new Error('Sin búsquedas disponibles');
         }
