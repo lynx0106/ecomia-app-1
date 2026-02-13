@@ -151,9 +151,13 @@ export default function ResearchSessionCard({ session, readOnly }: ResearchSessi
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    
+    a.download = `investigacion-${session.goal.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const handleDeleteResearch = async () => {
+    if (isDeleting) return;
     if (!showDeleteConfirm) {
       setShowDeleteConfirm(true);
       return;
@@ -175,6 +179,7 @@ export default function ResearchSessionCard({ session, readOnly }: ResearchSessi
       }
 
       toast({ title: 'Investigación eliminada completamente', tone: 'success' });
+      setShowDeleteConfirm(false);
       router.refresh();
     } catch (error) {
       console.error('Delete error:', error);
@@ -183,9 +188,6 @@ export default function ResearchSessionCard({ session, readOnly }: ResearchSessi
     } finally {
       setIsDeleting(false);
     }
-  };a.download = `investigacion-${session.goal.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
   };
 
   const toggleCandidateExpand = (candidateId: string) => {
@@ -404,14 +406,32 @@ export default function ResearchSessionCard({ session, readOnly }: ResearchSessi
 
   return (
     <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 space-y-4">
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between gap-3">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{session.goal}</h3>
-        <button
-          onClick={handleExportPDF}
-          className="text-xs px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50"
-        >
-          📥 PDF
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={handleExportPDF}
+            className="text-xs px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50"
+          >
+            📥 PDF
+          </button>
+          <button
+            onClick={handleDeleteResearch}
+            disabled={isDeleting}
+            className={`inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition ${showDeleteConfirm ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-300 dark:hover:bg-red-900/40'} disabled:opacity-60`}
+          >
+            <Trash2 size={14} />
+            {isDeleting ? 'Eliminando...' : showDeleteConfirm ? 'Confirmar' : 'Eliminar'}
+          </button>
+          {showDeleteConfirm && !isDeleting && (
+            <button
+              onClick={() => setShowDeleteConfirm(false)}
+              className="rounded px-2 py-1 text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-800"
+            >
+              Cancelar
+            </button>
+          )}
+        </div>
       </div>
       <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
         <span className={`rounded-full px-3 py-1 font-medium ${statusColors[session.status] || statusColors.draft}`}>
