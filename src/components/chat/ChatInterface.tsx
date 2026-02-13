@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useToast } from '@/components/ui/ToastProvider';
+import { Trash2, RotateCcw } from 'lucide-react';
 
 type Message = { id: string; role: "user" | "assistant"; content: string };
 
@@ -11,6 +12,38 @@ export function ChatInterface() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const handleClearChat = () => {
+    if (messages.length === 0) return;
+    
+    if (confirm('¿Limpiar todas las investigaciones? No se guardarán en el histórico.')) {
+      setMessages([]);
+      setInput("");
+      setError(null);
+      toast({
+        title: '✓ Chat limpiado',
+        description: 'Puedes comenzar una nueva investigación.',
+        tone: 'success',
+        durationMs: 3000,
+      });
+    }
+  };
+
+  const handleNewResearch = () => {
+    if (messages.length === 0) return handleClearChat();
+    
+    if (confirm('¿Comenzar nueva investigación? Los mensajes actuales se perderán (no se guardan).')) {
+      setMessages([]);
+      setInput("");
+      setError(null);
+      toast({
+        title: '🚀 Nueva investigación',
+        description: 'Lista para comenzar.',
+        tone: 'success',
+        durationMs: 2000,
+      });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +89,32 @@ export function ChatInterface() {
 
   return (
     <div className="flex flex-col h-screen max-w-2xl mx-auto">
+      {/* Header with action buttons */}
+      {messages.length > 0 && (
+        <div className="flex justify-between items-center p-4 border-b bg-gray-50">
+          <h3 className="font-semibold text-gray-700">
+            {messages.length} mensajes en el chat
+          </h3>
+          <div className="flex gap-2">
+            <button
+              onClick={handleNewResearch}
+              className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+              title="Comenzar nueva investigación (no se guardan los datos)"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Nueva Investigación
+            </button>
+            <button
+              onClick={handleClearChat}
+              className="flex items-center gap-2 px-3 py-1.5 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition"
+              title="Limpiar chat actual"
+            >
+              <Trash2 className="w-4 h-4" />
+              Limpiar
+            </button>
+          </div>
+        </div>
+      )}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((m) => (
           <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
