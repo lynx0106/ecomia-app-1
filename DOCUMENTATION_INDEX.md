@@ -42,8 +42,7 @@
 | Documento | Propósito | Lectura |
 |-----------|----------|---------|
 | **README.md** | Descripción general del proyecto | 5 min |
-| **SETUP_LOCAL.md** | Setup local para desarrollo | 10 min |
-| **DEPLOYMENT_GUIDE.md** ⭐ | Todo sobre deployar a producción | 10 min |
+| **SETUP_LOCAL.md** | Setup local para desarrollo | 10 min || **WORKFLOW_SYNC.md** 🔄 | Sincronización entre repos (dev ↔ prod) | 10 min || **DEPLOYMENT_GUIDE.md** ⭐ | Todo sobre deployar a producción | 10 min |
 | **TESTING_GUIDE.md** | Guía de testing y validación | 15 min |
 | **ONBOARDING_SYSTEM_V2.md** ✨ | Sistema de onboarding profesional (Modal + Help) | 8 min |
 | **SCRIPTS.md** | Scripts disponibles y comandos | 5 min |
@@ -71,9 +70,10 @@
 ### **Soy Desarrollador**
 1. **Primero:** [README.md](./README.md) - Entiende el proyecto
 2. **Setup:** [SETUP_LOCAL.md](./SETUP_LOCAL.md) - Configura local
-3. **Código:** [SCRIPTS.md](./SCRIPTS.md) - Comandos útiles
-4. **Deploy:** [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) - ⭐ MAS IMPORTANTE
-5. **Validar:** [TESTING_GUIDE.md](./TESTING_GUIDE.md) - Tests
+3. **Workflow:** [WORKFLOW_SYNC.md](./WORKFLOW_SYNC.md) - Sincronización repos
+4. **Código:** [SCRIPTS.md](./SCRIPTS.md) - Comandos útiles
+5. **Deploy:** [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) - ⭐ MAS IMPORTANTE
+6. **Validar:** [TESTING_GUIDE.md](./TESTING_GUIDE.md) - Tests
 
 ### **Soy Usuario Final**
 1. **Aprende:** [GUIA_DE_USUARIO.md](./GUIA_DE_USUARIO.md) - Todo sobre usar la app
