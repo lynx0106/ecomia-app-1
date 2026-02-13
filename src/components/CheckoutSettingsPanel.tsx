@@ -2,6 +2,7 @@
 
 import { useFormStatus } from 'react-dom';
 import { useMemo } from 'react';
+import { getString, getNumber } from '@/lib/form-utils';
 
 export type CheckoutSettingsPanelConfig = {
   id: string;
@@ -28,14 +29,6 @@ function SaveButton({ theme = 'slate' }: { theme?: 'slate' | 'emerald' }) {
       {pending ? 'Guardando...' : 'Guardar checkout'}
     </button>
   );
-}
-
-function getString(value: unknown) {
-  return typeof value === 'string' ? value : '';
-}
-
-function getNumber(value: unknown) {
-  return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
 export default function CheckoutSettingsPanel({ 
