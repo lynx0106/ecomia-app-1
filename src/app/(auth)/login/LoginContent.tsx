@@ -100,23 +100,24 @@ export function LoginContent() {
           className="absolute inset-0 object-cover opacity-50"
         />
         
-        <div className="relative z-20 p-12 text-white max-w-xl">
+        <div className="relative z-20 p-12 text-white flex flex-col items-center justify-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
+            className="flex flex-col items-center w-full"
           >
-            <div className="mb-10 flex justify-center">
+            <div className="mb-10 flex justify-center w-full">
               <Image
                 src="/logo-clean.png"
                 alt="EcomIA"
-                width={624}
-                height={187}
-                className="object-contain h-56 w-auto drop-shadow-lg"
+                width={1248}
+                height={374}
+                className="object-contain h-[224px] w-auto drop-shadow-xl"
                 priority
               />
             </div>
-            <p className="text-xl text-gray-300 leading-relaxed">
+            <p className="text-xl text-gray-300 leading-relaxed text-center max-w-md">
               La plataforma inteligente para crear, gestionar y escalar tu tienda online con el poder de la Inteligencia Artificial.
             </p>
           </motion.div>
