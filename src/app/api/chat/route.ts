@@ -6,6 +6,7 @@ import { tavily } from '@tavily/core';
 import { AGENT_CONFIGS, type AgentKey } from '@/lib/agents/config';
 import { executeSupportAgent } from '@/lib/agents/support-agent';
 import { isSuperAdmin } from '@/lib/agents/admin';
+import { executeMultiAgentWorkflow } from '@/lib/agents/multi-agent-workflow';
 
 // Allow streaming responses up to 60 seconds (research takes time)
 export const maxDuration = 60;
@@ -197,7 +198,51 @@ export async function POST(req: Request) {
     }
   }
 
-  // ELSE: Modo MAIN (multi-agente) - continúa con el flujo existente
+  // MULTI-AGENT MODE: Orquestador + flujo especializado
+  if (mode === 'multi') {
+    console.log('/api/chat: Modo MULTI-AGENT activado');
+    try {
+      const multiAgentResult = await executeMultiAgentWorkflow(messages, user.id);
+
+      if (sync) {
+        // Synchronous response
+        return new Response(
+          JSON.stringify({ 
+            content: multiAgentResult.content,
+            state: multiAgentResult.state,
+            hasMore: multiAgentResult.hasMore,
+          }),
+          { 
+            status: 200, 
+            headers: { 'Content-Type': 'application/json' } 
+          }
+        );
+      } else {
+        // Streaming response
+        const encoder = new TextEncoder();
+        return new Response(
+          new ReadableStream({
+            start(controller) {
+              controller.enqueue(encoder.encode(multiAgentResult.content));
+              controller.close();
+            },
+          }),
+          { 
+            status: 200, 
+            headers: { 'Content-Type': 'text/plain; charset=utf-8' } 
+          }
+        );
+      }
+    } catch (err) {
+      console.error('/api/chat multi-agent mode error:', err);
+      return new Response(
+        JSON.stringify({ error: 'Error en agentes especializados, intenta más tarde' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+  }
+
+  // ELSE: Modo MAIN (multi-agente legacy) - continúa con el flujo existente
 
   // Basic rate limiting per user (in-memory, best-effort)
   try {
