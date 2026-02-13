@@ -55,7 +55,6 @@
 | **ROADMAP.md** | Próximos pasos y mejoras planeadas |
 | **AGENTS_WORKFLOW.md** | Arquitectura de agentes IA |
 | **PROMPTS.md** | Configuración de prompts LLM |
-| **ANALISIS_MANUAL_INTERACTIVO.md** | Onboarding: análisis + estado actual |
 | **GUIA_DE_USUARIO.md** | Manual completo para usuarios finales |
 
 ### **Quick Reference**
@@ -132,7 +131,6 @@ ecomia-app/
 ├── 📄 ROADMAP.md                     (Próximos pasos)
 ├── 📄 AGENTS_WORKFLOW.md             (Arquitectura IA)
 ├── 📄 PROMPTS.md                     (Config de LLM)
-├── 📄 ANALISIS_MANUAL_INTERACTIVO.md (Onboarding)
 ├── 📄 GUIA_DE_USUARIO.md             (Manual usuarios)
 ├── 📄 CHEAT_SHEET.md                 (Quick reference)
 ├── 📄 DOCUMENTATION_INDEX.md          (Este archivo)
@@ -162,16 +160,16 @@ ecomia-app/
 
 ### Onboarding  
 - **Status:** ✅ IMPLEMENTADO EN PRODUCCIÓN
-- **Componente:** `src/components/onboarding/InteractiveTour.tsx`
-- **Librería:** react-joyride
-- **5 pasos:** Sidebar → Chat → Tiendas → Landing → Research
+- **Componente:** `src/components/onboarding/OnboardingModal.tsx`
+- **Ubicacion:** `src/app/(dashboard)/tutorials/page.tsx`
+- **Flujo:** Se abre desde Tutoriales (no auto-open en dashboard)
 
 ### Stack Tecnológico
 - **Frontend:** Next.js 16 + React 19
 - **Styling:** Tailwind CSS
 - **Backend:** Supabase (PostgreSQL)
 - **AI:** Groq LLM + Tavily API
-- **Analytics:** react-joyride + custom logging
+- **Analytics:** Supabase (opcional)
 
 ---
 

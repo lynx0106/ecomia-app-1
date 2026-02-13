@@ -1,13 +1,11 @@
 "use client";
 
 import PillLink from "@/components/ui/PillLink";
-import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
 import { MessageSquare, Store, ArrowRight } from "lucide-react";
 
 export default function DashboardHome() {
   return (
     <div className="space-y-6">
-      <OnboardingModal />
       <div className="flex flex-col lg:flex-row gap-6">
         <aside className="lg:w-72 w-full">
           <div className="space-y-4 lg:sticky lg:top-6">

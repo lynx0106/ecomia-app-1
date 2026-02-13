@@ -175,22 +175,14 @@ export default function DashboardLayout({
           </button>
         </div>
 
-        <nav className="flex-1 px-4 py-4 space-y-2" data-tour="sidebar">
+        <nav className="flex-1 px-4 py-4 space-y-2">
           {(isAdmin ? sidebarItemsAdmin : sidebarItemsUser).map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-            
-            // Map hrefs to tour attributes
-            let tourAttribute = '';
-            if (item.href === '/chat') tourAttribute = 'chat';
-            else if (item.href === '/stores') tourAttribute = 'stores';
-            else if (item.href === '/landing') tourAttribute = 'landing';
-            else if (item.href === '/research-history' || item.href === '/research') tourAttribute = 'research';
             
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                data-tour={tourAttribute}
                 className={cn(
                   "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group",
                   isActive 
