@@ -219,14 +219,14 @@ export default function DashboardLayout({
 
         <div className="p-4 border-t border-gray-200 dark:border-gray-800">
           <button
-            onClick={handleSignOut}
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className={cn(
-              "flex items-center gap-3 px-3 py-3 w-full rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors",
+              "flex items-center gap-3 px-3 py-3 w-full rounded-xl text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors",
               !isSidebarOpen && "justify-center"
             )}
           >
-            <LogOut size={22} />
-            {isSidebarOpen && <span>Cerrar Sesión</span>}
+            {isSidebarOpen ? <X size={22} /> : <Menu size={22} />}
+            {isSidebarOpen && <span>Contraer menu</span>}
           </button>
         </div>
       </motion.aside>
@@ -294,11 +294,11 @@ export default function DashboardLayout({
 
         <div className="p-4 border-t border-gray-200 dark:border-gray-800">
           <button
-            onClick={handleSignOut}
-            className="flex items-center gap-3 px-3 py-3 w-full rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+            onClick={() => setIsSidebarOpen(false)}
+            className="flex items-center gap-3 px-3 py-3 w-full rounded-xl text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           >
-            <LogOut size={22} />
-            <span>Cerrar Sesión</span>
+            <X size={22} />
+            <span>Cerrar menu</span>
           </button>
         </div>
       </motion.aside>
