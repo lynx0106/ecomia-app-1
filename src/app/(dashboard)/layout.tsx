@@ -308,12 +308,22 @@ export default function DashboardLayout({
         {/* Mobile Header */}
         <div className="md:hidden h-16 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex items-center justify-between px-4 z-10">
           <span className="text-xl font-bold text-indigo-600">EcomIA</span>
-          <button 
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-          >
-            <Menu size={24} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleSignOut}
+              className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition-colors"
+              aria-label="Cerrar sesion"
+            >
+              <LogOut size={20} />
+            </button>
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="p-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              aria-label="Abrir menu"
+            >
+              <Menu size={24} />
+            </button>
+          </div>
         </div>
 
         {/* Content Scroll Area */}
@@ -328,25 +338,34 @@ export default function DashboardLayout({
           <HelpBubble />
           <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-black p-4 md:p-8">
             <div className="max-w-7xl mx-auto">
-            {pathname !== "/" && (
-              <div className="mb-4">
-                <PillLink
-                  href="/"
-                  variant="neutral"
-                  size="sm"
-                  startIcon={
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300">
-                      <ArrowLeft size={14} />
-                    </span>
-                  }
+              <div className="hidden md:flex items-center justify-end mb-4">
+                <button
+                  onClick={handleSignOut}
+                  className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 dark:border-red-900/40 dark:bg-gray-900 dark:text-red-300 dark:hover:bg-red-900/10"
                 >
-                  Volver al panel de control
-                </PillLink>
+                  <LogOut size={14} />
+                  Cerrar sesion
+                </button>
               </div>
-            )}
-            <ToastProvider>{children}</ToastProvider>
+              {pathname !== "/" && (
+                <div className="mb-4">
+                  <PillLink
+                    href="/"
+                    variant="neutral"
+                    size="sm"
+                    startIcon={
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300">
+                        <ArrowLeft size={14} />
+                      </span>
+                    }
+                  >
+                    Volver al panel de control
+                  </PillLink>
+                </div>
+              )}
+              <ToastProvider>{children}</ToastProvider>
+            </div>
           </div>
-        </div>
         </ErrorBoundary>
       </main>
     </div>
