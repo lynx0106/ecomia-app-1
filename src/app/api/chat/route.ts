@@ -862,7 +862,7 @@ No menciones herramientas ni el proceso. Responde solo con el contenido.
 `;
 
       const result = await generateText({
-        model: xai('grok-2'),
+        model: xai('grok-4-1-fast-non-reasoning'),
         system: landingPrompt,
         messages,
       } as any);
@@ -991,7 +991,7 @@ Responde solo con la clave exacta.
 `;
 
       const routingResult = await generateText({
-        model: xai('grok-2'),
+        model: xai('grok-4-1-fast-non-reasoning'),
         system: routingPrompt,
         messages: [],
       } as any);
@@ -1105,7 +1105,7 @@ No menciones herramientas ni el proceso. Responde solo con el contenido.
 `;
 
       const result = await generateText({
-        model: xai('grok-2'),
+        model: xai('grok-4-1-fast-non-reasoning'),
         system: copyPrompt,
         messages,
       } as any);
@@ -1141,7 +1141,7 @@ No menciones herramientas ni el proceso. Responde solo con el contenido.
 `;
 
       const result = await generateText({
-        model: xai('grok-2'),
+        model: xai('grok-4-1-fast-non-reasoning'),
         system: landingPrompt,
         messages,
       } as any);
@@ -1173,7 +1173,7 @@ No menciones herramientas ni el proceso. Responde solo con el contenido.
 `;
 
       const result = await generateText({
-        model: xai('grok-2'),
+        model: xai('grok-4-1-fast-non-reasoning'),
         system: mediaPrompt,
         messages,
       } as any);
@@ -1205,7 +1205,7 @@ No menciones herramientas ni el proceso. Responde solo con el contenido.
 `;
 
       const result = await generateText({
-        model: xai('grok-2'),
+        model: xai('grok-4-1-fast-non-reasoning'),
         system: fallbackPrompt,
         messages,
       } as any);
@@ -1255,7 +1255,7 @@ No menciones herramientas ni el proceso.
 `;
 
     const result = await generateText({
-      model: xai('grok-2'),
+      model: xai('grok-4-1-fast-non-reasoning'),
       system: recommendationPrompt,
       messages,
     } as any);
@@ -1355,7 +1355,7 @@ No menciones herramientas ni el proceso.
   }
 
   const result = streamText({
-    model: xai('grok-2'),
+    model: xai('grok-4-1-fast-non-reasoning'),
     system: systemPrompt,
     messages,
     tools,
