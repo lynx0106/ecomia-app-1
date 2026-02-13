@@ -20,6 +20,33 @@ type ParsedTable = {
   rows: string[][];
 };
 
+const MAX_MESSAGE_CHARS = 1200;
+const MAX_TOTAL_CHARS = 6000;
+const MAX_MESSAGES = 10;
+
+type ChatMessage = { role: string; content: string };
+
+function trimMessages(input: ChatMessage[]): ChatMessage[] {
+  const normalized = input
+    .filter((msg) => msg && typeof msg.content === 'string')
+    .map((msg) => ({
+      ...msg,
+      content: msg.content.length > MAX_MESSAGE_CHARS
+        ? `${msg.content.slice(0, MAX_MESSAGE_CHARS)}…`
+        : msg.content,
+    }));
+
+  let trimmed = normalized.slice(-MAX_MESSAGES);
+  let total = trimmed.reduce((acc, msg) => acc + msg.content.length, 0);
+
+  while (total > MAX_TOTAL_CHARS && trimmed.length > 1) {
+    const removed = trimmed.shift();
+    total -= removed ? removed.content.length : 0;
+  }
+
+  return trimmed;
+}
+
 function parseMarkdownTable(text: string): ParsedTable | null {
   const lines = text
     .split('\n')
@@ -98,6 +125,10 @@ export async function POST(req: Request) {
         console.log('/api/chat: mensaje ya transformado →', msg);
         return msg;
       });
+    }
+
+    if (Array.isArray(messages)) {
+      messages = trimMessages(messages as ChatMessage[]);
     }
 
     console.log('/api/chat: mensajes transformados finales:', JSON.stringify(messages, null, 2));

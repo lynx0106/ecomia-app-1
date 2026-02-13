@@ -124,11 +124,12 @@ Cuéntame tu idea y yo me encargo del resto.`;
     setInput('');
 
     try {
+      const recentMessages = nextMessages.slice(-8);
       const res = await fetch('/api/chat?sync=true', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: nextMessages.map((m) => ({ role: m.role, content: m.content })),
+          messages: recentMessages.map((m) => ({ role: m.role, content: m.content })),
         }),
       });
 
