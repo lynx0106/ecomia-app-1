@@ -1,9 +1,13 @@
+"use client";
+
 import PillLink from "@/components/ui/PillLink";
+import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
 import { MessageSquare, Store, ArrowRight } from "lucide-react";
 
 export default function DashboardHome() {
   return (
     <div className="space-y-6">
+      <OnboardingModal />
       <div className="flex flex-col lg:flex-row gap-6">
         <aside className="lg:w-72 w-full">
           <div className="space-y-4 lg:sticky lg:top-6">
@@ -53,7 +57,18 @@ export default function DashboardHome() {
               </div>
               <h3 className="font-semibold text-base mb-1">Tutoriales</h3>
               <p className="text-gray-500 text-xs mb-3">Aprende a sacar el máximo provecho de EcomIA.</p>
-              <span className="text-gray-400 text-xs font-medium cursor-not-allowed">Próximamente</span>
+              <PillLink
+                href="/tutorials"
+                variant="neutral"
+                size="xs"
+                endIcon={
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gray-200 text-gray-700 shadow-sm dark:bg-gray-800 dark:text-gray-200">
+                    <ArrowRight size={12} />
+                  </span>
+                }
+              >
+                Ver Tutoriales
+              </PillLink>
             </div>
           </div>
         </aside>

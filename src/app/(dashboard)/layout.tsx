@@ -14,7 +14,8 @@ import {
   Menu, 
   X, 
   LogOut, 
-  User 
+  User,
+  BookOpen 
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -23,9 +24,8 @@ import { twMerge } from "tailwind-merge";
 import { ToastProvider } from "@/components/ui/ToastProvider";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import PillLink from "@/components/ui/PillLink";
-import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
 import { logger } from "@/lib/logging";
-import { HelpCircle } from "lucide-react";
+import { HelpBubble } from "@/components/ui/HelpBubble";
 
 function cn(...inputs: (string | undefined | null | false)[]) {
   return twMerge(clsx(inputs));
@@ -49,6 +49,12 @@ const sidebarItemsUser = [
     href: "/creations",
     icon: LayoutDashboard,
     description: "Tiendas y landings creadas",
+  },
+  {
+    title: "Tutoriales",
+    href: "/tutorials",
+    icon: BookOpen,
+    description: "Aprende a usar todas las features",
   },
   {
     title: "Configuración",
@@ -89,6 +95,11 @@ const sidebarItemsAdmin = [
     icon: Bot,
   },
   {
+    title: "Tutoriales",
+    href: "/tutorials",
+    icon: BookOpen,
+  },
+  {
     title: "Configuración",
     href: "/settings",
     icon: Settings,
@@ -114,7 +125,6 @@ export default function DashboardLayout({
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -157,21 +167,12 @@ export default function DashboardLayout({
           ) : (
             <span className="text-2xl font-bold text-indigo-600">E</span>
           )}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowOnboardingModal(true)}
-              title="Ver guía de bienvenida"
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 hover:text-indigo-600 transition-colors"
-            >
-              <HelpCircle size={20} />
-            </button>
-            <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition-colors"
-            >
-              {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-          </div>
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition-colors"
+          >
+            {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
         </div>
 
         <nav className="flex-1 px-4 py-4 space-y-2" data-tour="sidebar">
@@ -318,9 +319,8 @@ export default function DashboardLayout({
             });
           }}
         >
-          {/* Onboarding Modal */}
-          <OnboardingModal isOpen={showOnboardingModal} onClose={() => setShowOnboardingModal(false)} />
-          
+          {/* Help Bubble */}
+          <HelpBubble />
           <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-black p-4 md:p-8">
             <div className="max-w-7xl mx-auto">
             {pathname !== "/dashboard" && (
