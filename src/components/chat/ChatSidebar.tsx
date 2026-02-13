@@ -87,9 +87,9 @@ export function ChatSidebar({
           <Image
             src="/logo-clean.png"
             alt="EcomAgent"
-            width={40}
-            height={40}
-            className="object-contain h-9 w-auto"
+            width={48}
+            height={48}
+            className="object-contain h-11 w-auto"
           />
           <h3 className="font-bold text-gray-800 dark:text-white">EcomAgent</h3>
         </div>
@@ -110,9 +110,9 @@ export function ChatSidebar({
             <Image
               src="/logo-clean.png"
               alt="EcomAgent"
-              width={112}
-              height={112}
-              className="object-contain h-24 w-auto mb-4 opacity-90"
+              width={136}
+              height={136}
+              className="object-contain h-28 w-auto mb-4 opacity-90"
             />
             <h4 className="text-lg font-medium text-gray-800 mb-2 dark:text-white">¡Hola! Soy EcomAgent</h4>
             <p className="text-sm text-gray-700 max-w-[200px] dark:text-gray-300">
@@ -133,9 +133,9 @@ export function ChatSidebar({
                     <Image
                       src="/logo-clean.png"
                       alt="EcomAgent"
-                      width={24}
-                      height={24}
-                      className="object-contain h-6 w-auto"
+                      width={28}
+                      height={28}
+                      className="object-contain h-7 w-auto"
                     />
                   </div>
                 </div>
@@ -193,9 +193,9 @@ export function ChatSidebar({
                 <Image
                   src="/logo-clean.png"
                   alt="EcomAgent"
-                  width={24}
-                  height={24}
-                  className="object-contain h-6 w-auto"
+                  width={28}
+                  height={28}
+                  className="object-contain h-7 w-auto"
                 />
               </div>
             </div>
