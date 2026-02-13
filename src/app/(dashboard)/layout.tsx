@@ -187,9 +187,9 @@ export default function DashboardLayout({
                 <Image
                   src="/logo-clean.png"
                   alt="EcomIA Logo"
-                  width={240}
-                  height={68}
-                  className="object-contain h-14 w-auto"
+                  width={480}
+                  height={136}
+                  className="object-contain h-28 w-auto"
                   priority
                 />
               </motion.div>
@@ -197,9 +197,9 @@ export default function DashboardLayout({
               <Image
                 src="/logo-clean.png"
                 alt="EcomIA"
-                width={56}
-                height={56}
-                className="object-contain h-12 w-auto"
+                width={112}
+                height={112}
+                className="object-contain h-24 w-auto"
                 priority
               />
             )}
@@ -278,9 +278,9 @@ export default function DashboardLayout({
             <Image
               src="/logo-clean.png"
               alt="EcomIA"
-              width={208}
-              height={58}
-              className="object-contain h-12 w-auto"
+              width={416}
+              height={116}
+              className="object-contain h-24 w-auto"
             />
           </motion.div>
           <button
@@ -341,9 +341,9 @@ export default function DashboardLayout({
             <Image
               src="/logo-clean.png"
               alt="EcomIA"
-              width={208}
-              height={58}
-              className="object-contain h-12 w-auto"
+              width={416}
+              height={116}
+              className="object-contain h-24 w-auto"
               priority
             />
           </div>
