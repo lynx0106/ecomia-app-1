@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { 
   MessageSquare, 
   LayoutDashboard, 
@@ -177,15 +178,29 @@ export default function DashboardLayout({
       >
         <div className="flex items-center justify-between p-6 h-20">
           {isSidebarOpen ? (
-            <motion.span 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600"
+              className="flex items-center"
             >
-              EcomIA
-            </motion.span>
+              <Image
+                src="/logo.png"
+                alt="EcomIA Logo"
+                width={140}
+                height={40}
+                className="object-contain"
+                priority
+              />
+            </motion.div>
           ) : (
-            <span className="text-2xl font-bold text-indigo-600">E</span>
+            <Image
+              src="/logo.png"
+              alt="EcomIA"
+              width={32}
+              height={32}
+              className="object-contain"
+              priority
+            />
           )}
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -253,13 +268,19 @@ export default function DashboardLayout({
         className="fixed left-0 top-0 h-screen w-72 md:hidden flex flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 z-40"
       >
         <div className="flex items-center justify-between p-6 h-20">
-          <motion.span 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600"
+            className="flex items-center"
           >
-            EcomIA
-          </motion.span>
+            <Image
+              src="/logo.png"
+              alt="EcomIA"
+              width={120}
+              height={36}
+              className="object-contain"
+            />
+          </motion.div>
           <button
             onClick={() => setIsSidebarOpen(false)}
             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition-colors"
@@ -314,7 +335,13 @@ export default function DashboardLayout({
       <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden h-16 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex items-center justify-between px-4 z-10">
-          <span className="text-xl font-bold text-indigo-600">EcomIA</span>
+          <Image
+            src="/logo.png"
+            alt="EcomIA"
+            width={100}
+            height={30}
+            className="object-contain"
+          />
           <div className="flex items-center gap-2">
             <button
               onClick={handleSignOut}

@@ -2,7 +2,7 @@
 
 import { Send, User } from 'lucide-react';
 import { useRef, useEffect } from 'react';
-import { EcomAgentLogo } from '@/components/ui/EcomAgentLogo';
+import Image from 'next/image';
 import SessionStatusCard from '@/components/chat/SessionStatusCard';
 import ResearchFlowSteps from '@/components/ui/ResearchFlowSteps';
 
@@ -84,7 +84,13 @@ export function ChatSidebar({
     <div className="flex flex-col h-full bg-gray-50 border-l border-gray-200 shadow-xl dark:bg-gray-950 dark:border-gray-800">
       <div className="p-4 border-b border-gray-200 bg-gray-100 flex items-center justify-between dark:border-gray-800 dark:bg-gray-900">
         <div className="flex items-center gap-2">
-          <EcomAgentLogo size="sm" showText={false} />
+          <Image
+            src="/logo.png"
+            alt="EcomAgent"
+            width={32}
+            height={32}
+            className="object-contain"
+          />
           <h3 className="font-bold text-gray-800 dark:text-white">EcomAgent</h3>
         </div>
         <div className="flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-full border border-green-100 dark:text-green-200 dark:bg-green-900/30 dark:border-green-800">
@@ -101,7 +107,13 @@ export function ChatSidebar({
       <div className="flex-1 overflow-y-auto overflow-x-auto p-4 space-y-6" ref={scrollRef}>
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center p-6 opacity-80">
-            <EcomAgentLogo size="lg" showText={false} className="mb-4 opacity-80" />
+            <Image
+              src="/logo.png"
+              alt="EcomAgent"
+              width={80}
+              height={80}
+              className="object-contain mb-4 opacity-80"
+            />
             <h4 className="text-lg font-medium text-gray-800 mb-2 dark:text-white">¡Hola! Soy EcomAgent</h4>
             <p className="text-sm text-gray-700 max-w-[200px] dark:text-gray-300">
               Estoy aquí para ayudarte a crear y gestionar tu tienda online.
@@ -118,7 +130,13 @@ export function ChatSidebar({
               {m.role !== 'user' && (
                 <div className="flex-shrink-0 mt-1">
                   <div className="bg-white p-1 rounded-full border border-gray-200 shadow-sm dark:bg-gray-900 dark:border-gray-700">
-                    <EcomAgentLogo size="sm" showText={false} />
+                    <Image
+                      src="/logo.png"
+                      alt="EcomAgent"
+                      width={24}
+                      height={24}
+                      className="object-contain"
+                    />
                   </div>
                 </div>
               )}
@@ -172,7 +190,13 @@ export function ChatSidebar({
           <div className="flex gap-3 justify-start">
             <div className="flex-shrink-0 mt-1">
               <div className="bg-white p-1 rounded-full border border-gray-200 shadow-sm dark:bg-gray-900 dark:border-gray-700">
-                <EcomAgentLogo size="sm" showText={false} />
+                <Image
+                  src="/logo.png"
+                  alt="EcomAgent"
+                  width={24}
+                  height={24}
+                  className="object-contain"
+                />
               </div>
             </div>
             <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3 rounded-bl-none shadow-sm dark:bg-gray-900 dark:border-gray-800">

@@ -6,7 +6,6 @@ import { createClient } from "@/lib/supabase/client";
 import { motion } from "framer-motion";
 import { Loader2, Mail, ArrowRight, CheckCircle2, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { EcomAgentLogo } from "@/components/ui/EcomAgentLogo";
 import Image from "next/image";
 
 export function LoginContent() {
@@ -107,8 +106,15 @@ export function LoginContent() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <div className="mb-8 transform scale-125 origin-left">
-              <EcomAgentLogo size="xl" />
+            <div className="mb-8">
+              <Image
+                src="/logo.png"
+                alt="EcomIA"
+                width={200}
+                height={60}
+                className="object-contain"
+                priority
+              />
             </div>
             <p className="text-xl text-gray-300 leading-relaxed">
               La plataforma inteligente para crear, gestionar y escalar tu tienda online con el poder de la Inteligencia Artificial.
