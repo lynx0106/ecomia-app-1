@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { tavily } from '@tavily/core';
 import { AGENT_CONFIGS, type AgentKey } from '@/lib/agents/config';
+import { executeSupportAgent } from '@/lib/agents/support-agent';
 
 // Allow streaming responses up to 60 seconds (research takes time)
 export const maxDuration = 60;
@@ -111,6 +112,54 @@ export async function POST(req: Request) {
       { status: 401, headers: { 'Content-Type': 'application/json' } }
     );
   }
+
+  // ROUTING: Detectar modo support vs main
+  const mode = url.searchParams.get('mode') || 'main';
+  
+  if (mode === 'support') {
+    console.log('/api/chat: Modo SUPPORT activado');
+    try {
+      const supportResult = await executeSupportAgent(messages, user.id, supabase);
+      
+      if (sync) {
+        // Synchronous response (no streaming)
+        return new Response(
+          JSON.stringify({ 
+            content: supportResult.content,
+          }),
+          { 
+            status: 200, 
+            headers: { 'Content-Type': 'application/json' } 
+          }
+        );
+      } else {
+        // Streaming response
+        const encoder = new TextEncoder();
+        let streamContent = supportResult.content;
+        
+        return new Response(
+          new ReadableStream({
+            start(controller) {
+              controller.enqueue(encoder.encode(streamContent));
+              controller.close();
+            },
+          }),
+          { 
+            status: 200, 
+            headers: { 'Content-Type': 'text/plain; charset=utf-8' } 
+          }
+        );
+      }
+    } catch (err) {
+      console.error('/api/chat support mode error:', err);
+      return new Response(
+        JSON.stringify({ error: 'Error en soporte, intenta más tarde' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+  }
+
+  // ELSE: Modo MAIN (multi-agente) - continúa con el flujo existente
 
   // Basic rate limiting per user (in-memory, best-effort)
   try {
