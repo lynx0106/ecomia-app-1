@@ -9,7 +9,6 @@ import { updateSession } from './lib/supabase/middleware';
  * - Redirecting unauthenticated users to /login (except public routes)
  *
  * Public routes (no auth required):
- * - / (home)
  * - /login
  * - /auth/* (OAuth callbacks)
  */

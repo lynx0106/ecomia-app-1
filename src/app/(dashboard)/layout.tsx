@@ -328,10 +328,10 @@ export default function DashboardLayout({
           <HelpBubble />
           <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-black p-4 md:p-8">
             <div className="max-w-7xl mx-auto">
-            {pathname !== "/dashboard" && (
+            {pathname !== "/" && (
               <div className="mb-4">
                 <PillLink
-                  href="/dashboard"
+                  href="/"
                   variant="neutral"
                   size="sm"
                   startIcon={

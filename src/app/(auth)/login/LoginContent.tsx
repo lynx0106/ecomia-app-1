@@ -69,7 +69,7 @@ export function LoginContent() {
 
       if (usePassword && !isSignUp) {
         // Redirect manually if needed, or let the session handler take over
-        window.location.href = "/dashboard";
+        window.location.href = "/";
       } else {
         setSent(true);
       }
