@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { createXai } from '@ai-sdk/xai';
 import { tavily } from '@tavily/core';
 import type { AgentState } from './types';
+import { getAgentSystemPrompt } from './agent-definitions';
 
 const xai = createXai({
   apiKey: process.env.XAI_API_KEY,
@@ -12,17 +13,11 @@ const tvly = tavily({ apiKey: process.env.TAVILY_API_KEY || 'dummy-key-for-build
 
 /**
  * Sourcing & Research Agent - Investigación de productos y proveedores
+ * System Prompt is now loaded from database for real-time updates
  */
 
-export async function executeSourcingAgent(
-  messages: any[],
-  state: AgentState
-): Promise<{ response: string; nextAgent: string; state: AgentState }> {
-  const userMessage = messages
-    ?.filter((m) => m.role === 'user')
-    ?.pop()?.content || '';
-
-  const systemPrompt = `
+function getSourcingFallbackPrompt(): string {
+  return `
 Eres un Analista de Sourcing Estratégico especializado en e-commerce para LATAM.
 
 MISIÓN:
@@ -65,6 +60,28 @@ Descripción breve de por qué es ganador.
 [SÍ] → Landing Builder próximo
 [NO] → ¿Investigar otro producto?
 `;
+}
+
+export async function executeSourcingAgent(
+  messages: any[],
+  state: AgentState
+): Promise<{ response: string; nextAgent: string; state: AgentState }> {
+  const userMessage = messages
+    ?.filter((m) => m.role === 'user')
+    ?.pop()?.content || '';
+
+  // Load system prompt from database
+  let systemPrompt: string;
+  try {
+    systemPrompt = await getAgentSystemPrompt('sourcing');
+    if (!systemPrompt) {
+      console.warn('No sourcing prompt found in DB, using fallback');
+      systemPrompt = getSourcingFallbackPrompt();
+    }
+  } catch (err) {
+    console.error('Error loading sourcing prompt from DB:', err);
+    systemPrompt = getSourcingFallbackPrompt();
+  }
 
   try {
     // Buscar en internet usando Tavily

@@ -1,6 +1,7 @@
 import { generateText } from 'ai';
 import { createXai } from '@ai-sdk/xai';
 import type { AgentState } from './types';
+import { getAgentSystemPrompt } from './agent-definitions';
 
 const xai = createXai({
   apiKey: process.env.XAI_API_KEY,
@@ -8,19 +9,11 @@ const xai = createXai({
 
 /**
  * Media Creator Agent - Ideas de videos, imágenes y estilo visual
+ * System Prompt is now loaded from database for real-time updates
  */
 
-export async function executeMediaCreatorAgent(
-  messages: any[],
-  state: AgentState
-): Promise<{ response: string; nextAgent: string; state: AgentState }> {
-  const userMessage = messages
-    ?.filter((m) => m.role === 'user')
-    ?.pop()?.content || '';
-
-  const productName = state.sourcingResult?.productName || 'producto';
-
-  const systemPrompt = `
+function getMediaCreatorFallbackPrompt(productName: string): string {
+  return `
 Eres un Director Creativo especializado en content visual para e-commerce viral.
 
 MISIÓN:
@@ -144,6 +137,33 @@ ESTRUCTURA DE RESPUESTA:
 ### SIGUIENTE PASO
 ¿Listo para crear tu tienda online? Nos falta: dominio, configurar pagos, y lanzar. ¿Continuamos?
 `;
+}
+
+export async function executeMediaCreatorAgent(
+  messages: any[],
+  state: AgentState
+): Promise<{ response: string; nextAgent: string; state: AgentState }> {
+  const userMessage = messages
+    ?.filter((m) => m.role === 'user')
+    ?.pop()?.content || '';
+
+  const productName = state.sourcingResult?.productName || 'producto';
+
+  // Load system prompt from database
+  let systemPrompt: string;
+  try {
+    let dbPrompt = await getAgentSystemPrompt('media_creator');
+    if (!dbPrompt) {
+      console.warn('No media_creator prompt found in DB, using fallback');
+      systemPrompt = getMediaCreatorFallbackPrompt(productName);
+    } else {
+      // Replace placeholder if present
+      systemPrompt = dbPrompt.replace('${productName}', productName);
+    }
+  } catch (err) {
+    console.error('Error loading media_creator prompt from DB:', err);
+    systemPrompt = getMediaCreatorFallbackPrompt(productName);
+  }
 
   try {
     const response = await generateText({

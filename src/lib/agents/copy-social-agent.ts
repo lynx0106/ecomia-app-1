@@ -1,6 +1,7 @@
 import { generateText } from 'ai';
 import { createXai } from '@ai-sdk/xai';
 import type { AgentState } from './types';
+import { getAgentSystemPrompt } from './agent-definitions';
 
 const xai = createXai({
   apiKey: process.env.XAI_API_KEY,
@@ -8,19 +9,11 @@ const xai = createXai({
 
 /**
  * Copy Social Agent - Crear copys persuasivos para redes sociales
+ * System Prompt is now loaded from database for real-time updates
  */
 
-export async function executeCopySocialAgent(
-  messages: any[],
-  state: AgentState
-): Promise<{ response: string; nextAgent: string; state: AgentState }> {
-  const userMessage = messages
-    ?.filter((m) => m.role === 'user')
-    ?.pop()?.content || '';
-
-  const productName = state.sourcingResult?.productName || 'producto';
-
-  const systemPrompt = `
+function getCopySocialFallbackPrompt(productName: string): string {
+  return `
 Eres un Content Creator especializado en copys virales para e-commerce en TikTok, Instagram y Facebook.
 
 MISIÓN:
@@ -93,6 +86,33 @@ ${productName === 'producto' ? '[Hook que detiene el scroll]' : '[Crea hook impa
 ### SIGUIENTE PASO
 ¿Quieres ideas de media + videos? O vamos directo a crear tu tienda online?
 `;
+}
+
+export async function executeCopySocialAgent(
+  messages: any[],
+  state: AgentState
+): Promise<{ response: string; nextAgent: string; state: AgentState }> {
+  const userMessage = messages
+    ?.filter((m) => m.role === 'user')
+    ?.pop()?.content || '';
+
+  const productName = state.sourcingResult?.productName || 'producto';
+
+  // Load system prompt from database
+  let systemPrompt: string;
+  try {
+    let dbPrompt = await getAgentSystemPrompt('copy_social');
+    if (!dbPrompt) {
+      console.warn('No copy_social prompt found in DB, using fallback');
+      systemPrompt = getCopySocialFallbackPrompt(productName);
+    } else {
+      // Replace placeholder if present
+      systemPrompt = dbPrompt.replace('${productName}', productName);
+    }
+  } catch (err) {
+    console.error('Error loading copy_social prompt from DB:', err);
+    systemPrompt = getCopySocialFallbackPrompt(productName);
+  }
 
   try {
     const response = await generateText({

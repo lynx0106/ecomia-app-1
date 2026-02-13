@@ -2,6 +2,7 @@ import { generateText } from 'ai';
 import { z } from 'zod';
 import { createXai } from '@ai-sdk/xai';
 import type { AgentState } from './types';
+import { getAgentSystemPrompt } from './agent-definitions';
 
 const xai = createXai({
   apiKey: process.env.XAI_API_KEY,
@@ -9,17 +10,11 @@ const xai = createXai({
 
 /**
  * Orchestrator Agent - Detecta intención del usuario y ruta al agente correcto
+ * Sistema Prompt es cargado desde la base de datos para permitir actualizaciones en tiempo real
  */
 
-export async function executeOrchestratorAgent(
-  messages: any[],
-  userId: string
-): Promise<{ nextAgent: string; intention: string; state: AgentState }> {
-  const lastUserMessage = messages
-    ?.filter((m) => m.role === 'user')
-    ?.pop()?.content || '';
-
-  const systemPrompt = `
+function getOrchestratorFallbackPrompt(): string {
+  return `
 Eres un Orquestador de IA Multiagente especializado en e-commerce en LATAM.
 
 TU TRABAJO:
@@ -53,6 +48,28 @@ RESPONDE EN JSON STRICT (válido):
   "directResponse": "si nextAgent=direct, respuesta aquí. Si no, null"
 }
 `;
+}
+
+export async function executeOrchestratorAgent(
+  messages: any[],
+  userId: string
+): Promise<{ nextAgent: string; intention: string; state: AgentState }> {
+  const lastUserMessage = messages
+    ?.filter((m) => m.role === 'user')
+    ?.pop()?.content || '';
+
+  // Cargar system prompt desde la base de datos en lugar de hardcodearlo
+  let systemPrompt: string;
+  try {
+    systemPrompt = await getAgentSystemPrompt('orchestrator');
+    if (!systemPrompt) {
+      console.warn('No orchestrator prompt found in DB, using fallback');
+      systemPrompt = getOrchestratorFallbackPrompt();
+    }
+  } catch (err) {
+    console.error('Error loading orchestrator prompt from DB:', err);
+    systemPrompt = getOrchestratorFallbackPrompt();
+  }
 
   try {
     const response = await generateText({
