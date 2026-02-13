@@ -344,6 +344,61 @@ Cuando Support Agent esté validado:
 
 ---
 
+## ✨ MEJORAS APLICADAS (Feb 13, 03:45 UTC)
+
+**Problemas reportados:**
+1. ❌ Support Agent responde "Disculpa, no pude procesar tu pregunta" sin más detalles
+2. ❌ Usuarios no tienen forma de ver sus tickets creados
+3. ❌ Usuarios no saben cuándo un ticket está resuelto
+
+**Soluciones implementadas:**
+
+### 1. Vista de Tickets para Usuarios (`UserTicketsView.tsx`)
+- ✅ Componente completo para visualizar tickets del usuario
+- ✅ Página `/tickets` accesible desde sidebar
+- ✅ Stats: Tickets activos, resueltos y total
+- ✅ Lista separada: Tickets activos vs resueltos
+- ✅ Panel de detalles con toda la información
+- ✅ Notificaciones de estado con mensajes claros:
+  - 🔔 "Tu ticket ha sido recibido" (open)
+  - ⚡ "Un administrador está trabajando en tu solicitud" (in_progress)
+  - ✅ "Tu ticket ha sido resuelto" (resolved)
+- ✅ UI responsive y moderna con Tailwind
+- ✅ Fechas en español con formato legible
+
+### 2. Enlace en Sidebar de Usuario
+- ✅ Agregado "Mis Tickets" con icono `LifeBuoy`
+- ✅ Ubicado después de "Mis Creaciones"
+- ✅ Descripción: "Solicitudes de soporte"
+- ✅ Accesible para todos los usuarios no-admin
+
+### 3. Mejor Manejo de Errores
+**HelpBubble.tsx:**
+- ✅ Captura errores HTTP con status code
+- ✅ Parsea respuestas JSON de error
+- ✅ Muestra mensajes descriptivos al usuario
+- ✅ Logging detallado en consola para debugging
+
+**support-agent.ts:**
+- ✅ Logging al inicio y éxito de cada llamada
+- ✅ Captura detalles del error (message, cause, stack)
+- ✅ Retorna mensajes de error descriptivos en lugar de genéricos
+- ✅ Mejor diagnóstico para troubleshooting
+
+### 4. Archivos Creados/Modificados
+**Nuevos:**
+- `src/components/user/UserTicketsView.tsx` - Vista de tickets para usuarios (400+ líneas)
+- `src/app/(dashboard)/tickets/page.tsx` - Página de tickets
+
+**Modificados:**
+- `src/app/(dashboard)/layout.tsx` - Agregado enlace "Mis Tickets" en sidebar
+- `src/components/ui/HelpBubble.tsx` - Mejor manejo de errores
+- `src/lib/agents/support-agent.ts` - Logging y errores descriptivos
+
+**Commit:** `f33883c` - feat: vista de tickets para usuarios + mejor manejo de errores
+
+---
+
 ## 📌 CÓMO FUNCIONAN LOS TICKETS
 
 ### Para USUARIOS (No hay formulario manual):
@@ -374,9 +429,9 @@ Cuando Support Agent esté validado:
 
 ---
 
-**Última actualización:** Feb 13, 2026 03:20 UTC
-**Session hash:** 9a66624..1541a9f (8 commits)
-**Status:** ✅ Ready for testing + Fix aplicado
+**Última actualización:** Feb 13, 2026 03:50 UTC
+**Session hash:** 9a66624..f33883c (10 commits)
+**Status:** ✅ Vista de tickets implementada + Manejo de errores mejorado
 **Migration Status:** ✅ Applied to Supabase (Feb 13, 02:50 UTC)
-**Deploy Status:** ✅ Deployed + Push automático en proceso (1541a9f)
+**Deploy Status:** ✅ Deployed + Auto-deploy en proceso (f33883c)
 
