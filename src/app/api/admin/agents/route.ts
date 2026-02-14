@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/server';
 import { isSuperAdmin } from '@/lib/agents/admin';
+import { invalidateAgentCache } from '@/lib/agents/agent-definitions';
 
 async function canManageAgents(
   supabase: SupabaseClient,
@@ -125,6 +126,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Failed to save agent', details: error.message }, { status: 500 });
   }
 
+  // Invalidate cache so new agent is immediately available in chat
+  invalidateAgentCache();
+  console.log('[AdminAgents POST] Agent created/updated, cache invalidated');
+
   return NextResponse.json({ agent: data });
 }
 
@@ -152,6 +157,10 @@ export async function DELETE(req: Request) {
     console.error('[AdminAgents DELETE] Error:', error);
     return NextResponse.json({ error: 'Failed to delete agent' }, { status: 500 });
   }
+
+  // Invalidate cache so deleted agent is immediately removed from chat
+  invalidateAgentCache();
+  console.log('[AdminAgents DELETE] Agent deleted, cache invalidated');
 
   return NextResponse.json({ ok: true });
 }
