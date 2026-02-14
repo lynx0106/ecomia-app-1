@@ -28,14 +28,27 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('agent_definitions')
-    .select('agent_key, name, description, default_prompt, active')
-    .order('name');
+    .select('id, key, name, description, system_prompt, category, enabled, "order"')
+    .order('order');
 
   if (error) {
+    console.error('[AdminAgents GET] Error:', error);
     return NextResponse.json({ error: 'Failed to load agents' }, { status: 500 });
   }
 
-  return NextResponse.json({ agents: data || [] });
+  // Map to expected format
+  const agents = (data || []).map((agent: any) => ({
+    id: agent.id,
+    key: agent.key,
+    name: agent.name,
+    description: agent.description,
+    system_prompt: agent.system_prompt,
+    category: agent.category,
+    enabled: agent.enabled,
+    order: agent.order,
+  }));
+
+  return NextResponse.json({ agents });
 }
 
 export async function POST(req: Request) {
@@ -47,33 +60,32 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json().catch(() => ({}));
-  const agent = body?.agent || {};
+  const agent = body;
 
-  if (!agent.agent_key || !agent.name) {
-    return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
+  if (!agent?.key || !agent?.name) {
+    return NextResponse.json({ error: 'Missing key or name' }, { status: 400 });
   }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('agent_definitions')
     .upsert({
-      agent_key: String(agent.agent_key),
+      key: String(agent.key),
       name: String(agent.name),
       description: String(agent.description || ''),
-      default_prompt: String(agent.default_prompt || ''),
-      active: agent.active !== false,
-    }, { onConflict: 'agent_key' });
+      system_prompt: String(agent.system_prompt || ''),
+      category: agent.category || 'specialized',
+      enabled: agent.enabled !== false,
+      order: agent.order || 0,
+    }, { onConflict: 'key' })
+    .select()
+    .maybeSingle();
 
   if (error) {
-    if (process.env.NODE_ENV !== 'production') {
-      return NextResponse.json(
-        { error: 'Failed to save agent', details: error },
-        { status: 500 }
-      );
-    }
-    return NextResponse.json({ error: 'Failed to save agent' }, { status: 500 });
+    console.error('[AdminAgents POST] Error:', error);
+    return NextResponse.json({ error: 'Failed to save agent', details: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ agent: data });
 }
 
 export async function DELETE(req: Request) {
@@ -85,18 +97,19 @@ export async function DELETE(req: Request) {
   }
 
   const body = await req.json().catch(() => ({}));
-  const agentKey = body?.agent_key;
+  const agentKey = body?.agent_key || body?.key;
 
   if (!agentKey) {
-    return NextResponse.json({ error: 'Missing agent_key' }, { status: 400 });
+    return NextResponse.json({ error: 'Missing agent_key or key' }, { status: 400 });
   }
 
   const { error } = await supabase
     .from('agent_definitions')
     .delete()
-    .eq('agent_key', String(agentKey));
+    .eq('key', String(agentKey));
 
   if (error) {
+    console.error('[AdminAgents DELETE] Error:', error);
     return NextResponse.json({ error: 'Failed to delete agent' }, { status: 500 });
   }
 

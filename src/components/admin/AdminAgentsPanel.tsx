@@ -216,9 +216,9 @@ export function AdminAgentsPanel() {
               <label className="block text-sm font-medium mb-1">Key</label>
               <input
                 type="text"
-                value={editingAgent.key}
-                onChange={(e) => setEditingAgent({ ...editingAgent, key: e.target.value })}
-                disabled={!!editingAgent.id}
+                value={editingAgent?.key || ''}
+                onChange={(e) => editingAgent && setEditingAgent({ ...editingAgent, key: e.target.value })}
+                disabled={!!editingAgent?.id}
                 placeholder="orchestrator_v2"
                 className="w-full px-3 py-2 border rounded disabled:bg-gray-200"
               />
@@ -229,8 +229,8 @@ export function AdminAgentsPanel() {
               <label className="block text-sm font-medium mb-1">Name</label>
               <input
                 type="text"
-                value={editingAgent.name}
-                onChange={(e) => setEditingAgent({ ...editingAgent, name: e.target.value })}
+                value={editingAgent?.name || ''}
+                onChange={(e) => editingAgent && setEditingAgent({ ...editingAgent, name: e.target.value })}
                 placeholder="Orchestrator Agent"
                 className="w-full px-3 py-2 border rounded"
               />
@@ -239,8 +239,8 @@ export function AdminAgentsPanel() {
             <div>
               <label className="block text-sm font-medium mb-1">Description</label>
               <textarea
-                value={editingAgent.description}
-                onChange={(e) => setEditingAgent({ ...editingAgent, description: e.target.value })}
+                value={editingAgent?.description || ''}
+                onChange={(e) => editingAgent && setEditingAgent({ ...editingAgent, description: e.target.value })}
                 placeholder="What does this agent do?"
                 rows={2}
                 className="w-full px-3 py-2 border rounded"
@@ -250,14 +250,14 @@ export function AdminAgentsPanel() {
             <div>
               <label className="block text-sm font-medium mb-1">System Prompt</label>
               <textarea
-                value={editingAgent.system_prompt}
-                onChange={(e) => setEditingAgent({ ...editingAgent, system_prompt: e.target.value })}
+                value={editingAgent?.system_prompt || ''}
+                onChange={(e) => editingAgent && setEditingAgent({ ...editingAgent, system_prompt: e.target.value })}
                 placeholder="You are an AI agent that..."
                 rows={8}
                 className="w-full px-3 py-2 border rounded font-mono text-xs"
               />
               <p className="text-xs text-gray-500 mt-1">
-                {editingAgent.system_prompt.length} characters
+                {(editingAgent?.system_prompt || '').length} characters
               </p>
             </div>
 
@@ -266,8 +266,8 @@ export function AdminAgentsPanel() {
                 <label className="block text-sm font-medium mb-1">Category</label>
                 <input
                   type="text"
-                  value={editingAgent.category || ''}
-                  onChange={(e) => setEditingAgent({ ...editingAgent, category: e.target.value })}
+                  value={editingAgent?.category || ''}
+                  onChange={(e) => editingAgent && setEditingAgent({ ...editingAgent, category: e.target.value })}
                   placeholder="research, landing, etc."
                   className="w-full px-3 py-2 border rounded"
                 />
@@ -277,8 +277,8 @@ export function AdminAgentsPanel() {
                 <label className="block text-sm font-medium mb-1">Order</label>
                 <input
                   type="number"
-                  value={editingAgent.order}
-                  onChange={(e) => setEditingAgent({ ...editingAgent, order: parseInt(e.target.value) })}
+                  value={editingAgent?.order ?? 0}
+                  onChange={(e) => editingAgent && setEditingAgent({ ...editingAgent, order: parseInt(e.target.value) || 0 })}
                   className="w-full px-3 py-2 border rounded"
                 />
               </div>
@@ -287,8 +287,8 @@ export function AdminAgentsPanel() {
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"
-                checked={editingAgent.enabled}
-                onChange={(e) => setEditingAgent({ ...editingAgent, enabled: e.target.checked })}
+                checked={editingAgent?.enabled ?? true}
+                onChange={(e) => editingAgent && setEditingAgent({ ...editingAgent, enabled: e.target.checked })}
                 id="enabled"
               />
               <label htmlFor="enabled" className="text-sm">
