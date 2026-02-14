@@ -125,19 +125,31 @@ export function LoginContent() {
       </div>
 
       {/* Right Side - Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-gray-50 dark:bg-black">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-8 bg-gray-50 dark:bg-black">
         <motion.div 
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="w-full max-w-md space-y-8 bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800"
+          className="w-full max-w-md space-y-6 sm:space-y-8 bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800"
         >
           {!sent ? (
             <>
+              {/* Logo visible en móvil */}
+              <div className="flex justify-center lg:hidden mb-6">
+                <Image
+                  src="/logo-clean.png"
+                  alt="EcomIA"
+                  width={300}
+                  height={90}
+                  className="object-contain h-16 sm:h-20 w-auto"
+                  priority
+                />
+              </div>
+
               <div className="text-center">
-                <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
                   {isSignUp && usePassword ? "Crear Cuenta" : "Bienvenido"}
                 </h2>
-                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                <p className="mt-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                   {isSignUp && usePassword
                     ? "Regístrate para comenzar tu viaje en e-commerce con IA"
                     : "Ingresa tu correo para acceder a tu panel de control"}
