@@ -179,8 +179,7 @@ export default function ResearchHistoryPage() {
           {filteredSessions.map((session) => (
             <ResearchSessionCard 
               key={session.id} 
-              session={session} 
-              readOnly={!isAdmin}
+              session={session}
             />
           ))}
         </div>
