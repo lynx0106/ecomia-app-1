@@ -21,17 +21,17 @@ interface SupportTicket {
 }
 
 const statusColors: Record<TicketStatus, string> = {
-  open: 'bg-blue-100 text-blue-800',
-  in_progress: 'bg-yellow-100 text-yellow-800',
-  resolved: 'bg-green-100 text-green-800',
-  closed: 'bg-gray-100 text-gray-800',
+  open: 'bg-blue-900/40 text-blue-300',
+  in_progress: 'bg-yellow-900/40 text-yellow-300',
+  resolved: 'bg-green-900/40 text-green-300',
+  closed: 'bg-gray-800 text-gray-400',
 };
 
 const priorityColors: Record<TicketPriority, string> = {
-  low: 'text-green-600',
-  medium: 'text-yellow-600',
-  high: 'text-orange-600',
-  urgent: 'text-red-600',
+  low: 'text-green-400',
+  medium: 'text-yellow-400',
+  high: 'text-orange-400',
+  urgent: 'text-red-400',
 };
 
 const priorityIcons: Record<TicketPriority, React.ReactNode> = {
