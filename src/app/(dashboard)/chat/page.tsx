@@ -196,6 +196,20 @@ Cuéntame tu idea y yo me encargo del resto.`;
     await sendMessage(input);
   };
 
+  const handleContinue = async () => {
+    // Enviar confirmación automática
+    await sendMessage('sí, continuar');
+  };
+
+  const handleDeleteInvestigation = () => {
+    if (confirm('¿Eliminar esta investigación? Se perderán todos los resultados.')) {
+      setAgentState(null);
+      setMessages([]);
+      setIsPanelVisible(false);
+      setInput('');
+    }
+  };
+
   return (
     <div className="flex flex-col lg:flex-row h-full min-h-0 overflow-hidden bg-gray-200 dark:bg-black relative">
       {/* Panel de resultados de agentes */}
@@ -203,18 +217,41 @@ Cuéntame tu idea y yo me encargo del resto.`;
         agentState={agentState} 
         isVisible={isPanelVisible}
         onClose={() => setIsPanelVisible(false)}
+        onContinue={handleContinue}
+        onDelete={handleDeleteInvestigation}
       />
 
-      {/* Main Content Area (Research Results) */}
-      <div className="flex-1 min-w-0 h-full min-h-0 overflow-hidden relative">
-        <ResearchDisplay 
-          toolInvocations={toolInvocations} 
-          isLoading={isLoading} 
-          assistantMessage={latestAssistantMessage}
-          refreshKey={messages.length}
-          onQuickPrompt={sendMessage}
-        />
-      </div>
+      {/* Main Content Area (Research Results) - Ocultar en modo multi-agent */}
+      {!agentState && (
+        <div className="flex-1 min-w-0 h-full min-h-0 overflow-hidden relative">
+          <ResearchDisplay 
+            toolInvocations={toolInvocations} 
+            isLoading={isLoading} 
+            assistantMessage={latestAssistantMessage}
+            refreshKey={messages.length}
+            onQuickPrompt={sendMessage}
+          />
+        </div>
+      )}
+
+      {/* Mensaje de bienvenida cuando hay agentState pero panel cerrado */}
+      {agentState && !isPanelVisible && (
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="text-center max-w-md">
+            <div className="text-6xl mb-4">👋</div>
+            <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">Investigación en Progreso</h2>
+            <p className="text-gray-600 mb-6 dark:text-gray-400">
+              Tienes una investigación activa. Haz clic en "Ver Resultados" en el chat para continuar.
+            </p>
+            <button
+              onClick={() => setIsPanelVisible(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+            >
+              Ver Resultados
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Right Sidebar (Chat) */}
       <div className="w-full lg:w-64 xl:w-72 h-[40vh] lg:h-full flex-shrink-0 z-10">
