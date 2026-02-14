@@ -22,7 +22,6 @@ export function AdminAgentsPanel() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [promptPreview, setPromptPreview] = useState<Agent | null>(null);
 
   useEffect(() => {
     fetchAgents();
@@ -152,100 +151,71 @@ export function AdminAgentsPanel() {
           Error: {error}
         </div>
       )}
+
+      {/* Agents Grid */}
       {!editingAgent && !showCreateForm && (
-        <div className="overflow-x-auto border border-gray-700 rounded">
-          <table className="w-full text-sm bg-gray-900">
-            <thead className="bg-gray-900 border-b border-gray-700">
-              <tr>
-                <th className="text-left p-3 text-gray-400 font-semibold">Name</th>
-                <th className="text-left p-3 text-gray-400 font-semibold">Key</th>
-                <th className="text-left p-3 text-gray-400 font-semibold">Category</th>
-                <th className="text-left p-3 text-gray-400 font-semibold">System Prompt</th>
-                <th className="text-left p-3 text-gray-400 font-semibold">Enabled</th>
-                <th className="text-left p-3 text-gray-400 font-semibold">Order</th>
-                <th className="text-left p-3 text-gray-400 font-semibold">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {agents.map((agent) => (
-                <tr key={agent.key} className="border-b border-gray-800 hover:border-b hover:border-gray-700 transition-colors cursor-pointer">
-                  <td className="p-3 font-medium text-gray-200">{agent.name}</td>
-                  <td className="p-3 font-mono text-xs text-gray-400">{agent.key}</td>
-                  <td className="p-3 text-xs text-gray-500">{agent.category || '-'}</td>
-                  <td
-                    className="p-3 text-xs text-gray-400 max-w-xs truncate"
-                    title={agent.system_prompt || ''}
-                  >
-                    {agent.system_prompt || '-'}
-                    {agent.system_prompt ? (
-                      <button
-                        type="button"
-                        onClick={() => setPromptPreview(agent)}
-                        className="ml-2 text-xs text-blue-300 hover:text-blue-200"
-                      >
-                        Ver
-                      </button>
-                    ) : null}
-                  </td>
-                  <td className="p-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+          {agents.map((agent) => (
+            <div
+              key={agent.key}
+              className="bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-sm flex flex-col gap-3 hover:border-gray-700 transition-colors"
+            >
+              {/* Header */}
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-900/40 text-indigo-300">
+                      {agent.key}
+                    </span>
                     <span className={`text-xs px-2 py-1 rounded font-semibold ${
                       agent.enabled 
                         ? 'bg-green-900/50 text-green-400' 
                         : 'bg-gray-800 text-gray-500'
                     }`}>
-                      {agent.enabled ? 'Yes' : 'No'}
+                      {agent.enabled ? 'Enabled' : 'Disabled'}
                     </span>
-                  </td>
-                  <td className="p-3 text-gray-400">{agent.order}</td>
-                  <td className="p-3 flex gap-2">
-                    <button
-                      onClick={() => setEditingAgent(agent)}
-                      className="p-1 hover:text-blue-300 transition-colors"
-                      title="Edit"
-                    >
-                      <Edit2 className="w-4 h-4 text-blue-500" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteAgent(agent.key)}
-                      className="p-1 hover:text-red-300 transition-colors"
-                      title="Delete"
-                    >
-                      <Trash2 className="w-4 h-4 text-red-500" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+                  </div>
+                  <h3 className="text-base font-semibold text-gray-100">{agent.name}</h3>
+                  <p className="text-xs text-gray-400 mt-1">{agent.description}</p>
+                </div>
+                
+                {/* Actions */}
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => setEditingAgent(agent)}
+                    className="p-1.5 hover:bg-gray-800 rounded transition-colors"
+                    title="Edit"
+                  >
+                    <Edit2 className="w-4 h-4 text-blue-400" />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteAgent(agent.key)}
+                    className="p-1.5 hover:bg-gray-800 rounded transition-colors"
+                    title="Delete"
+                  >
+                    <Trash2 className="w-4 h-4 text-red-400" />
+                  </button>
+                </div>
+              </div>
 
-      {promptPreview && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-          onClick={() => setPromptPreview(null)}
-        >
-          <div
-            className="w-full max-w-2xl rounded-lg border border-gray-700 bg-gray-900 p-4"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="mb-3 flex items-center justify-between">
-              <h4 className="text-sm font-semibold text-gray-100">
-                System Prompt: {promptPreview.name}
-              </h4>
-              <button
-                type="button"
-                onClick={() => setPromptPreview(null)}
-                className="rounded p-1 text-gray-300 hover:text-gray-100"
-                aria-label="Close prompt preview"
-              >
-                <X className="h-4 w-4" />
-              </button>
+              {/* Metadata */}
+              <div className="flex items-center gap-3 text-xs text-gray-500">
+                <span>Category: {agent.category || 'N/A'}</span>
+                <span>•</span>
+                <span>Order: {agent.order}</span>
+              </div>
+
+              {/* System Prompt Preview */}
+              <details className="text-xs text-gray-400">
+                <summary className="cursor-pointer text-indigo-400 hover:text-indigo-300">
+                  Ver system prompt
+                </summary>
+                <div className="mt-2 whitespace-pre-wrap rounded-lg bg-gray-950 border border-gray-800 p-3 text-gray-300 max-h-40 overflow-y-auto">
+                  {agent.system_prompt || 'No system prompt configured.'}
+                </div>
+              </details>
             </div>
-            <div className="max-h-[60vh] overflow-auto rounded border border-gray-800 bg-gray-950 p-3 text-xs text-gray-200 whitespace-pre-wrap font-mono">
-              {promptPreview.system_prompt || 'No prompt available.'}
-            </div>
-          </div>
+          ))}
         </div>
       )}
 
