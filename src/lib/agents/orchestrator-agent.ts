@@ -75,11 +75,12 @@ export async function executeOrchestratorAgent(
     const response = await generateText({
       model: xai('grok-4-1-fast-non-reasoning'),
       system: systemPrompt,
-      messages: messages.map((m: any) => ({
+      messages: messages.slice(-2).map((m: any) => ({ // Solo últimos 2 mensajes
         role: m.role,
         content: m.content,
       })),
       temperature: 0.3,
+      maxTokens: 300, // Limitar respuesta del orquestador
     } as any);
 
     const text = response.text.trim();

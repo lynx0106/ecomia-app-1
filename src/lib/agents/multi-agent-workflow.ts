@@ -14,6 +14,7 @@ export interface MultiAgentResult {
   state: AgentState;
   hasMore: boolean;
   nextPrompt?: string;
+  progressMessages?: string[]; // Nuevos mensajes de progreso para mostrar en el chat
 }
 
 /**
@@ -22,12 +23,15 @@ export interface MultiAgentResult {
  * 2. Routing a agente específico (sourcing, landing, content, media)
  * 3. Mantenimiento de estado entre agentes
  * 4. **UNO A LA VEZ** - espera confirmación del usuario entre pasos
+ * 5. **MENSAJES DE PROGRESO** - informa al usuario en tiempo real
  */
 export async function executeMultiAgentWorkflow(
   messages: any[],
   userId: string,
   existingState?: AgentState
 ): Promise<MultiAgentResult> {
+  const progressMessages: string[] = [];
+  
   try {
     console.log('[MultiAgentWorkflow] ===========================================');
     console.log('[MultiAgentWorkflow] Iniciando workflow');
@@ -54,7 +58,8 @@ export async function executeMultiAgentWorkflow(
     // Si hay estado existente y usuario está confirmando, continuar con siguiente agente
     if (existingState && isConfirming && existingState.nextAgent) {
       console.log(`[MultiAgentWorkflow] ✅ CONTINUANDO con agente: ${existingState.nextAgent}`);
-      return await executeSingleAgent(messages, userId, existingState, existingState.nextAgent);
+      progressMessages.push(`🔄 Continuando con ${existingState.nextAgent}...`);
+      return await executeSingleAgent(messages, userId, existingState, existingState.nextAgent, progressMessages);
     }
 
     console.log(`${'-'.repeat(60)}`);
@@ -62,10 +67,12 @@ export async function executeMultiAgentWorkflow(
     console.log(`${'-'.repeat(60)}`);
     
     // Primera vez: Orquestador detecta intención
+    progressMessages.push('🎯 Analizando tu solicitud...');
     const orchestrationResult = await executeOrchestratorAgent(messages, userId);
 
     const nextAgent = orchestrationResult.nextAgent;
     console.log(`[MultiAgentWorkflow] Orquestador decidió: "${nextAgent}"`);
+    progressMessages.push(`✅ Análisis completado. Iniciando: ${nextAgent}`);
 
     // Si el orquestador dice "direct", responder y terminar
     if (nextAgent === 'direct') {
@@ -75,6 +82,7 @@ export async function executeMultiAgentWorkflow(
         content: orchestrationResult.intention,
         state: orchestrationResult.state,
         hasMore: false,
+        progressMessages,
       };
     }
 
@@ -84,7 +92,7 @@ export async function executeMultiAgentWorkflow(
     console.log(`[MultiAgentWorkflow] ⚠️ Después de esto, el workflow se PAUSARÁ`);
     console.log(`[MultiAgentWorkflow] ⚠️ Usuario debe confirmar para continuar`);
     console.log(`${'!'.repeat(60)}`);
-    return await executeSingleAgent(messages, userId, orchestrationResult.state, nextAgent);
+    return await executeSingleAgent(messages, userId, orchestrationResult.state, nextAgent, progressMessages);
   } catch (err) {
     console.error('[MultiAgentWorkflow] Error:', err);
     throw new Error(`Error en flujo multi-agente: ${err instanceof Error ? err.message : 'desconocido'}`);
@@ -98,7 +106,8 @@ async function executeSingleAgent(
   messages: any[],
   userId: string,
   state: AgentState,
-  agentToExecute: string
+  agentToExecute: string,
+  progressMessages: string[] = []
 ): Promise<MultiAgentResult> {
   console.log(`[executeSingleAgent] ==============`);
   console.log(`[executeSingleAgent] Agente a ejecutar: ${agentToExecute}`);
@@ -111,17 +120,21 @@ async function executeSingleAgent(
   switch (agentToExecute) {
     case 'sourcing':
       console.log('[executeSingleAgent] ⚙️ Ejecutando SOURCING...');
+      progressMessages.push('🔍 Investigando producto y proveedores...');
       const sourcingResult = await executeSourcingAgent(messages, state);
       agentResponse = sourcingResult.response;
       updatedState = sourcingResult.state;
       nextAgent = sourcingResult.nextAgent;
+      progressMessages.push('✅ Investigación completada');
       console.log(`[executeSingleAgent] ✅ Sourcing completado. Siguiente sugerido: ${nextAgent}`);
       break;
 
     case 'landing_builder':
       console.log('[MultiAgentWorkflow] Ejecutando SOLO Landing Builder Agent...');
+      progressMessages.push('📄 Generando landing page...');
       if (!state.sourcingResult) {
         // Si no hay sourcing previo, ejecutar primero
+        progressMessages.push('⚠️ Ejecutando investigación previa...');
         const sourcingFirst = await executeSourcingAgent(messages, state);
         updatedState = sourcingFirst.state;
       }
@@ -129,22 +142,27 @@ async function executeSingleAgent(
       agentResponse = landingResult.response;
       updatedState = landingResult.state;
       nextAgent = landingResult.nextAgent;
+      progressMessages.push('✅ Landing page generada');
       break;
 
     case 'copy_social':
       console.log('[MultiAgentWorkflow] Ejecutando SOLO Copy Social Agent...');
+      progressMessages.push('💬 Creando copys para redes...');
       const contentResult = await executeCopySocialAgent(messages, state);
       agentResponse = contentResult.response;
       updatedState = contentResult.state;
       nextAgent = contentResult.nextAgent;
+      progressMessages.push('✅ Copys generados');
       break;
 
     case 'media_creator':
       console.log('[MultiAgentWorkflow] Ejecutando SOLO Media Creator Agent...');
+      progressMessages.push('🎨 Generando ideas visuales...');
       const mediaResult = await executeMediaCreatorAgent(messages, state);
       agentResponse = mediaResult.response;
       updatedState = mediaResult.state;
       nextAgent = mediaResult.nextAgent;
+      progressMessages.push('✅ Medios generados');
       break;
 
     default:
@@ -160,6 +178,10 @@ async function executeSingleAgent(
   console.log(`[executeSingleAgent] 🛑 WORKFLOW PAUSADO`);
   console.log(`[executeSingleAgent] Estado guardado con nextAgent: "${nextAgent}"`);
   console.log(`[executeSingleAgent] Esperando confirmación del usuario...`);
+  
+  // Agregar mensaje de resumen con el progreso
+  const progressSummary = progressMessages.join('\n');
+  const finalMessage = `${progressSummary}\n\n${agentResponse}\n\n${nextAgent !== 'complete' ? `⏸️ **Workflow pausado**. ¿Continuar con ${nextAgent}?` : '✅ **Workflow completado**'}`;
   console.log(`[executeSingleAgent] Usuario debe enviar: "sí", "siguiente", "continuar", "ok" o "dale"`);
   console.log(`${'🛑'.repeat(30)}\n`);
   console.log(`${'='.repeat(60)}\n`);
@@ -168,10 +190,11 @@ async function executeSingleAgent(
   const fullResponse = buildWorkflowResponse(agentResponse, nextAgent, updatedState);
 
   return {
-    content: fullResponse,
+    content: finalMessage || fullResponse,
     state: updatedState,
     hasMore: nextAgent !== 'complete' && nextAgent !== 'direct',
     nextPrompt: getNextPromptSuggestion(nextAgent, updatedState),
+    progressMessages,
   };
 }
 

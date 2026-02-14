@@ -4,9 +4,9 @@
 import dynamic from 'next/dynamic';
 import { useMemo, useState, useEffect } from 'react';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
-import { AgentResultsPanel } from '@/components/chat/AgentResultsPanel';
 import { createClient } from '@/lib/supabase/client';
 import { logger } from '@/lib/logging';
+import { CheckCircle, Loader2, Trash2 } from 'lucide-react';
 
 // Lazy load ResearchDisplay to optimize memory usage
 const ResearchDisplay = dynamic(
@@ -150,12 +150,18 @@ Cuéntame tu idea y yo me encargo del resto.`;
       if (data.state) {
         setAgentState(data.state);
         console.log('[ChatPage] Estado de agentes actualizado:', data.state);
-        
-        // Auto-abrir panel si hay resultados
-        if (data.state.sourcingResult || data.state.landingResult || 
-            data.state.contentResult || data.state.mediaResult) {
-          setIsPanelVisible(true);
-        }
+      }
+      
+      // Agregar mensajes de progreso al chat si existen
+      const progressMsgs: Message[] = [];
+      if (data.progressMessages && Array.isArray(data.progressMessages)) {
+        data.progressMessages.forEach((msg: string) => {
+          progressMsgs.push({
+            id: crypto.randomUUID(),
+            role: 'system',
+            content: msg,
+          });
+        });
       }
       
       const rawAssistantText = String(data.content);
@@ -167,22 +173,13 @@ Cuéntame tu idea y yo me encargo del resto.`;
         throw new Error('El asistente no pudo generar una respuesta. Intenta con un mensaje diferente.');
       }
 
-      // Filtrar mensajes extensos (>500 chars) para mostrar solo resumen en chat
-      const shouldAddToChat = assistantText.length < 500 || 
-                              assistantText.includes('¿') || 
-                              assistantText.toLowerCase().includes('continuar');
-      
-      const messageContent = shouldAddToChat 
-        ? assistantText 
-        : '✅ Resultados procesados. Haz clic en "Ver Resultados" para ver los detalles.';
-
       const assistantMessage: Message = {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: messageContent,
+        content: assistantText,
       };
 
-      setMessages((prev) => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, ...progressMsgs, assistantMessage]);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error inesperado';
       setError(msg);
@@ -213,23 +210,14 @@ Cuéntame tu idea y yo me encargo del resto.`;
 
   return (
     <div className="flex flex-col lg:flex-row h-full min-h-0 overflow-hidden bg-gray-200 dark:bg-black relative">
-      {/* Panel de resultados de agentes */}
-      <AgentResultsPanel 
-        agentState={agentState} 
-        isVisible={isPanelVisible}
-        onClose={() => setIsPanelVisible(false)}
-        onContinue={handleContinue}
-        onDelete={handleDeleteInvestigation}
-      />
-
-      {/* Main Content Area (Research Results) - Ocultar en modo multi-agent */}
+      {/* Main Content Area (Research Results) */}
       {!agentState && !showLegacyResults && (
         <div className="flex-1 flex items-center justify-center p-8">
           <div className="text-center max-w-md">
             <div className="text-6xl mb-4">🧭</div>
             <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">Listo para investigar</h2>
             <p className="text-gray-600 mb-6 dark:text-gray-400">
-              Usa el chat para iniciar una investigacion. Los resultados apareceran en el panel lateral.
+              Usa el chat para iniciar una investigación. Los resultados aparecerán aquí en el centro.
             </p>
             <button
               onClick={() => setShowLegacyResults(true)}
@@ -253,27 +241,132 @@ Cuéntame tu idea y yo me encargo del resto.`;
         </div>
       )}
 
-      {/* Mensaje de bienvenida cuando hay agentState pero panel cerrado */}
-      {agentState && !isPanelVisible && (
-        <div className="flex-1 flex items-center justify-center p-8">
-          <div className="text-center max-w-md">
-            <div className="text-6xl mb-4">👋</div>
-            <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">Investigación en Progreso</h2>
-            <p className="text-gray-600 mb-6 dark:text-gray-400">
-              Tienes una investigación activa. Haz clic en "Ver Resultados" en el chat para continuar.
-            </p>
-            <button
-              onClick={() => setIsPanelVisible(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
-            >
-              Ver Resultados
-            </button>
+      {/* Vista de progreso de agentes en el centro */}
+      {agentState && (
+        <div className="flex-1 min-w-0 h-full min-h-0 overflow-hidden p-6">
+          <div className="max-w-4xl mx-auto h-full flex flex-col">
+            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Flujo Multi-Agente</h2>
+            
+            {/* Progreso de agentes */}
+            <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6 mb-4">
+              <div className="space-y-3">
+                {[
+                  { name: '🎯 Análisis de Intención', type: 'orchestrator' },
+                  { name: '🔍 Investigación de Producto', type: 'sourcing', result: agentState.sourcingResult },
+                  { name: '📄 Generación de Landing', type: 'landing', result: agentState.landingResult },
+                  { name: '💬 Creación de Copys', type: 'copys', result: agentState.contentResult },
+                  { name: '🎨 Generación de Medios', type: 'media', result: agentState.mediaResult },
+                ].map((item, idx) => {
+                  const status = (() => {
+                    if (!agentState) return 'pending';
+                    const currentStep = agentState.currentStep;
+                    const previousSteps = agentState.previousSteps || [];
+                    if (currentStep === item.type) return 'loading';
+                    if (previousSteps.includes(item.type)) return 'completed';
+                    return 'pending';
+                  })();
+
+                  return (
+                    <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="flex-shrink-0">
+                        {status === 'completed' && (
+                          <CheckCircle className="w-5 h-5 text-green-500" />
+                        )}
+                        {status === 'loading' && (
+                          <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />
+                        )}
+                        {status === 'pending' && (
+                          <div className="w-5 h-5 rounded-full bg-gray-300 dark:bg-gray-700" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">{item.name}</p>
+                        {status === 'loading' && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Procesando...</p>
+                        )}
+                        {status === 'completed' && item.result && (
+                          <p className="text-xs text-green-600 dark:text-green-400">Completado</p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Barra de progreso */}
+              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400 mb-2">
+                  <span>Progreso del flujo</span>
+                  <span>{(agentState.previousSteps?.length || 0)}/4 completados</span>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div 
+                    className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-500"
+                    style={{ width: `${((agentState.previousSteps?.length || 0) / 4) * 100}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Botones de acción */}
+              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex gap-2">
+                {agentState.nextAgent && agentState.nextAgent !== 'complete' && (
+                  <button
+                    onClick={handleContinue}
+                    className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-medium"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    Continuar con {agentState.nextAgent === 'landing_builder' ? 'Landing' : agentState.nextAgent === 'copy_social' ? 'Copys' : agentState.nextAgent === 'media_creator' ? 'Medios' : 'siguiente paso'}
+                  </button>
+                )}
+                <button
+                  onClick={handleDeleteInvestigation}
+                  className="px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                  title="Eliminar investigación"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Resultados */}
+            <div className="flex-1 overflow-y-auto space-y-4">
+              {agentState.sourcingResult && (
+                <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">🔍 Investigación de Producto</h3>
+                  <div className="prose dark:prose-invert max-w-none">
+                    <p className="text-sm text-gray-700 dark:text-gray-300">Producto: {agentState.sourcingResult.productName}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">{agentState.sourcingResult.productDescription}</p>
+                  </div>
+                </div>
+              )}
+              
+              {agentState.landingResult && (
+                <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">📄 Landing Page</h3>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">Landing generada exitosamente</p>
+                </div>
+              )}
+              
+              {agentState.contentResult && (
+                <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">💬 Copys para Redes</h3>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">Contenido generado para redes sociales</p>
+                </div>
+              )}
+              
+              {agentState.mediaResult && (
+                <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6">
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">🎨 Medios y Visuales</h3>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">Ideas visuales generadas</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
 
       {/* Right Sidebar (Chat) */}
-      <div className="w-full lg:w-64 xl:w-72 h-[40vh] lg:h-full flex-shrink-0 z-10">
+      <div className="w-full lg:w-80 xl:w-96 h-[40vh] lg:h-full flex-shrink-0 z-10">
         <ChatSidebar
           messages={messages}
           input={input}
@@ -282,8 +375,6 @@ Cuéntame tu idea y yo me encargo del resto.`;
           sendMessage={sendMessage}
           isLoading={isLoading}
           sessionRefreshKey={messages.length}
-          onToggleResults={() => setIsPanelVisible(!isPanelVisible)}
-          isPanelVisible={isPanelVisible}
         />
         {error && (
           <div className="px-4 pb-4 text-sm text-red-600">

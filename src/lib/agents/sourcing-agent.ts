@@ -11,11 +11,6 @@ const xai = createXai({
 
 const tvly = tavily({ apiKey: process.env.TAVILY_API_KEY || 'dummy-key-for-build' });
 
-/**
- * Sourcing & Research Agent - Investigación de productos y proveedores
- * System Prompt is now loaded from database for real-time updates
- */
-
 function getSourcingFallbackPrompt(): string {
   return `
 Eres un Analista de Sourcing Estratégico especializado en e-commerce para LATAM.
@@ -25,40 +20,25 @@ MISIÓN:
 - Buscar proveedores reales en Mercado Libre Colombia, AliExpress, distribuidoras
 - Analizar viabilidad: demanda, competencia, margen, riesgos
 - Proporcionar tabla clara con opciones
-- Pedir confirmación antes de continuar
 
 DIRECTRICES:
-- NUNCA INVENTES PRECIOS NI PROVEEDORES
-- Si no encuentras, indica "dato no disponible"
+- Sé rápido y práctico
+- Si no encuentras datos, indica "dato no disponible"
 - Prioriza: Colombia > Latinoamérica > Internacional
-- Formatos: COP y USD
-- Links reales o "dato no disponible"
-- Si el usuario quiere "flujo completo", después de esto dice: "Continuamos a Landing Builder"
 
 ESTRUCTURA DE RESPUESTA:
 ## [NOMBRE DEL PRODUCTO]
-Descripción breve de por qué es ganador.
+Descripción breve y análisis de viabilidad.
 
 ### TABLA DE INVESTIGACIÓN
-| Proveedor | Contacto | Precio Proveedor | PVP Sugerido |
-| --- | --- | --- | --- |
-| [nombre] | [URL o dato no disponible] | [COP/USD] | [COP/USD] |
+| Proveedor | Precio | PVP Sugerido |
+| --- | --- | --- |
+| [nombre] | [COP/USD] | [COP/USD] |
 
-### ANÁLISIS RÁPIDO
-- **Demanda:** [Alta/Media/Baja] + motivo breve
-- **Competencia:** [Alta/Media/Baja] + motivo breve
-- **Margen:** [Bajo/Medio/Alto] + motivo breve
-- **Riesgos:** [logística, devoluciones, restricciones ads]
-
-### ESTRATEGIA PARA REDES SOCIALES
-- **Hook:** [por qué detiene el scroll]
-- **Tendencia:** [popularidad actual en TikTok/Instagram]
-- **Alternativa:** [producto similar en tendencia]
-
-### SIGUIENTE PASO
-¿Quieres continuar con una Landing Page + tienda online para este producto? 
-[SÍ] → Landing Builder próximo
-[NO] → ¿Investigar otro producto?
+### ANÁLISIS
+- **Demanda:** Alta/Media/Baja
+- **Competencia:** Alta/Media/Baja  
+- **Margen:** Bajo/Medio/Alto
 `;
 }
 
@@ -70,7 +50,6 @@ export async function executeSourcingAgent(
     ?.filter((m) => m.role === 'user')
     ?.pop()?.content || '';
 
-  // Load system prompt from database
   let systemPrompt: string;
   try {
     systemPrompt = await getAgentSystemPrompt('sourcing');
@@ -84,39 +63,45 @@ export async function executeSourcingAgent(
   }
 
   try {
-    // Buscar en internet usando Tavily
-    const searchResults = await (async () => {
-      try {
-        const results = await tvly.search(userMessage, {
-          topic: 'general',
-          max_results: 3,
-        });
-        return results.results.map((r: any) => `${r.title}: ${r.content}`).join('\n');
-      } catch {
-        return '(Búsqueda en internet no disponible)';
-      }
-    })();
+    // Búsqueda con timeout corto (máx 1.5s para ser más rápido)
+    const searchResults = await Promise.race([
+      (async () => {
+        try {
+          const results = await tvly.search(userMessage, {
+            topic: 'general',
+            max_results: 2,
+          });
+          return results.results.map((r: any) => `${r.title}: ${r.content}`).join('\n');
+        } catch {
+          return '';
+        }
+      })(),
+      new Promise<string>((resolve) => setTimeout(() => resolve(''), 1500)),
+    ]);
+
+    console.log('[Sourcing] 🔍 Búsqueda completada en < 1.5s');
 
     const response = await generateText({
       model: xai('grok-4-1-fast-non-reasoning'),
       system: systemPrompt,
       messages: [
-        ...messages.map((m: any) => ({
+        ...messages.slice(-3).map((m: any) => ({ // Solo últimos 3 mensajes para reducir tokens
           role: m.role,
           content: m.content,
         })),
-        {
+        ...(searchResults ? [{
           role: 'user',
-          content: `Datos de búsqueda en internet:\n${searchResults}`,
-        },
+          content: `DATOS DE BÚSQUEDA:\n${searchResults.slice(0, 1000)}`, // Limitar a 1000 chars
+        }] : []),
       ],
       temperature: 0.5,
+      maxTokens: 800, // Limitar tokens de respuesta para ser más rápido
     } as any);
 
     const newState: AgentState = {
       ...state,
       currentStep: 'sourcing',
-      previousSteps: [...state.previousSteps, 'sourcing'],
+      previousSteps: [...(state.previousSteps || []), 'sourcing'],
       updatedAt: new Date(),
       sourcingResult: {
         productName: userMessage.substring(0, 50),
@@ -136,13 +121,13 @@ export async function executeSourcingAgent(
       },
     };
 
-    // SIEMPRE hacer pausa después de sourcing
-    // El usuario decide si quiere continuar con landing
-    const nextAgent = 'landing_builder'; // Sugiere landing como siguiente, pero NO lo ejecuta
+    const nextAgent = 'landing_builder';
+
+    console.log('[Sourcing] ✅ Completado. Siguiente sugerido: landing');
 
     return {
       response: response.text,
-      nextAgent, // Solo sugerencia, requiere confirmación del usuario
+      nextAgent,
       state: newState,
     };
   } catch (err) {
