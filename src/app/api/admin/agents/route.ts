@@ -7,48 +7,96 @@ async function canManageAgents(
   supabase: SupabaseClient,
   user: User | null
 ) {
-  if (!user) return false;
-  if (isSuperAdmin(user?.email)) return true;
-  const { data } = await supabase
-    .from('user_roles')
-    .select('role')
-    .or(`user_id.eq.${user.id},email.eq.${user.email}`)
-    .limit(1)
-    .maybeSingle();
-  return data?.role === 'admin';
+  if (!user) {
+    console.log('[canManageAgents] No user');
+    return false;
+  }
+  
+  const email = user?.email || '';
+  console.log('[canManageAgents] Checking email:', email);
+  
+  if (isSuperAdmin(email)) {
+    console.log('[canManageAgents] User is super admin');
+    return true;
+  }
+  
+  try {
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('role')
+      .or(`user_id.eq.${user.id},email.eq.${email}`)
+      .limit(1)
+      .maybeSingle();
+    
+    if (error) {
+      console.warn('[canManageAgents] user_roles query error:', error.message);
+      // If table doesn't exist or other error, allow via email check
+      return isSuperAdmin(email);
+    }
+    
+    const isAdmin = data?.role === 'admin';
+    console.log('[canManageAgents] Role check result:', isAdmin);
+    return isAdmin;
+  } catch (err) {
+    console.warn('[canManageAgents] Exception:', err);
+    return false;
+  }
 }
 
 export async function GET() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-  if (!(await canManageAgents(supabase, user))) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    console.log('[AdminAgents GET] User:', user?.email, 'ID:', user?.id);
+
+    if (!(await canManageAgents(supabase, user))) {
+      console.log('[AdminAgents GET] User not authorized');
+      return NextResponse.json({ error: 'Unauthorized - User is not admin' }, { status: 401 });
+    }
+
+    // For admin, read without RLS
+    const { data, error } = await supabase
+      .from('agent_definitions')
+      .select('id, key, name, description, system_prompt, category, enabled, "order"')
+      .order('order');
+
+    if (error) {
+      console.error('[AdminAgents GET] Supabase Error:', error.message, error.details, error.code);
+      
+      // Try alternate query if first fails
+      if (error.code === '42P01' || error.message.includes('does not exist')) {
+        console.log('[AdminAgents GET] Table might not exist, returning empty array');
+        return NextResponse.json({ agents: [] });
+      }
+      
+      return NextResponse.json(
+        { error: 'Failed to load agents', details: error.message, code: error.code },
+        { status: 500 }
+      );
+    }
+
+    // Map to expected format
+    const agents = (data || []).map((agent: any) => ({
+      id: agent.id,
+      key: agent.key,
+      name: agent.name,
+      description: agent.description,
+      system_prompt: agent.system_prompt,
+      category: agent.category,
+      enabled: agent.enabled,
+      order: agent.order,
+    }));
+
+    console.log('[AdminAgents GET] Success, loaded', agents.length, 'agents');
+    return NextResponse.json({ agents });
+  } catch (err) {
+    console.error('[AdminAgents GET] Exception:', err);
+    return NextResponse.json(
+      { error: 'Internal server error', details: err instanceof Error ? err.message : String(err) },
+      { status: 500 }
+    );
   }
-
-  const { data, error } = await supabase
-    .from('agent_definitions')
-    .select('id, key, name, description, system_prompt, category, enabled, "order"')
-    .order('order');
-
-  if (error) {
-    console.error('[AdminAgents GET] Error:', error);
-    return NextResponse.json({ error: 'Failed to load agents' }, { status: 500 });
-  }
-
-  // Map to expected format
-  const agents = (data || []).map((agent: any) => ({
-    id: agent.id,
-    key: agent.key,
-    name: agent.name,
-    description: agent.description,
-    system_prompt: agent.system_prompt,
-    category: agent.category,
-    enabled: agent.enabled,
-    order: agent.order,
-  }));
-
-  return NextResponse.json({ agents });
 }
 
 export async function POST(req: Request) {
