@@ -32,6 +32,7 @@ export default function ChatPage() {
   const [hasLoadedWelcome, setHasLoadedWelcome] = useState(false);
   const [agentState, setAgentState] = useState<any>(null);
   const [isPanelVisible, setIsPanelVisible] = useState(false);
+  const [showLegacyResults, setShowLegacyResults] = useState(false);
 
   // Load welcome message for new users
   useEffect(() => {
@@ -110,7 +111,6 @@ Cuéntame tu idea y yo me encargo del resto.`;
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
   };
-
   const sendMessage = async (content: string) => {
     if (!content.trim() || isLoading) return;
     setError(null);
@@ -207,6 +207,7 @@ Cuéntame tu idea y yo me encargo del resto.`;
       setMessages([]);
       setIsPanelVisible(false);
       setInput('');
+      setShowLegacyResults(false);
     }
   };
 
@@ -222,7 +223,25 @@ Cuéntame tu idea y yo me encargo del resto.`;
       />
 
       {/* Main Content Area (Research Results) - Ocultar en modo multi-agent */}
-      {!agentState && (
+      {!agentState && !showLegacyResults && (
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="text-center max-w-md">
+            <div className="text-6xl mb-4">🧭</div>
+            <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">Listo para investigar</h2>
+            <p className="text-gray-600 mb-6 dark:text-gray-400">
+              Usa el chat para iniciar una investigacion. Los resultados apareceran en el panel lateral.
+            </p>
+            <button
+              onClick={() => setShowLegacyResults(true)}
+              className="bg-gray-900 hover:bg-gray-800 text-white px-5 py-2.5 rounded-lg font-semibold transition-colors dark:bg-gray-800 dark:hover:bg-gray-700"
+            >
+              Ver investigaciones anteriores
+            </button>
+          </div>
+        </div>
+      )}
+
+      {!agentState && showLegacyResults && (
         <div className="flex-1 min-w-0 h-full min-h-0 overflow-hidden relative">
           <ResearchDisplay 
             toolInvocations={toolInvocations} 

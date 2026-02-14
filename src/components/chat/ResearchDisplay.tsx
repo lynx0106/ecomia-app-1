@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Loader2, Search, TrendingUp, Users, ShoppingBag } from 'lucide-react';
+import { Loader2, Search, TrendingUp, Users, ShoppingBag, Trash2 } from 'lucide-react';
 
 type ToolInvocation = {
   toolName?: string;
@@ -187,6 +187,58 @@ export function ResearchDisplay({
   const [assets, setAssets] = useState<AssetRow[]>([]);
   const [isSessionLoading, setIsSessionLoading] = useState(false);
   const [sessionError, setSessionError] = useState<string | null>(null);
+  const [deletingAssetId, setDeletingAssetId] = useState<string | null>(null);
+  const [isDeletingSession, setIsDeletingSession] = useState(false);
+
+  const handleDeleteAsset = async (assetId: string) => {
+    if (!confirm('¿Eliminar este asset?')) return;
+    
+    setDeletingAssetId(assetId);
+    try {
+      const res = await fetch(`/api/product-assets/${assetId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!res.ok) {
+        throw new Error('Error al eliminar');
+      }
+      
+      // Remover de la UI inmediatamente
+      setAssets((prev) => prev.filter((a) => a.id !== assetId));
+    } catch (error) {
+      alert('No se pudo eliminar el asset');
+      console.error(error);
+    } finally {
+      setDeletingAssetId(null);
+    }
+  };
+
+  const handleDeleteSession = async () => {
+    if (!session) return;
+    if (!confirm('¿Eliminar esta investigación y todos sus resultados?')) return;
+
+    setIsDeletingSession(true);
+    setSessionError(null);
+    try {
+      const res = await fetch(`/api/research-sessions/${session.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) {
+        throw new Error('No se pudo eliminar la investigación');
+      }
+
+      setSession(null);
+      setCandidates([]);
+      setSuppliers([]);
+      setAssets([]);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al eliminar investigación';
+      setSessionError(message);
+    } finally {
+      setIsDeletingSession(false);
+    }
+  };
 
   useEffect(() => {
     if (marketTable) setLastMarketTable(marketTable);
@@ -298,9 +350,24 @@ export function ResearchDisplay({
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Sesion activa</h3>
           <p className="text-sm text-gray-700 dark:text-gray-300">{session.goal}</p>
         </div>
-        <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-300">
-          {session.status}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+            {session.status}
+          </span>
+          <button
+            type="button"
+            onClick={handleDeleteSession}
+            disabled={isDeletingSession}
+            className="rounded-lg p-2 text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50 dark:hover:bg-red-900/20"
+            title="Eliminar investigación"
+          >
+            {isDeletingSession ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Trash2 className="h-4 w-4" />
+            )}
+          </button>
+        </div>
       </div>
 
       {sessionError && (
@@ -384,7 +451,7 @@ export function ResearchDisplay({
               className="rounded-lg border border-gray-100 bg-gray-50 p-3 text-xs text-gray-700 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-200"
             >
               <div className="flex items-start justify-between gap-2">
-                <div>
+                <div className="flex-1">
                   <p className="font-semibold">{asset.asset_type}</p>
                   {asset.candidate_id && candidateLookup[asset.candidate_id] && (
                     <p className="text-[11px] text-gray-500 dark:text-gray-400">
@@ -392,9 +459,23 @@ export function ResearchDisplay({
                     </p>
                   )}
                 </div>
-                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] text-gray-500 dark:bg-gray-800 dark:text-gray-400">
-                  {new Date(asset.created_at).toLocaleDateString()}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                    {new Date(asset.created_at).toLocaleDateString()}
+                  </span>
+                  <button
+                    onClick={() => handleDeleteAsset(asset.id)}
+                    disabled={deletingAssetId === asset.id}
+                    className="rounded-lg p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
+                    title="Eliminar asset"
+                  >
+                    {deletingAssetId === asset.id ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-3.5 w-3.5" />
+                    )}
+                  </button>
+                </div>
               </div>
               {asset.url && (
                 <a
