@@ -65,7 +65,7 @@ function parseMarkdownTable(text: string): ParsedTable | null {
 
 export async function POST(req: Request) {
   try {
-    let { messages } = await req.json();
+    let { messages, state: existingState } = await req.json();
     const url = new URL(req.url);
     const sync = url.searchParams.get('sync') === 'true';
 
@@ -201,8 +201,11 @@ export async function POST(req: Request) {
   // MULTI-AGENT MODE: Orquestador + flujo especializado
   if (mode === 'multi') {
     console.log('/api/chat: Modo MULTI-AGENT activado');
+    if (existingState) {
+      console.log('/api/chat: Estado existente recibido, continuando flujo...');
+    }
     try {
-      const multiAgentResult = await executeMultiAgentWorkflow(messages, user.id);
+      const multiAgentResult = await executeMultiAgentWorkflow(messages, user.id, existingState);
 
       if (sync) {
         // Synchronous response

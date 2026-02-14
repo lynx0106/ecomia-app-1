@@ -17,11 +17,11 @@ export interface MultiAgentResult {
 }
 
 /**
- * Ejecuta el flujo multi-agente secuencial:
+ * Ejecuta el flujo multi-agente secuencial CON PAUSAS:
  * 1. Orquestador detecta intención
  * 2. Routing a agente específico (sourcing, landing, content, media)
  * 3. Mantenimiento de estado entre agentes
- * 4. Flujo completo: sourcing → landing → content → media
+ * 4. **UNO A LA VEZ** - espera confirmación del usuario entre pasos
  */
 export async function executeMultiAgentWorkflow(
   messages: any[],
@@ -29,79 +29,121 @@ export async function executeMultiAgentWorkflow(
   existingState?: AgentState
 ): Promise<MultiAgentResult> {
   try {
-    // Paso 1: Orquestador detecta intención
+    // Verificar si el usuario está confirmando continuar
+    const lastUserMessage = messages
+      .filter((m: any) => m.role === 'user')
+      .pop()?.content.toLowerCase() || '';
+    
+    const isConfirming = 
+      lastUserMessage.includes('sí') ||
+      lastUserMessage.includes('si') ||
+      lastUserMessage.includes('siguiente') ||
+      lastUserMessage.includes('continua') ||
+      lastUserMessage.includes('continuar') ||
+      lastUserMessage.includes('ok') ||
+      lastUserMessage.includes('dale');
+
+    // Si hay estado existente y usuario está confirmando, continuar con siguiente agente
+    if (existingState && isConfirming && existingState.nextAgent) {
+      console.log(`[MultiAgentWorkflow] Usuario confirmó, continuando con: ${existingState.nextAgent}`);
+      return await executeSingleAgent(messages, userId, existingState, existingState.nextAgent);
+    }
+
+    // Primera vez: Orquestador detecta intención
     console.log('[MultiAgentWorkflow] Iniciando orquestador...');
     const orchestrationResult = await executeOrchestratorAgent(messages, userId);
 
-    let state = existingState || orchestrationResult.state;
-    let agentResponse = '';
-    let nextAgent = orchestrationResult.nextAgent;
-
-    // Paso 2: Routing basado en intención detectada
+    const nextAgent = orchestrationResult.nextAgent;
     console.log(`[MultiAgentWorkflow] Orquestador recomienda agente: ${nextAgent}`);
 
-    switch (nextAgent) {
-      case 'sourcing':
-        console.log('[MultiAgentWorkflow] Ejecutando Sourcing Agent...');
-        const sourcingResult = await executeSourcingAgent(messages, state);
-        agentResponse = sourcingResult.response;
-        state = sourcingResult.state;
-        nextAgent = sourcingResult.nextAgent;
-        break;
-
-      case 'landing_builder':
-        console.log('[MultiAgentWorkflow] Ejecutando Landing Builder Agent...');
-        if (!state.sourcingResult) {
-          // Si no hay sourcing previo, ejecutar primero
-          const sourcingFirst = await executeSourcingAgent(messages, state);
-          state = sourcingFirst.state;
-        }
-        const landingResult = await executeLandingBuilderAgent(messages, state);
-        agentResponse = landingResult.response;
-        state = landingResult.state;
-        nextAgent = landingResult.nextAgent;
-        break;
-
-      case 'copy_social':
-        console.log('[MultiAgentWorkflow] Ejecutando Copy Social Agent...');
-        const contentResult = await executeCopySocialAgent(messages, state);
-        agentResponse = contentResult.response;
-        state = contentResult.state;
-        nextAgent = contentResult.nextAgent;
-        break;
-
-      case 'media_creator':
-        console.log('[MultiAgentWorkflow] Ejecutando Media Creator Agent...');
-        const mediaResult = await executeMediaCreatorAgent(messages, state);
-        agentResponse = mediaResult.response;
-        state = mediaResult.state;
-        nextAgent = mediaResult.nextAgent;
-        break;
-
-      case 'direct':
-      default:
+    // Si el orquestador dice "direct", responder y terminar
+    if (nextAgent === 'direct') {
       console.log('[MultiAgentWorkflow] Respuesta directa del orquestador');
-        // El orquestador respondió directamente (no requiere agente especializado)
-        return {
-          content: orchestrationResult.intention,
-          state,
-          hasMore: false,
-        };
+      return {
+        content: orchestrationResult.intention,
+        state: orchestrationResult.state,
+        hasMore: false,
+      };
     }
 
-    // Paso 3: Construir respuesta completa
-    const fullResponse = buildWorkflowResponse(agentResponse, nextAgent, state);
-
-    return {
-      content: fullResponse,
-      state,
-      hasMore: nextAgent !== 'complete' && nextAgent !== 'direct',
-      nextPrompt: getNextPromptSuggestion(nextAgent, state),
-    };
+    // Ejecutar SOLO el primer agente recomendado
+    return await executeSingleAgent(messages, userId, orchestrationResult.state, nextAgent);
   } catch (err) {
     console.error('[MultiAgentWorkflow] Error:', err);
     throw new Error(`Error en flujo multi-agente: ${err instanceof Error ? err.message : 'desconocido'}`);
   }
+}
+
+/**
+ * Ejecuta UN SOLO agente y se detiene
+ */
+async function executeSingleAgent(
+  messages: any[],
+  userId: string,
+  state: AgentState,
+  agentToExecute: string
+): Promise<MultiAgentResult> {
+  let agentResponse = '';
+  let nextAgent = 'complete';
+  let updatedState = { ...state };
+
+  // Ejecutar SOLO el agente indicado
+  switch (agentToExecute) {
+    case 'sourcing':
+      console.log('[MultiAgentWorkflow] Ejecutando SOLO Sourcing Agent...');
+      const sourcingResult = await executeSourcingAgent(messages, state);
+      agentResponse = sourcingResult.response;
+      updatedState = sourcingResult.state;
+      nextAgent = sourcingResult.nextAgent;
+      break;
+
+    case 'landing_builder':
+      console.log('[MultiAgentWorkflow] Ejecutando SOLO Landing Builder Agent...');
+      if (!state.sourcingResult) {
+        // Si no hay sourcing previo, ejecutar primero
+        const sourcingFirst = await executeSourcingAgent(messages, state);
+        updatedState = sourcingFirst.state;
+      }
+      const landingResult = await executeLandingBuilderAgent(messages, updatedState);
+      agentResponse = landingResult.response;
+      updatedState = landingResult.state;
+      nextAgent = landingResult.nextAgent;
+      break;
+
+    case 'copy_social':
+      console.log('[MultiAgentWorkflow] Ejecutando SOLO Copy Social Agent...');
+      const contentResult = await executeCopySocialAgent(messages, state);
+      agentResponse = contentResult.response;
+      updatedState = contentResult.state;
+      nextAgent = contentResult.nextAgent;
+      break;
+
+    case 'media_creator':
+      console.log('[MultiAgentWorkflow] Ejecutando SOLO Media Creator Agent...');
+      const mediaResult = await executeMediaCreatorAgent(messages, state);
+      agentResponse = mediaResult.response;
+      updatedState = mediaResult.state;
+      nextAgent = mediaResult.nextAgent;
+      break;
+
+    default:
+      console.log('[MultiAgentWorkflow] Agente no reconocido:', agentToExecute);
+      agentResponse = 'Agente no disponible.';
+      nextAgent = 'complete';
+  }
+
+  // Guardar el siguiente agente en el estado para la próxima iteración
+  updatedState.nextAgent = nextAgent;
+
+  // Construir respuesta con indicación clara de siguiente paso
+  const fullResponse = buildWorkflowResponse(agentResponse, nextAgent, updatedState);
+
+  return {
+    content: fullResponse,
+    state: updatedState,
+    hasMore: nextAgent !== 'complete' && nextAgent !== 'direct',
+    nextPrompt: getNextPromptSuggestion(nextAgent, updatedState),
+  };
 }
 
 /**

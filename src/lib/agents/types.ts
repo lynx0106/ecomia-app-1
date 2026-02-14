@@ -10,6 +10,7 @@ export interface AgentState {
   // Contexto del flujo
   currentStep: 'orchestrate' | 'sourcing' | 'landing' | 'content' | 'media' | 'complete';
   previousSteps: string[];
+  nextAgent?: string; // Próximo agente a ejecutar cuando usuario confirme
 
   // Datos recopilados
   userIntention: string; // Descripción inicial del usuario

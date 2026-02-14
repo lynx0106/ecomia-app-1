@@ -5,12 +5,14 @@ import { useToast } from '@/components/ui/ToastProvider';
 import { Trash2, RotateCcw } from 'lucide-react';
 
 type Message = { id: string; role: "user" | "assistant"; content: string };
+type AgentState = any; // Estado del flujo multi-agente
 
 export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [agentState, setAgentState] = useState<AgentState | null>(null); // Estado del workflow
   const { toast } = useToast();
 
   const handleClearChat = () => {
@@ -20,6 +22,7 @@ export function ChatInterface() {
       setMessages([]);
       setInput("");
       setError(null);
+      setAgentState(null); // Limpiar estado del workflow
       toast({
         title: '✓ Chat limpiado',
         description: 'Puedes comenzar una nueva investigación.',
@@ -36,6 +39,7 @@ export function ChatInterface() {
       setMessages([]);
       setInput("");
       setError(null);
+      setAgentState(null); // Reiniciar estado del workflow
       toast({
         title: '🚀 Nueva investigación',
         description: 'Lista para comenzar.',
@@ -58,6 +62,7 @@ export function ChatInterface() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: messages.concat(userMsg).map((m) => ({ role: m.role, content: m.content })),
+          state: agentState, // Enviar estado existente si lo hay
         }),
       });
       if (!res.ok) {
@@ -76,8 +81,28 @@ export function ChatInterface() {
         
         throw new Error(data.error || "Error en el chat");
       }
+      
+      // Intentar parsear como JSON para obtener estado
       const text = await res.text();
-      const assistantMsg: Message = { id: crypto.randomUUID(), role: "assistant", content: text };
+      let content = text;
+      let newState = agentState;
+      
+      try {
+        const jsonData = JSON.parse(text);
+        if (jsonData.content) {
+          content = jsonData.content;
+        }
+        if (jsonData.state) {
+          newState = jsonData.state;
+          setAgentState(newState); // Guardar nuevo estado
+          console.log('[ChatInterface] Estado actualizado:', newState);
+        }
+      } catch {
+        // Si no es JSON, usar el texto plano
+        content = text;
+      }
+      
+      const assistantMsg: Message = { id: crypto.randomUUID(), role: "assistant", content };
       setMessages((prev) => [...prev, assistantMsg]);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Error inesperado";
