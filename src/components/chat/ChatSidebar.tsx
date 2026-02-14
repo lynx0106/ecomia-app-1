@@ -1,6 +1,6 @@
 'use client';
 
-import { Send, User } from 'lucide-react';
+import { Send, User, PanelRightOpen, PanelRightClose } from 'lucide-react';
 import { useRef, useEffect } from 'react';
 import Image from 'next/image';
 import SessionStatusCard from '@/components/chat/SessionStatusCard';
@@ -21,6 +21,8 @@ interface ChatSidebarProps {
   append?: (message: Omit<Message, 'id'>) => Promise<string | null | undefined>; // Deprecado a favor de sendMessage, pero mantenido por compatibilidad
   isLoading: boolean;
   sessionRefreshKey?: number;
+  onToggleResults?: () => void;
+  isPanelVisible?: boolean;
 }
 
 export function ChatSidebar({ 
@@ -30,6 +32,8 @@ export function ChatSidebar({
   handleSubmit, 
   sendMessage,
   append,
+  onToggleResults,
+  isPanelVisible = false,
   isLoading,
   sessionRefreshKey = 0,
 }: ChatSidebarProps) {
@@ -93,9 +97,28 @@ export function ChatSidebar({
           />
           <h3 className="font-bold text-gray-800 dark:text-white">EcomAgent</h3>
         </div>
-        <div className="flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-full border border-green-100 dark:text-green-200 dark:bg-green-900/30 dark:border-green-800">
-          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-          Online
+        <div className="flex items-center gap-2">
+          {onToggleResults && (
+            <button
+              onClick={onToggleResults}
+              className={`p-2 rounded-lg transition ${
+                isPanelVisible 
+                  ? 'bg-blue-500 text-white hover:bg-blue-600' 
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+              }`}
+              title={isPanelVisible ? 'Ocultar resultados' : 'Ver resultados'}
+            >
+              {isPanelVisible ? (
+                <PanelRightClose className="w-4 h-4" />
+              ) : (
+                <PanelRightOpen className="w-4 h-4" />
+              )}
+            </button>
+          )}
+          <div className="flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-full border border-green-100 dark:text-green-200 dark:bg-green-900/30 dark:border-green-800">
+            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+            Online
+          </div>
         </div>
       </div>
 

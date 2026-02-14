@@ -4,6 +4,7 @@
 import dynamic from 'next/dynamic';
 import { useMemo, useState, useEffect } from 'react';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
+import { AgentResultsPanel } from '@/components/chat/AgentResultsPanel';
 import { createClient } from '@/lib/supabase/client';
 import { logger } from '@/lib/logging';
 
@@ -29,6 +30,8 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasLoadedWelcome, setHasLoadedWelcome] = useState(false);
+  const [agentState, setAgentState] = useState<any>(null);
+  const [isPanelVisible, setIsPanelVisible] = useState(false);
 
   // Load welcome message for new users
   useEffect(() => {
@@ -124,11 +127,12 @@ Cuéntame tu idea y yo me encargo del resto.`;
     setInput('');
 
     try {
-      const res = await fetch('/api/chat?sync=true', {
+      const res = await fetch('/api/chat?mode=multi&sync=true', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: nextMessages.map((m) => ({ role: m.role, content: m.content })),
+          state: agentState,
         }),
       });
 
@@ -141,6 +145,19 @@ Cuéntame tu idea y yo me encargo del resto.`;
       if (!data || !data.content) {
         throw new Error('Respuesta vacía del servidor. Intenta de nuevo.');
       }
+      
+      // Actualizar estado de agentes si existe
+      if (data.state) {
+        setAgentState(data.state);
+        console.log('[ChatPage] Estado de agentes actualizado:', data.state);
+        
+        // Auto-abrir panel si hay resultados
+        if (data.state.sourcingResult || data.state.landingResult || 
+            data.state.contentResult || data.state.mediaResult) {
+          setIsPanelVisible(true);
+        }
+      }
+      
       const rawAssistantText = String(data.content);
       const assistantText = rawAssistantText
         .replace(/<function=\w+>[^]*?<\/function>/g, '')
@@ -150,10 +167,19 @@ Cuéntame tu idea y yo me encargo del resto.`;
         throw new Error('El asistente no pudo generar una respuesta. Intenta con un mensaje diferente.');
       }
 
+      // Filtrar mensajes extensos (>500 chars) para mostrar solo resumen en chat
+      const shouldAddToChat = assistantText.length < 500 || 
+                              assistantText.includes('¿') || 
+                              assistantText.toLowerCase().includes('continuar');
+      
+      const messageContent = shouldAddToChat 
+        ? assistantText 
+        : '✅ Resultados procesados. Haz clic en "Ver Resultados" para ver los detalles.';
+
       const assistantMessage: Message = {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: assistantText,
+        content: messageContent,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
@@ -171,7 +197,14 @@ Cuéntame tu idea y yo me encargo del resto.`;
   };
 
   return (
-    <div className="flex flex-col lg:flex-row h-full min-h-0 overflow-hidden bg-gray-200 dark:bg-black">
+    <div className="flex flex-col lg:flex-row h-full min-h-0 overflow-hidden bg-gray-200 dark:bg-black relative">
+      {/* Panel de resultados de agentes */}
+      <AgentResultsPanel 
+        agentState={agentState} 
+        isVisible={isPanelVisible}
+        onClose={() => setIsPanelVisible(false)}
+      />
+
       {/* Main Content Area (Research Results) */}
       <div className="flex-1 min-w-0 h-full min-h-0 overflow-hidden relative">
         <ResearchDisplay 
@@ -193,6 +226,8 @@ Cuéntame tu idea y yo me encargo del resto.`;
           sendMessage={sendMessage}
           isLoading={isLoading}
           sessionRefreshKey={messages.length}
+          onToggleResults={() => setIsPanelVisible(!isPanelVisible)}
+          isPanelVisible={isPanelVisible}
         />
         {error && (
           <div className="px-4 pb-4 text-sm text-red-600">
