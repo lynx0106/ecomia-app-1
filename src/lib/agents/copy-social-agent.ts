@@ -127,7 +127,7 @@ export async function executeCopySocialAgent(
 
     const newState: AgentState = {
       ...state,
-      currentStep: 'content',
+      currentStep: undefined, // Limpiado después de completar
       previousSteps: [...state.previousSteps, 'content'],
       updatedAt: new Date(),
       contentResult: {

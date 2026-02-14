@@ -178,7 +178,7 @@ export async function executeMediaCreatorAgent(
 
     const newState: AgentState = {
       ...state,
-      currentStep: 'media',
+      currentStep: undefined, // Limpiado después de completar
       previousSteps: [...state.previousSteps, 'media'],
       updatedAt: new Date(),
       mediaResult: {

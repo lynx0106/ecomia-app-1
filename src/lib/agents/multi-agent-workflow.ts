@@ -225,7 +225,7 @@ function buildWorkflowResponse(
   };
 
   const header = `
-${progressEmojis[state.currentStep] || '✨'} **${stepName[state.currentStep] || 'Procesando'}**
+${state.currentStep ? (progressEmojis[state.currentStep] || '✨') : '✨'} **${state.currentStep ? stepName[state.currentStep] : 'Procesando'}**
 
 ---
 `;

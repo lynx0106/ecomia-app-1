@@ -187,14 +187,9 @@ export function ChatSidebar({
                     .replace(/^\*\*[^*]+\*\*:?\s*/gm, '')
                     .trim();
 
-                  if (copyKeywords.test(output)) {
-                    return 'Los copys estan en el panel central. ¿Quieres ajustes de tono o longitud?';
-                  }
-
-                  if (!output) {
-                    return 'Los datos clave estan en el panel central. ¿Quieres que te recomiende la mejor opcion?';
-                  }
-                  return output;
+                  // En modo multi-agente, el chat solo muestra confirmaciones simples
+                  // No necesitamos mensajes hardcoded
+                  return output || m.content;
                 })()}
                 </div>
 

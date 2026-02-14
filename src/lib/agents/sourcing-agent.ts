@@ -63,44 +63,44 @@ export async function executeSourcingAgent(
   }
 
   try {
-    // Búsqueda con timeout corto (máx 1.5s para ser más rápido)
+    // Búsqueda con timeout balanceado (máx 3s)
     const searchResults = await Promise.race([
       (async () => {
         try {
           const results = await tvly.search(userMessage, {
             topic: 'general',
-            max_results: 2,
+            max_results: 3,
           });
           return results.results.map((r: any) => `${r.title}: ${r.content}`).join('\n');
         } catch {
           return '';
         }
       })(),
-      new Promise<string>((resolve) => setTimeout(() => resolve(''), 1500)),
+      new Promise<string>((resolve) => setTimeout(() => resolve(''), 3000)),
     ]);
 
-    console.log('[Sourcing] 🔍 Búsqueda completada en < 1.5s');
+    console.log('[Sourcing] 🔍 Búsqueda completada');
 
     const response = await generateText({
       model: xai('grok-4-1-fast-non-reasoning'),
       system: systemPrompt,
       messages: [
-        ...messages.slice(-3).map((m: any) => ({ // Solo últimos 3 mensajes para reducir tokens
+        ...messages.slice(-6).map((m: any) => ({
           role: m.role,
           content: m.content,
         })),
         ...(searchResults ? [{
           role: 'user',
-          content: `DATOS DE BÚSQUEDA:\n${searchResults.slice(0, 1000)}`, // Limitar a 1000 chars
+          content: `DATOS DE BÚSQUEDA:\n${searchResults.slice(0, 2500)}`,
         }] : []),
       ],
       temperature: 0.5,
-      maxTokens: 800, // Limitar tokens de respuesta para ser más rápido
+      maxTokens: 2000, // Suficiente para análisis completo detallado
     } as any);
 
     const newState: AgentState = {
       ...state,
-      currentStep: 'sourcing',
+      currentStep: undefined, // Limpiado después de completar
       previousSteps: [...(state.previousSteps || []), 'sourcing'],
       updatedAt: new Date(),
       sourcingResult: {

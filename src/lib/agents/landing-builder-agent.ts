@@ -111,7 +111,7 @@ export async function executeLandingBuilderAgent(
 
     const newState: AgentState = {
       ...state,
-      currentStep: 'landing',
+      currentStep: undefined, // Limpiado después de completar
       previousSteps: [...state.previousSteps, 'landing'],
       updatedAt: new Date(),
       landingResult: {

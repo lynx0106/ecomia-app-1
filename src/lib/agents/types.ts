@@ -8,7 +8,7 @@ export interface AgentState {
   email?: string;
 
   // Contexto del flujo
-  currentStep: 'orchestrate' | 'sourcing' | 'landing' | 'content' | 'media' | 'complete';
+  currentStep?: 'orchestrate' | 'sourcing' | 'landing' | 'content' | 'media' | 'complete';
   previousSteps: string[];
   nextAgent?: string; // Próximo agente a ejecutar cuando usuario confirme
 
