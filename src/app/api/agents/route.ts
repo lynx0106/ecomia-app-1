@@ -8,11 +8,11 @@ type AgentPromptRow = {
 };
 
 type AgentDefinitionRow = {
-  agent_key: string;
+  key: string;
   name: string;
   description: string;
-  default_prompt: string;
-  active: boolean;
+  system_prompt: string;
+  enabled: boolean;
 };
 
 type AgentPromptInput = {
@@ -44,8 +44,8 @@ export async function GET() {
 
   const { data: definitions, error: defError } = await supabase
     .from('agent_definitions')
-    .select('agent_key, name, description, default_prompt, active')
-    .eq('active', true)
+    .select('key, name, description, system_prompt, enabled')
+    .eq('enabled', true)
     .order('name');
 
   const baseAgents = defError || !definitions || definitions.length === 0
@@ -56,10 +56,10 @@ export async function GET() {
         defaultPrompt: agent.defaultPrompt,
       }))
     : (definitions as AgentDefinitionRow[]).map((agent) => ({
-        key: agent.agent_key,
+        key: agent.key,
         name: agent.name,
         description: agent.description,
-        defaultPrompt: agent.default_prompt,
+        defaultPrompt: agent.system_prompt,
       }));
 
   const agents = baseAgents.map((agent) => ({
@@ -84,7 +84,16 @@ export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
   const agents: AgentPromptInput[] = Array.isArray(body?.agents) ? body.agents : [];
 
-  const validKeys = new Set(AGENT_CONFIGS.map((a) => a.key));
+  const { data: keysData, error: keysError } = await supabase
+    .from('agent_definitions')
+    .select('key')
+    .eq('enabled', true);
+
+  const validKeys = new Set(
+    !keysError && keysData && keysData.length > 0
+      ? keysData.map((row) => row.key)
+      : AGENT_CONFIGS.map((a) => a.key)
+  );
   const payload = agents
     .filter((agent): agent is { key: AgentKey; prompt?: string } =>
       typeof agent.key === 'string' && validKeys.has(agent.key as AgentKey)

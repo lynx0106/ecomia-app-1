@@ -22,6 +22,7 @@ export function AdminAgentsPanel() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [promptPreview, setPromptPreview] = useState<Agent | null>(null);
 
   useEffect(() => {
     fetchAgents();
@@ -159,6 +160,7 @@ export function AdminAgentsPanel() {
                 <th className="text-left p-3 text-gray-400 font-semibold">Name</th>
                 <th className="text-left p-3 text-gray-400 font-semibold">Key</th>
                 <th className="text-left p-3 text-gray-400 font-semibold">Category</th>
+                <th className="text-left p-3 text-gray-400 font-semibold">System Prompt</th>
                 <th className="text-left p-3 text-gray-400 font-semibold">Enabled</th>
                 <th className="text-left p-3 text-gray-400 font-semibold">Order</th>
                 <th className="text-left p-3 text-gray-400 font-semibold">Actions</th>
@@ -170,6 +172,21 @@ export function AdminAgentsPanel() {
                   <td className="p-3 font-medium text-gray-200">{agent.name}</td>
                   <td className="p-3 font-mono text-xs text-gray-400">{agent.key}</td>
                   <td className="p-3 text-xs text-gray-500">{agent.category || '-'}</td>
+                  <td
+                    className="p-3 text-xs text-gray-400 max-w-xs truncate"
+                    title={agent.system_prompt || ''}
+                  >
+                    {agent.system_prompt || '-'}
+                    {agent.system_prompt ? (
+                      <button
+                        type="button"
+                        onClick={() => setPromptPreview(agent)}
+                        className="ml-2 text-xs text-blue-300 hover:text-blue-200"
+                      >
+                        Ver
+                      </button>
+                    ) : null}
+                  </td>
                   <td className="p-3">
                     <span className={`text-xs px-2 py-1 rounded font-semibold ${
                       agent.enabled 
@@ -200,6 +217,35 @@ export function AdminAgentsPanel() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {promptPreview && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          onClick={() => setPromptPreview(null)}
+        >
+          <div
+            className="w-full max-w-2xl rounded-lg border border-gray-700 bg-gray-900 p-4"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <h4 className="text-sm font-semibold text-gray-100">
+                System Prompt: {promptPreview.name}
+              </h4>
+              <button
+                type="button"
+                onClick={() => setPromptPreview(null)}
+                className="rounded p-1 text-gray-300 hover:text-gray-100"
+                aria-label="Close prompt preview"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="max-h-[60vh] overflow-auto rounded border border-gray-800 bg-gray-950 p-3 text-xs text-gray-200 whitespace-pre-wrap font-mono">
+              {promptPreview.system_prompt || 'No prompt available.'}
+            </div>
+          </div>
         </div>
       )}
 
