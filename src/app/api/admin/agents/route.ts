@@ -55,7 +55,6 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized - User is not admin' }, { status: 401 });
     }
 
-    // For admin, read without RLS
     const { data, error } = await supabase
       .from('agent_definitions')
       .select('id, key, name, description, system_prompt, category, enabled, "order"')
@@ -63,13 +62,6 @@ export async function GET() {
 
     if (error) {
       console.error('[AdminAgents GET] Supabase Error:', error.message, error.details, error.code);
-      
-      // Try alternate query if first fails
-      if (error.code === '42P01' || error.message.includes('does not exist')) {
-        console.log('[AdminAgents GET] Table might not exist, returning empty array');
-        return NextResponse.json({ agents: [] });
-      }
-      
       return NextResponse.json(
         { error: 'Failed to load agents', details: error.message, code: error.code },
         { status: 500 }

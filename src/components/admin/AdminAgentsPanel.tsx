@@ -167,12 +167,12 @@ export function AdminAgentsPanel() {
             </thead>
             <tbody>
               {agents.map((agent) => (
-                <tr key={agent.key} className="border-b hover:bg-gray-50">
-                  <td className="p-3 font-medium">{agent.name}</td>
-                  <td className="p-3 font-mono text-xs">{agent.key}</td>
-                  <td className="p-3 text-xs">{agent.category || '-'}</td>
+                <tr key={agent.key} className="border-b hover:bg-blue-50 transition-colors">
+                  <td className="p-3 font-medium text-gray-900">{agent.name}</td>
+                  <td className="p-3 font-mono text-xs text-gray-700">{agent.key}</td>
+                  <td className="p-3 text-xs text-gray-600">{agent.category || '-'}</td>
                   <td className="p-3">
-                    <span className={`text-xs px-2 py-1 rounded ${
+                    <span className={`text-xs px-2 py-1 rounded font-semibold ${
                       agent.enabled 
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-gray-100 text-gray-600'
@@ -180,18 +180,18 @@ export function AdminAgentsPanel() {
                       {agent.enabled ? 'Yes' : 'No'}
                     </span>
                   </td>
-                  <td className="p-3">{agent.order}</td>
+                  <td className="p-3 text-gray-700">{agent.order}</td>
                   <td className="p-3 flex gap-2">
                     <button
                       onClick={() => setEditingAgent(agent)}
-                      className="p-1 hover:bg-blue-100 rounded"
+                      className="p-1 hover:bg-blue-100 rounded transition-colors"
                       title="Edit"
                     >
                       <Edit2 className="w-4 h-4 text-blue-600" />
                     </button>
                     <button
                       onClick={() => handleDeleteAgent(agent.key)}
-                      className="p-1 hover:bg-red-100 rounded"
+                      className="p-1 hover:bg-red-100 rounded transition-colors"
                       title="Delete"
                     >
                       <Trash2 className="w-4 h-4 text-red-600" />
