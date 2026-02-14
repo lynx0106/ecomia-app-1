@@ -40,6 +40,7 @@ type ResearchSessionCardProps = {
     updated_at: string;
   };
   readOnly?: boolean;
+  onDelete?: (sessionId: string) => void; // Callback para eliminar de la UI
 };
 
 const SESSION_STATUSES = new Set(['draft', 'researching', 'proposed', 'selected', 'completed']);
@@ -52,7 +53,7 @@ const statusColors: Record<string, string> = {
   completed: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
 };
 
-export default function ResearchSessionCard({ session, readOnly }: ResearchSessionCardProps) {
+export default function ResearchSessionCard({ session, readOnly, onDelete }: ResearchSessionCardProps) {
   const [candidates, setCandidates] = useState<ProductCandidate[]>([]);
   const [suppliers, setSuppliers] = useState<ProductSupplier[]>([]);
   const [loadingCandidates, setLoadingCandidates] = useState(false);
@@ -180,7 +181,14 @@ export default function ResearchSessionCard({ session, readOnly }: ResearchSessi
 
       toast({ title: 'Investigación eliminada completamente', tone: 'success' });
       setShowDeleteConfirm(false);
-      router.refresh();
+      
+      // Llamar al callback para eliminar de la UI inmediatamente
+      if (onDelete) {
+        onDelete(session.id);
+      } else {
+        // Fallback: refrescar la página si no hay callback
+        router.refresh();
+      }
     } catch (error) {
       console.error('Delete error:', error);
       toast({ title: 'Error', description: 'Hubo un problema al eliminar', tone: 'error' });

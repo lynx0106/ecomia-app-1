@@ -37,6 +37,11 @@ export default function ResearchPage() {
     loadData();
   }, []);
 
+  // Función para eliminar de la UI inmediatamente
+  const handleDeleteSession = (sessionId: string) => {
+    setSessions((prev) => prev.filter((s) => s.id !== sessionId));
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -96,6 +101,7 @@ export default function ResearchPage() {
           <ResearchSessionCard 
             key={session.id} 
             session={session}
+            onDelete={handleDeleteSession}
           />
         ))}
       </div>

@@ -38,6 +38,11 @@ export default function ResearchHistoryPage() {
     loadData();
   }, []);
 
+  // Función para eliminar de la UI inmediatamente
+  const handleDeleteSession = (sessionId: string) => {
+    setSessions((prev) => prev.filter((s) => s.id !== sessionId));
+  };
+
   // Apply filters
   const filteredSessions = sessions.filter((session) => {
     // Filter by goal/search
@@ -180,6 +185,7 @@ export default function ResearchHistoryPage() {
             <ResearchSessionCard 
               key={session.id} 
               session={session}
+              onDelete={handleDeleteSession}
             />
           ))}
         </div>
