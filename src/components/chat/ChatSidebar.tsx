@@ -145,40 +145,33 @@ export function ChatSidebar({
         )}
         
         {messages.map((m) => (
-          <div key={m.id}>
-            {m.role === 'system' ? (
-              // Mensaje de progreso del sistema
-              <div className="flex justify-center my-2">
-                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg px-3 py-1.5 text-xs text-blue-700 dark:text-blue-300">
-                  {m.content}
-                </div>
-              </div>
-            ) : (
-              <div
-                className={`flex gap-3 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                {m.role !== 'user' && (
-                  <div className="flex-shrink-0 mt-1">
-                    <div className="bg-white p-1 rounded-full border border-gray-200 shadow-sm dark:bg-gray-900 dark:border-gray-700">
-                      <Image
-                        src="/logo-clean.png"
-                        alt="EcomAgent"
-                        width={28}
-                        height={28}
-                        className="object-contain h-7 w-auto"
-                      />
-                    </div>
+          m.role !== 'system' && (
+            <div
+              key={m.id}
+              className={`flex gap-3 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              {m.role !== 'user' && (
+                <div className="flex-shrink-0 mt-1">
+                  <div className="bg-white p-1 rounded-full border border-gray-200 shadow-sm dark:bg-gray-900 dark:border-gray-700">
+                    <Image
+                      src="/logo-clean.png"
+                      alt="EcomAgent"
+                      width={28}
+                      height={28}
+                      className="object-contain h-7 w-auto"
+                    />
                   </div>
-                )}
-                
-                <div
-                  className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm shadow-sm break-words whitespace-pre-wrap overflow-x-auto ${
-                    m.role === 'user'
-                      ? 'bg-blue-600 text-white rounded-br-none'
-                      : 'bg-white border border-gray-200 text-gray-900 rounded-bl-none dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100'
-                  }`}
-                >
-                  {(() => {
+                </div>
+              )}
+              
+              <div
+                className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm shadow-sm break-words whitespace-pre-wrap overflow-x-auto ${
+                  m.role === 'user'
+                    ? 'bg-blue-600 text-white rounded-br-none'
+                    : 'bg-white border border-gray-200 text-gray-900 rounded-bl-none dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100'
+                }`}
+              >
+                {(() => {
                   if (m.role === 'user') return m.content;
 
                   const tablePattern = /\n?\|.+\|\n\|[-:|\s]+\|(?:\n\|.*\|)*/m;
@@ -212,9 +205,8 @@ export function ChatSidebar({
                     </div>
                   </div>
                 )}
-              </div>
-            )}
-          </div>
+            </div>
+          )
         ))}
         
         {isLoading && (

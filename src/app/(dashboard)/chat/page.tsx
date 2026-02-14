@@ -152,18 +152,8 @@ Cuéntame tu idea y yo me encargo del resto.`;
         console.log('[ChatPage] Estado de agentes actualizado:', data.state);
       }
       
-      // Agregar mensajes de progreso al chat si existen
-      const progressMsgs: Message[] = [];
-      if (data.progressMessages && Array.isArray(data.progressMessages)) {
-        data.progressMessages.forEach((msg: string) => {
-          progressMsgs.push({
-            id: crypto.randomUUID(),
-            role: 'system',
-            content: msg,
-          });
-        });
-      }
-      
+      // NO agregar mensajes de progreso ni resultados extensos al chat
+      // Solo agregar confirmación simple
       const rawAssistantText = String(data.content);
       const assistantText = rawAssistantText
         .replace(/<function=\w+>[^]*?<\/function>/g, '')
@@ -173,13 +163,22 @@ Cuéntame tu idea y yo me encargo del resto.`;
         throw new Error('El asistente no pudo generar una respuesta. Intenta con un mensaje diferente.');
       }
 
+      // Si hay agentState, solo mostrar mensaje simple en el chat
+      // Los detalles se ven en el centro
+      let chatMessage = assistantText;
+      if (data.state && (data.state.sourcingResult || data.state.currentStep)) {
+        // Es un flujo multi-agente, mostrar solo confirmación en el chat
+        const currentStep = data.state.currentStep || 'análisis';
+        chatMessage = `✅ Procesando ${currentStep}... Revisa el panel central para ver el progreso.`;
+      }
+
       const assistantMessage: Message = {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: assistantText,
+        content: chatMessage,
       };
 
-      setMessages((prev) => [...prev, ...progressMsgs, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error inesperado';
       setError(msg);
