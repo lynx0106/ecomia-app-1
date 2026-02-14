@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Loader2, Search, TrendingUp, Users, ShoppingBag, Trash2 } from 'lucide-react';
+import { Loader2, Search, TrendingUp, Users, ShoppingBag, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 
 type ToolInvocation = {
   toolName?: string;
@@ -189,6 +189,22 @@ export function ResearchDisplay({
   const [sessionError, setSessionError] = useState<string | null>(null);
   const [deletingAssetId, setDeletingAssetId] = useState<string | null>(null);
   const [isDeletingSession, setIsDeletingSession] = useState(false);
+  const [expandedAssets, setExpandedAssets] = useState<Record<string, boolean>>({});
+
+  const toggleAsset = (assetId: string) => {
+    setExpandedAssets((prev) => ({
+      ...prev,
+      [assetId]: !prev[assetId],
+    }));
+  };
+
+  const getAssetPreview = (asset: AssetRow) => {
+    if (asset.content && Object.keys(asset.content).length > 0) {
+      const raw = JSON.stringify(asset.content);
+      return raw.length > 140 ? `${raw.slice(0, 140)}...` : raw;
+    }
+    return 'Sin contenido estructurado.';
+  };
 
   const handleDeleteAsset = async (assetId: string) => {
     if (!confirm('¿Eliminar este asset?')) return;
@@ -445,55 +461,80 @@ export function ResearchDisplay({
           <p className="text-xs text-gray-500">Aun no hay assets guardados.</p>
         )}
         <div className="grid gap-3 md:grid-cols-2">
-          {assets.map((asset) => (
-            <div
-              key={asset.id}
-              className="rounded-lg border border-gray-100 bg-gray-50 p-3 text-xs text-gray-700 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-200"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1">
-                  <p className="font-semibold">{asset.asset_type}</p>
-                  {asset.candidate_id && candidateLookup[asset.candidate_id] && (
-                    <p className="text-[11px] text-gray-500 dark:text-gray-400">
-                      Producto: {candidateLookup[asset.candidate_id]}
-                    </p>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] text-gray-500 dark:bg-gray-800 dark:text-gray-400">
-                    {new Date(asset.created_at).toLocaleDateString()}
-                  </span>
-                  <button
-                    onClick={() => handleDeleteAsset(asset.id)}
-                    disabled={deletingAssetId === asset.id}
-                    className="rounded-lg p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
-                    title="Eliminar asset"
-                  >
-                    {deletingAssetId === asset.id ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <Trash2 className="h-3.5 w-3.5" />
+          {assets.map((asset) => {
+            const isExpanded = Boolean(expandedAssets[asset.id]);
+            return (
+              <div
+                key={asset.id}
+                className="rounded-lg border border-gray-100 bg-gray-50 p-3 text-xs text-gray-700 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-200"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1">
+                    <button
+                      type="button"
+                      onClick={() => toggleAsset(asset.id)}
+                      className="flex items-center gap-2 text-left"
+                    >
+                      <p className="font-semibold">{asset.asset_type}</p>
+                      {isExpanded ? (
+                        <ChevronUp className="h-3.5 w-3.5 text-gray-400" />
+                      ) : (
+                        <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
+                      )}
+                    </button>
+                    {asset.candidate_id && candidateLookup[asset.candidate_id] && (
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                        Producto: {candidateLookup[asset.candidate_id]}
+                      </p>
                     )}
-                  </button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                      {new Date(asset.created_at).toLocaleDateString()}
+                    </span>
+                    <button
+                      onClick={() => handleDeleteAsset(asset.id)}
+                      disabled={deletingAssetId === asset.id}
+                      className="rounded-lg p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
+                      title="Eliminar asset"
+                    >
+                      {deletingAssetId === asset.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
-              {asset.url && (
-                <a
-                  href={asset.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-2 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-[11px] font-medium text-indigo-600 transition-colors hover:bg-indigo-100 dark:border-indigo-900/40 dark:bg-indigo-900/20 dark:text-indigo-300 dark:hover:bg-indigo-900/40"
-                >
-                  Ver enlace
-                </a>
-              )}
-              {asset.content && Object.keys(asset.content).length > 0 && (
-                <pre className="mt-2 whitespace-pre-wrap text-[11px] text-gray-500 dark:text-gray-400">
+
+                {!isExpanded && (
+                  <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
+                    {getAssetPreview(asset)}
+                  </p>
+                )}
+
+                {isExpanded && (
+                  <div className="mt-2 space-y-2">
+                    {asset.url && (
+                      <a
+                        href={asset.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-[11px] font-medium text-indigo-600 transition-colors hover:bg-indigo-100 dark:border-indigo-900/40 dark:bg-indigo-900/20 dark:text-indigo-300 dark:hover:bg-indigo-900/40"
+                      >
+                        Ver enlace
+                      </a>
+                    )}
+                    {asset.content && Object.keys(asset.content).length > 0 && (
+                      <pre className="whitespace-pre-wrap text-[11px] text-gray-500 dark:text-gray-400">
 {JSON.stringify(asset.content, null, 2)}
-                </pre>
-              )}
-            </div>
-          ))}
+                      </pre>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {session.selected_candidate_id && assets.length > 0 && onQuickPrompt && (
