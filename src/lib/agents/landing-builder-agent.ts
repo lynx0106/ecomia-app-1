@@ -123,12 +123,9 @@ export async function executeLandingBuilderAgent(
       },
     };
 
-    const userWantsMedia = userMessage.toLowerCase().includes('media') ||
-      userMessage.toLowerCase().includes('contenido') ||
-      userMessage.toLowerCase().includes('videos') ||
-      userMessage.toLowerCase().includes('copys');
-
-    const nextAgent = userWantsMedia ? 'copy_social' : 'copy_social';
+    // SIEMPRE hacer pausa después de landing
+    // El usuario decide si quiere continuar con copys
+    const nextAgent = 'copy_social';
 
     return {
       response: response.text,

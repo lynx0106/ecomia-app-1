@@ -136,16 +136,13 @@ export async function executeSourcingAgent(
       },
     };
 
-    // Determinar siguiente paso
-    const userWantsComplete = userMessage.toLowerCase().includes('tienda') ||
-      userMessage.toLowerCase().includes('landing') ||
-      userMessage.toLowerCase().includes('completo');
-
-    const nextAgent = userWantsComplete ? 'landing_builder' : 'media';
+    // SIEMPRE hacer pausa después de sourcing
+    // El usuario decide si quiere continuar con landing
+    const nextAgent = 'landing_builder'; // Sugiere landing como siguiente, pero NO lo ejecuta
 
     return {
       response: response.text,
-      nextAgent,
+      nextAgent, // Solo sugerencia, requiere confirmación del usuario
       state: newState,
     };
   } catch (err) {

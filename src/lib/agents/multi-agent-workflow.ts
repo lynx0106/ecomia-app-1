@@ -29,10 +29,16 @@ export async function executeMultiAgentWorkflow(
   existingState?: AgentState
 ): Promise<MultiAgentResult> {
   try {
+    console.log('[MultiAgentWorkflow] ===========================================');
+    console.log('[MultiAgentWorkflow] Iniciando workflow');
+    console.log('[MultiAgentWorkflow] Estado existente:', existingState ? 'SÍ' : 'NO');
+    
     // Verificar si el usuario está confirmando continuar
     const lastUserMessage = messages
       .filter((m: any) => m.role === 'user')
       .pop()?.content.toLowerCase() || '';
+    
+    console.log('[MultiAgentWorkflow] Último mensaje usuario:', lastUserMessage);
     
     const isConfirming = 
       lastUserMessage.includes('sí') ||
@@ -43,22 +49,28 @@ export async function executeMultiAgentWorkflow(
       lastUserMessage.includes('ok') ||
       lastUserMessage.includes('dale');
 
+    console.log('[MultiAgentWorkflow] ¿Usuario confirmando?:', isConfirming);
+
     // Si hay estado existente y usuario está confirmando, continuar con siguiente agente
     if (existingState && isConfirming && existingState.nextAgent) {
-      console.log(`[MultiAgentWorkflow] Usuario confirmó, continuando con: ${existingState.nextAgent}`);
+      console.log(`[MultiAgentWorkflow] ✅ CONTINUANDO con agente: ${existingState.nextAgent}`);
       return await executeSingleAgent(messages, userId, existingState, existingState.nextAgent);
     }
 
+    console.log(`${'-'.repeat(60)}`);
+    console.log('[MultiAgentWorkflow] 🎯 NUEVA EJECUCIÓN - Consultando orquestador...');
+    console.log(`${'-'.repeat(60)}`);
+    
     // Primera vez: Orquestador detecta intención
-    console.log('[MultiAgentWorkflow] Iniciando orquestador...');
     const orchestrationResult = await executeOrchestratorAgent(messages, userId);
 
     const nextAgent = orchestrationResult.nextAgent;
-    console.log(`[MultiAgentWorkflow] Orquestador recomienda agente: ${nextAgent}`);
+    console.log(`[MultiAgentWorkflow] Orquestador decidió: "${nextAgent}"`);
 
     // Si el orquestador dice "direct", responder y terminar
     if (nextAgent === 'direct') {
-      console.log('[MultiAgentWorkflow] Respuesta directa del orquestador');
+      console.log('[MultiAgentWorkflow] 💬 Respuesta directa, NO ejecutar agentes');
+      console.log(`${'='.repeat(60)}\n`);
       return {
         content: orchestrationResult.intention,
         state: orchestrationResult.state,
@@ -66,7 +78,12 @@ export async function executeMultiAgentWorkflow(
       };
     }
 
-    // Ejecutar SOLO el primer agente recomendado
+    // Ejecutar SOLO el primer agente recomendado y PARAR
+    console.log(`${'!'.repeat(60)}`);
+    console.log(`[MultiAgentWorkflow] ⚠️ EJECUTANDO SOLO: "${nextAgent}"`);
+    console.log(`[MultiAgentWorkflow] ⚠️ Después de esto, el workflow se PAUSARÁ`);
+    console.log(`[MultiAgentWorkflow] ⚠️ Usuario debe confirmar para continuar`);
+    console.log(`${'!'.repeat(60)}`);
     return await executeSingleAgent(messages, userId, orchestrationResult.state, nextAgent);
   } catch (err) {
     console.error('[MultiAgentWorkflow] Error:', err);
@@ -83,6 +100,9 @@ async function executeSingleAgent(
   state: AgentState,
   agentToExecute: string
 ): Promise<MultiAgentResult> {
+  console.log(`[executeSingleAgent] ==============`);
+  console.log(`[executeSingleAgent] Agente a ejecutar: ${agentToExecute}`);
+  
   let agentResponse = '';
   let nextAgent = 'complete';
   let updatedState = { ...state };
@@ -90,11 +110,12 @@ async function executeSingleAgent(
   // Ejecutar SOLO el agente indicado
   switch (agentToExecute) {
     case 'sourcing':
-      console.log('[MultiAgentWorkflow] Ejecutando SOLO Sourcing Agent...');
+      console.log('[executeSingleAgent] ⚙️ Ejecutando SOURCING...');
       const sourcingResult = await executeSourcingAgent(messages, state);
       agentResponse = sourcingResult.response;
       updatedState = sourcingResult.state;
       nextAgent = sourcingResult.nextAgent;
+      console.log(`[executeSingleAgent] ✅ Sourcing completado. Siguiente sugerido: ${nextAgent}`);
       break;
 
     case 'landing_builder':
@@ -134,6 +155,14 @@ async function executeSingleAgent(
 
   // Guardar el siguiente agente en el estado para la próxima iteración
   updatedState.nextAgent = nextAgent;
+
+  console.log(`\n${'🛑'.repeat(30)}`);
+  console.log(`[executeSingleAgent] 🛑 WORKFLOW PAUSADO`);
+  console.log(`[executeSingleAgent] Estado guardado con nextAgent: "${nextAgent}"`);
+  console.log(`[executeSingleAgent] Esperando confirmación del usuario...`);
+  console.log(`[executeSingleAgent] Usuario debe enviar: "sí", "siguiente", "continuar", "ok" o "dale"`);
+  console.log(`${'🛑'.repeat(30)}\n`);
+  console.log(`${'='.repeat(60)}\n`);
 
   // Construir respuesta con indicación clara de siguiente paso
   const fullResponse = buildWorkflowResponse(agentResponse, nextAgent, updatedState);

@@ -154,6 +154,15 @@ export async function POST(req: Request) {
 
   // ROUTING: Detectar modo support vs main
   const mode = url.searchParams.get('mode') || 'main';
+  console.log(`\n============================================`);
+  console.log(`[CHAT API] 🎯 MODO DETECTADO: "${mode}"`);
+  console.log(`[CHAT API] URL: ${url.toString()}`);
+  console.log(`[CHAT API] Estado existente:`, existingState ? 'SÍ' : 'NO');
+  if (existingState) {
+    console.log(`[CHAT API] nextAgent guardado:`, existingState.nextAgent);
+    console.log(`[CHAT API] currentStep:`, existingState.currentStep);
+  }
+  console.log(`============================================\n`);
   
   if (mode === 'support') {
     console.log('/api/chat: Modo SUPPORT activado');
