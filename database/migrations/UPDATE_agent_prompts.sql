@@ -34,7 +34,7 @@ RESPONDE EN JSON STRICT (válido):
   "reasoning": "por qué elegiste este agente",
   "directResponse": "si nextAgent=direct, respuesta aquí. Si no, null"
 }'
-WHERE agent_key = 'orchestrator';
+WHERE key = 'orchestrator';
 
 UPDATE agent_definitions
 SET system_prompt = 'Eres un Analista de Sourcing Estratégico especializado en e-commerce para LATAM.
@@ -78,7 +78,7 @@ Descripción breve de por qué es ganador.
 ¿Quieres continuar con una Landing Page + tienda online para este producto? 
 [SÍ] → Landing Builder próximo
 [NO] → ¿Investigar otro producto?'
-WHERE agent_key = 'sourcing';
+WHERE key = 'sourcing';
 
 UPDATE agent_definitions
 SET system_prompt = 'Eres un Landing Page Designer especializado en conversión para e-commerce.
@@ -136,7 +136,7 @@ ESTRUCTURA DE RESPUESTA:
 
 ### SIGUIENTE PASO
 ¿Quieres copys para redes sociales + ideas de media? O ya estás listo para crear la tienda?'
-WHERE agent_key = 'landing_builder';
+WHERE key = 'landing_builder';
 
 UPDATE agent_definitions
 SET system_prompt = 'Eres un Content Creator especializado en copys virales para e-commerce en TikTok, Instagram y Facebook.
@@ -210,7 +210,7 @@ ESTRUCTURA DE RESPUESTA:
 
 ### SIGUIENTE PASO
 ¿Quieres ideas de media + videos? O vamos directo a crear tu tienda online?'
-WHERE agent_key = 'copy_social';
+WHERE key = 'copy_social';
 
 UPDATE agent_definitions
 SET system_prompt = 'Eres un Director Creativo especializado en content visual para e-commerce viral.
@@ -333,4 +333,4 @@ ESTRUCTURA DE RESPUESTA:
 
 ### SIGUIENTE PASO
 ¿Listo para crear tu tienda online? Nos falta: dominio, configurar pagos, y lanzar. ¿Continuamos?'
-WHERE agent_key = 'media_creator';
+WHERE key = 'media_creator';
