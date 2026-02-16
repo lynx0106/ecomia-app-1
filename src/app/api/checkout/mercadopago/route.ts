@@ -1,7 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { decryptString } from '@/lib/crypto';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
+import { rateLimit, createRateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit';
 
 type CheckoutPayload = {
   landingId?: string;
@@ -17,6 +18,20 @@ function getString(value: unknown) {
 }
 
 export async function POST(request: Request) {
+  // Aplicar rate limiting al inicio
+  const authClient = await createClient();
+  const { data: { user } } = await authClient.auth.getUser();
+  
+  const rateLimitResult = await rateLimit(
+    request as NextRequest,
+    RATE_LIMITS.PAYMENT,
+    user?.id
+  );
+
+  if (!rateLimitResult.allowed) {
+    return createRateLimitResponse(rateLimitResult.resetAt);
+  }
+
   let payload: CheckoutPayload;
   try {
     payload = await request.json();
@@ -31,8 +46,6 @@ export async function POST(request: Request) {
 
   const origin = (await headers()).get('origin') || process.env.NEXT_PUBLIC_SITE_URL || '';
   const supabase = createServiceClient();
-  const authClient = await createClient();
-  const { data: { user } } = await authClient.auth.getUser();
 
   if (landingId) {
     const { data: landing, error } = await supabase

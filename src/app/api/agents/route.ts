@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { AGENT_CONFIGS, type AgentKey } from '@/lib/agents/config';
+import { rateLimit, createRateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit';
 
 type AgentPromptRow = {
   agent_key: string;
@@ -79,6 +80,17 @@ export async function POST(req: Request) {
 
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // Aplicar rate limiting
+  const rateLimitResult = await rateLimit(
+    req as NextRequest,
+    RATE_LIMITS.AGENTS,
+    user.id
+  );
+
+  if (!rateLimitResult.allowed) {
+    return createRateLimitResponse(rateLimitResult.resetAt);
   }
 
   const body = await req.json().catch(() => ({}));
