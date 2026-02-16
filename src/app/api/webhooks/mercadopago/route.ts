@@ -6,6 +6,7 @@ import {
   parseWebhookPayload,
   parseExternalReference,
 } from '@/lib/mercadopago/webhook-validator';
+import { auditPaymentEvent } from '@/lib/audit-logger';
 
 /**
  * Webhook de MercadoPago para notificaciones de pago
@@ -184,9 +185,25 @@ export async function POST(request: NextRequest) {
       console.log('[Webhook] Payment log saved successfully');
     }
 
-    // 10. Si el pago fue aprobado, actualizar estado en el recurso
+    // 10. Si el pago fue aprobado, actualizar estado en el recurso y registrar en auditoría
     if (paymentData.status === 'approved') {
       console.log('[Webhook] Payment approved, updating resource status');
+
+      // Registrar el pago en auditoría
+      await auditPaymentEvent(
+        '', // No tenemos user_id en webhook, es sistema
+        paymentData.payer?.email || 'anonymous',
+        'payment_completed',
+        paymentId,
+        paymentData.transaction_amount || 0,
+        'success',
+        {
+          landing_id: type === 'landing' ? resourceId : undefined,
+          store_id: type === 'store' ? resourceId : undefined,
+          payment_type: paymentData.payment_type_id,
+          currency: paymentData.currency_id,
+        }
+      );
 
       if (type === 'landing' && resourceId) {
         // Actualizar landing page con estado de pago
