@@ -135,7 +135,7 @@ export default function PaymentsWizard({ storeId, meta }: PaymentsWizardProps) {
           <p className="font-semibold text-slate-800 dark:text-white">Checklist rapido</p>
           <p className="mt-2">1) Crea tu cuenta en la pasarela.</p>
           <p>2) Comparte el email o ID de la cuenta.</p>
-          <p>3) Cuando este activo, marca el estado como "Activo".</p>
+          <p>3) Cuando este activo, marca el estado como Activo.</p>
           <p className="mt-2">Tus credenciales se guardan cifradas.</p>
         </div>
 

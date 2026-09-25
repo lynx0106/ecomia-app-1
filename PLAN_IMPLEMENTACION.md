@@ -1,3 +1,5 @@
+> **Histórico.** Este documento no describe el MVP vigente. La operación actual está en README.md, SETUP_LOCAL.md, INSTRUCCIONES_WEBHOOK_SETUP.md y GUIA_DE_USUARIO.md.
+
 # 📋 PLAN DE IMPLEMENTACIÓN - ECOMIA APP
 **Lista de Tareas Priorizadas para Llevar la App al 100% de Producción**
 

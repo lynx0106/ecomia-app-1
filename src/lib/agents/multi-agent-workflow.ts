@@ -241,14 +241,9 @@ ${state.currentStep ? (progressEmojis[state.currentStep] || '✨') : '✨'} **${
 
 ---
 
-✅ **¡Flujo completado!**
+✅ **Landing lista en borrador.**
 
-Ahora estás listo para:
-1. **Crear tu tienda online** con este producto
-2. **Configurar pagos** (MercadoPago, Stripe)
-3. **Publicar y empezar a vender**
-
-¿Continuamos? Escribe "crear tienda"
+Edita el precio en COP, pega el access token de tu Mercado Pago y publícala. El comprador abre /l/ sin iniciar sesión y el pago entra a tu cuenta.
 `;
 
   return header + agentResponse + footer;
@@ -262,7 +257,7 @@ function getNextPromptSuggestion(nextAgent: string, state: AgentState): string |
     landing_builder: `Sí, crea una landing page para ${state.sourcingResult?.productName || 'este producto'}`,
     copy_social: `Genera copys para TikTok, Instagram y Facebook`,
     media_creator: `¿Qué ideas de videos tienes? Crea guiones y prompts para IA`,
-    complete: `Crear tienda online con este producto`,
+    complete: `Editar precio y publicar la landing`,
   };
 
   return suggestions[nextAgent];
@@ -276,7 +271,7 @@ function getNextStepText(nextAgent: string): string {
     landing_builder: '**Landing Page** - Estructura profesional y copys de venta',
     copy_social: '**Copys Virales** - Instagram, TikTok, Facebook optimizados',
     media_creator: '**Ideas Visuales** - Prompts de IA + guiones de video',
-    complete: '**Crear Tienda** - Configurar dominio y pagos',
+    complete: '**Publicar** - Precio COP, token de Mercado Pago y /l/',
   };
 
   return steps[nextAgent] || 'Continuar con siguiente agente';

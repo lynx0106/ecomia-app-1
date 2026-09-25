@@ -1,7 +1,17 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+/** Rutas que un visitante sin sesión puede abrir. /s/ no es el MVP. */
+export function isPublicPath(pathname: string) {
+  if (pathname === '/login' || pathname.startsWith('/login/')) return true
+  if (pathname === '/auth' || pathname.startsWith('/auth/')) return true
+  if (pathname === '/l' || pathname.startsWith('/l/')) return true
+  return false
+}
+
 export async function updateSession(request: NextRequest) {
+  const isPublic = isPublicPath(request.nextUrl.pathname)
+
   try {
     let supabaseResponse = NextResponse.next({
       request,
@@ -38,12 +48,7 @@ export async function updateSession(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser()
 
-    if (
-      !user &&
-      !request.nextUrl.pathname.startsWith('/login') &&
-      !request.nextUrl.pathname.startsWith('/auth')
-    ) {
-      // no user, potentially respond by redirecting the user to the login page
+    if (!user && !isPublic) {
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       return NextResponse.redirect(url)
@@ -51,9 +56,10 @@ export async function updateSession(request: NextRequest) {
 
     return supabaseResponse
   } catch (error) {
-    // If middleware fails, allow the request to continue
-    // This prevents the entire app from being blocked by auth issues
     console.error('Middleware error:', error)
-    return NextResponse.next({ request })
+    if (isPublic) {
+      return NextResponse.next({ request })
+    }
+    return new NextResponse('No se pudo verificar la sesión.', { status: 503 })
   }
 }

@@ -1,7 +1,6 @@
-export const SUPERADMIN_EMAIL = 'lincecarlos01@gmail.com';
-
 export function isSuperAdmin(email?: string | null) {
-  return Boolean(email && email.toLowerCase() === SUPERADMIN_EMAIL.toLowerCase());
+  const expected = (process.env.SUPERADMIN_EMAIL || '').trim().toLowerCase();
+  return Boolean(expected && email && email.toLowerCase() === expected);
 }
 
 export function isAdminRole(role?: string | null) {

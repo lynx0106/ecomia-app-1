@@ -85,7 +85,7 @@ export async function executeLandingBuilderAgent(
   // Load system prompt from database
   let systemPrompt: string;
   try {
-    let dbPrompt = await getAgentSystemPrompt('landing_builder');
+    const dbPrompt = await getAgentSystemPrompt('landing_builder');
     if (!dbPrompt) {
       console.warn('No landing_builder prompt found in DB, using fallback');
       systemPrompt = getLandingBuilderFallbackPrompt(productContext);
@@ -123,9 +123,8 @@ export async function executeLandingBuilderAgent(
       },
     };
 
-    // SIEMPRE hacer pausa después de landing
-    // El usuario decide si quiere continuar con copys
-    const nextAgent = 'copy_social';
+    // Copy y media no son paso obligatorio para publicar.
+    const nextAgent = 'complete';
 
     return {
       response: response.text,

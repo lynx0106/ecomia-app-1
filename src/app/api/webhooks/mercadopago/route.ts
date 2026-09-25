@@ -1,158 +1,138 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { decryptString } from '@/lib/crypto';
 import {
   validateWebhookSignature,
   verifyPaymentWithApi,
   parseWebhookPayload,
   parseExternalReference,
 } from '@/lib/mercadopago/webhook-validator';
-import { auditPaymentEvent } from '@/lib/audit-logger';
+
+type LandingPaymentRow = {
+  id: string;
+  content: Record<string, unknown> | null;
+};
+
+function tokenFromContent(content: Record<string, unknown> | null) {
+  const payments = (content?.payments || {}) as Record<string, unknown>;
+  const mp = (payments.mercadopago || {}) as Record<string, unknown>;
+  return typeof mp.access_token_enc === 'string' ? mp.access_token_enc : '';
+}
+
+function decryptToken(payload: string) {
+  try {
+    return decryptString(payload);
+  } catch {
+    return '';
+  }
+}
+
+async function loadLanding(supabase: ReturnType<typeof createServiceClient>, id: string) {
+  const { data, error } = await supabase
+    .from('landing_pages')
+    .select('id, content')
+    .eq('id', id)
+    .maybeSingle();
+  if (error || !data) return null;
+  return data as LandingPaymentRow;
+}
+
+async function findLandingByCollector(supabase: ReturnType<typeof createServiceClient>, mpUserId: string) {
+  const { data, error } = await supabase
+    .from('landing_pages')
+    .select('id, content')
+    .filter('content->payments->mercadopago->>user_id', 'eq', mpUserId)
+    .limit(1);
+  if (error || !data?.length) return null;
+  return data[0] as LandingPaymentRow;
+}
 
 /**
- * Webhook de MercadoPago para notificaciones de pago
- * 
- * Configurar en: https://www.mercadopago.com.co/developers/panel/app/{APP_ID}/webhooks
- * URL del webhook: https://ecomia-app.online/api/webhooks/mercadopago
- * 
- * Este endpoint:
- * 1. Valida la firma del webhook
- * 2. Verifica el pago contra la API de MercadoPago
- * 3. Guarda el log del pago en la base de datos
- * 4. Actualiza el estado en landing_pages o stores si aplica
+ * El pago se verifica con el access token cifrado de la landing, no con el token de la plataforma.
+ * Si payment_logs no se puede escribir, se responde 500 para que Mercado Pago reintente.
  */
 export async function POST(request: NextRequest) {
   try {
-    console.log('[Webhook] Received payment notification');
-
-    // 1. Obtener headers de validación de MercadoPago
     const xSignature = request.headers.get('x-signature');
     const xRequestId = request.headers.get('x-request-id');
-
     if (!xSignature || !xRequestId) {
-      console.error('[Webhook] Missing required signature headers');
-      return NextResponse.json(
-        { error: 'Missing signature headers' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing signature headers' }, { status: 400 });
     }
 
-    // 2. Obtener el body RAW (necesario para validar la firma)
     const rawBody = await request.text();
-    let body: any;
-    
+    let body: unknown;
     try {
       body = JSON.parse(rawBody);
     } catch {
-      console.error('[Webhook] Invalid JSON body');
-      return NextResponse.json(
-        { error: 'Invalid JSON' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
     }
 
-    // 3. Parsear y validar el payload
     const payload = parseWebhookPayload(body);
     if (!payload) {
-      console.error('[Webhook] Invalid payload structure');
-      return NextResponse.json(
-        { error: 'Invalid payload' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
     }
 
-    // 4. Solo procesar eventos de pago
     if (payload.type !== 'payment') {
-      console.log('[Webhook] Ignoring non-payment event:', payload.type);
       return NextResponse.json({ ok: true, ignored: true });
     }
 
-    const paymentId = payload.data.id;
-    console.log('[Webhook] Processing payment ID:', paymentId);
-
-    // 5. Validar firma del webhook
     const webhookSecret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
     if (!webhookSecret) {
-      console.error('[Webhook] MERCADOPAGO_WEBHOOK_SECRET not configured');
-      return NextResponse.json(
-        { error: 'Server configuration error' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
     }
 
-    const isValidSignature = validateWebhookSignature(
-      xSignature,
-      xRequestId,
-      paymentId,
-      webhookSecret
-    );
-
-    if (!isValidSignature) {
-      console.error('[Webhook] Invalid signature for payment:', paymentId);
-      return NextResponse.json(
-        { error: 'Invalid signature' },
-        { status: 401 }
-      );
+    const paymentId = String(payload.data.id);
+    if (!validateWebhookSignature(xSignature, xRequestId, paymentId, webhookSecret)) {
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
-    console.log('[Webhook] Signature validated successfully');
-
-    // 6. Obtener access token para verificar el pago
-    // En producción, cada tienda/landing tiene su propio token
-    // Por ahora usamos un token general para verificación
-    const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
-    if (!accessToken) {
-      console.error('[Webhook] MERCADOPAGO_ACCESS_TOKEN not configured');
-      return NextResponse.json(
-        { error: 'Server configuration error' },
-        { status: 500 }
-      );
-    }
-
-    // 7. Verificar el pago directamente con la API de MercadoPago
-    const { valid, data: paymentData } = await verifyPaymentWithApi(
-      paymentId,
-      accessToken
-    );
-
-    if (!valid || !paymentData) {
-      console.error('[Webhook] Payment verification failed:', paymentId);
-      return NextResponse.json(
-        { error: 'Payment verification failed' },
-        { status: 400 }
-      );
-    }
-
-    console.log('[Webhook] Payment verified:', {
-      id: paymentData.id,
-      status: paymentData.status,
-      amount: paymentData.transaction_amount,
-    });
-
-    // 8. Extraer external_reference
-    const externalRef = paymentData.external_reference as string;
-    if (!externalRef) {
-      console.error('[Webhook] Missing external_reference in payment');
-      return NextResponse.json(
-        { error: 'Missing external_reference' },
-        { status: 400 }
-      );
-    }
-
-    const parsedRef = parseExternalReference(externalRef);
-    if (!parsedRef) {
-      console.error('[Webhook] Invalid external_reference format:', externalRef);
-      return NextResponse.json(
-        { error: 'Invalid external_reference' },
-        { status: 400 }
-      );
-    }
-
-    const { type, id: resourceId } = parsedRef;
-
-    // 9. Conectar a Supabase y guardar log del pago
     const supabase = createServiceClient();
+    const landingIdQuery = request.nextUrl.searchParams.get('landing_id');
+    let tokenLanding = landingIdQuery ? await loadLanding(supabase, landingIdQuery) : null;
+    if (!tokenLanding && payload.user_id) {
+      tokenLanding = await findLandingByCollector(supabase, String(payload.user_id));
+    }
+    if (!tokenLanding) {
+      return NextResponse.json({ error: 'No se encontró la landing del pago' }, { status: 400 });
+    }
 
-    const logData: any = {
+    const lookupToken = decryptToken(tokenFromContent(tokenLanding.content));
+    if (!lookupToken) {
+      return NextResponse.json({ error: 'La landing no tiene un token de Mercado Pago usable' }, { status: 400 });
+    }
+
+    const lookedUp = await verifyPaymentWithApi(paymentId, lookupToken);
+    if (!lookedUp.valid || !lookedUp.data) {
+      return NextResponse.json({ error: 'Payment verification failed' }, { status: 400 });
+    }
+
+    const externalRef = lookedUp.data.external_reference as string;
+    const parsedRef = parseExternalReference(externalRef || '');
+    if (!parsedRef || parsedRef.type !== 'landing') {
+      return NextResponse.json({ error: 'El pago no corresponde a una landing' }, { status: 400 });
+    }
+
+    const paidLanding = parsedRef.id === tokenLanding.id
+      ? tokenLanding
+      : await loadLanding(supabase, parsedRef.id);
+    if (!paidLanding) {
+      return NextResponse.json({ error: 'Landing del pago no encontrada' }, { status: 400 });
+    }
+
+    let paymentData = lookedUp.data;
+    if (paidLanding.id !== tokenLanding.id) {
+      const landingToken = decryptToken(tokenFromContent(paidLanding.content));
+      if (!landingToken) {
+        return NextResponse.json({ error: 'La landing del pago no tiene token' }, { status: 400 });
+      }
+      const verified = await verifyPaymentWithApi(paymentId, landingToken);
+      if (!verified.valid || !verified.data) {
+        return NextResponse.json({ error: 'Payment verification failed' }, { status: 400 });
+      }
+      paymentData = verified.data;
+    }
+
+    const logData = {
       mercadopago_id: paymentId,
       external_reference: externalRef,
       status: paymentData.status,
@@ -164,14 +144,8 @@ export async function POST(request: NextRequest) {
       webhook_data: paymentData,
       verified: true,
       verified_at: new Date().toISOString(),
+      landing_id: paidLanding.id,
     };
-
-    // Asignar landing_id o store_id según el tipo
-    if (type === 'landing') {
-      logData.landing_id = resourceId;
-    } else if (type === 'store') {
-      logData.store_id = resourceId;
-    }
 
     const { error: logError } = await supabase
       .from('payment_logs')
@@ -179,85 +153,46 @@ export async function POST(request: NextRequest) {
 
     if (logError) {
       console.error('[Webhook] Error saving payment log:', logError);
-      // No retornamos error porque el pago ya fue validado
-      // El log es importante pero no crítico
-    } else {
-      console.log('[Webhook] Payment log saved successfully');
+      return NextResponse.json({ error: 'No se pudo registrar el pago' }, { status: 500 });
     }
 
-    // 10. Si el pago fue aprobado, actualizar estado en el recurso y registrar en auditoría
-    if (paymentData.status === 'approved') {
-      console.log('[Webhook] Payment approved, updating resource status');
+    const currentContent = (paidLanding.content || {}) as Record<string, unknown>;
+    const order = {
+      status: paymentData.status === 'approved' ? 'paid' : paymentData.status,
+      external_reference: externalRef,
+      mercadopago_id: paymentId,
+      amount: paymentData.transaction_amount,
+      currency_id: paymentData.currency_id,
+      paid_at: paymentData.status === 'approved' ? new Date().toISOString() : null,
+    };
 
-      // Registrar el pago en auditoría
-      await auditPaymentEvent(
-        '', // No tenemos user_id en webhook, es sistema
-        paymentData.payer?.email || 'anonymous',
-        'payment_completed',
-        paymentId,
-        paymentData.transaction_amount || 0,
-        'success',
-        {
-          landing_id: type === 'landing' ? resourceId : undefined,
-          store_id: type === 'store' ? resourceId : undefined,
-          payment_type: paymentData.payment_type_id,
-          currency: paymentData.currency_id,
-        }
-      );
+    const { error: updateError } = await supabase
+      .from('landing_pages')
+      .update({
+        content: {
+          ...currentContent,
+          order,
+        },
+      })
+      .eq('id', paidLanding.id);
 
-      if (type === 'landing' && resourceId) {
-        // Actualizar landing page con estado de pago
-        const { error: updateError } = await supabase
-          .from('landing_pages')
-          .update({
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', resourceId);
-
-        if (updateError) {
-          console.error('[Webhook] Error updating landing:', updateError);
-        } else {
-          console.log('[Webhook] Landing page updated successfully');
-        }
-      } else if (type === 'store' && resourceId) {
-        // Actualizar store con estado de pago
-        const { error: updateError } = await supabase
-          .from('stores')
-          .update({
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', resourceId);
-
-        if (updateError) {
-          console.error('[Webhook] Error updating store:', updateError);
-        } else {
-          console.log('[Webhook] Store updated successfully');
-        }
-      }
+    if (updateError) {
+      console.error('[Webhook] Error updating landing order:', updateError);
+      return NextResponse.json({ error: 'No se pudo guardar el estado del pago' }, { status: 500 });
     }
 
-    console.log('[Webhook] Processing completed successfully');
-
-    // Retornar respuesta exitosa
     return NextResponse.json({
       ok: true,
       paymentId,
-      status: paymentData.status,
+      status: order.status,
       processed: true,
     });
-
   } catch (error) {
     console.error('[Webhook] Unexpected error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
-/**
- * GET endpoint para health check del webhook
- */
 export async function GET() {
   return NextResponse.json({
     status: 'ok',

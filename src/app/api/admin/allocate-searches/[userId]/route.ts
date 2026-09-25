@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/server';
+import { requireOperationsAdmin } from '@/lib/auth/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
@@ -7,24 +8,12 @@ export async function GET(
 ) {
   try {
     const { userId } = await params;
-    const supabase = await createClient();
-    const { data: { user: adminUser } } = await supabase.auth.getUser();
-
-    if (!adminUser) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Check if admin
-    const { data: adminData } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', adminUser.id)
-      .eq('role', 'admin')
-      .single();
-
-    if (!adminData) {
+    const admin = await requireOperationsAdmin();
+    if (!admin) {
       return NextResponse.json({ error: 'Only admins can manage allocations' }, { status: 403 });
     }
+
+    const supabase = createServiceClient();
 
     // Get allocated searches for user
     const { data, error } = await supabase
@@ -57,25 +46,12 @@ export async function POST(
 ) {
   try {
     const { userId } = await params;
-    const supabase = await createClient();
-    const { data: { user: adminUser } } = await supabase.auth.getUser();
-
-    if (!adminUser) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Check if admin
-    const { data: adminData } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', adminUser.id)
-      .eq('role', 'admin')
-      .single();
-
-    if (!adminData) {
+    const admin = await requireOperationsAdmin();
+    if (!admin) {
       return NextResponse.json({ error: 'Only admins can manage allocations' }, { status: 403 });
     }
 
+    const supabase = createServiceClient();
     const { allocated_count, action = 'set' } = await req.json();
 
     if (action === 'set') {

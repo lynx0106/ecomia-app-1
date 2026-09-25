@@ -12,6 +12,7 @@ export type CheckoutSettingsPanelConfig = {
   title?: string;
   defaultSourceOptions?: string[];
   error?: string;
+  showAccessToken?: boolean;
 };
 
 function SaveButton({ theme = 'slate' }: { theme?: 'slate' | 'emerald' }) {
@@ -38,17 +39,21 @@ export default function CheckoutSettingsPanel({
   theme = 'slate',
   title = 'Activa el pago',
   defaultSourceOptions = ['research', 'manual'],
-  error
+  error,
+  showAccessToken = false,
 }: CheckoutSettingsPanelConfig) {
   const defaults = useMemo(() => {
     const product = (data.product ?? {}) as Record<string, unknown>;
     const checkout = (data.checkout ?? {}) as Record<string, unknown>;
+    const payments = (data.payments ?? {}) as Record<string, unknown>;
+    const mp = (payments.mercadopago ?? {}) as Record<string, unknown>;
     
     return {
       enabled: Boolean(checkout.enabled),
       price: getNumber(checkout.price_cop) ?? null,
       productName: getString(checkout.product_name) || getString(product.name) || '',
       source: getString(checkout.source) || getString(product.source) || defaultSourceOptions[0] || 'research',
+      hasToken: Boolean(getString(mp.access_token_enc)),
     };
   }, [data, defaultSourceOptions]);
 
@@ -109,6 +114,24 @@ export default function CheckoutSettingsPanel({
             />
           </label>
         </div>
+
+        {showAccessToken && (
+          <label className="space-y-2">
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Access token de Mercado Pago</span>
+            <input
+              name="mp_access_token"
+              type="password"
+              autoComplete="off"
+              placeholder={defaults.hasToken ? 'Token guardado. Pega otro solo para reemplazarlo.' : 'Pega el access token de tu cuenta'}
+              className={`w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm ${focusColor} focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white`}
+            />
+            <span className="block text-xs text-slate-500">
+              {defaults.hasToken
+                ? 'Hay un token cifrado en esta landing. El dinero de la venta entra a esa cuenta.'
+                : 'El comprador paga en tu Mercado Pago. El token se guarda cifrado.'}
+            </span>
+          </label>
+        )}
 
         <label className="space-y-2">
           <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Origen del producto</span>

@@ -10,7 +10,9 @@ import { updateSession } from './lib/supabase/middleware';
  *
  * Public routes (no auth required):
  * - /login
- * - /auth/* (OAuth callbacks)
+ * - /auth/* (callback de sesión)
+ * - /l/* (oferta publicada; el comprador no tiene cuenta)
+ * El webhook de Mercado Pago vive en /api y el matcher no lo intercepta.
  */
 export async function middleware(request: NextRequest) {
   return await updateSession(request);

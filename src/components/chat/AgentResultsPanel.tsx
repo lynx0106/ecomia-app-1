@@ -14,19 +14,19 @@ interface AgentResultsPanelProps {
 
 export function AgentResultsPanel({ agentState, isVisible, onClose, onContinue, onDelete }: AgentResultsPanelProps) {
   const [isExpanded, setIsExpanded] = useState(true);
-  
-  if (!isVisible) return null;
 
-  // Auto-continue después de 4 segundos si hay siguiente agente
   useEffect(() => {
+    if (!isVisible) return;
     if (agentState?.nextAgent && agentState.nextAgent !== 'complete' && onContinue) {
       const timer = setTimeout(() => {
         onContinue();
       }, 4000);
-      
+
       return () => clearTimeout(timer);
     }
-  }, [agentState?.nextAgent, onContinue]);
+  }, [agentState?.nextAgent, isVisible, onContinue]);
+
+  if (!isVisible) return null;
 
   const getAgentStatus = (agentName: string) => {
     if (!agentState) return 'pending';

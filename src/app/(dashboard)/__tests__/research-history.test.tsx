@@ -2,10 +2,11 @@
 // Full component testing would require extensive mocking of server components
 // This suite focuses on key integration patterns
 
+import * as researchHistoryPage from '@/app/(dashboard)/research-history/page';
+
 describe('ResearchHistoryPage', () => {
   test('page module exists and exports', () => {
-    // Test that the page module can be imported without errors
-    expect(typeof require('@/app/(dashboard)/research-history/page')).toBe('object');
+    expect(typeof researchHistoryPage).toBe('object');
   });
 
   // Unit tests for filter logic would go here

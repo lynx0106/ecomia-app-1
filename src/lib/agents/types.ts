@@ -72,6 +72,9 @@ export interface AgentState {
   createdAt: Date;
   updatedAt: Date;
   conversationId?: string;
+  researchSessionId?: string;
+  landingPageId?: string;
+  landingSlug?: string;
 }
 
 export interface AgentResponse {
