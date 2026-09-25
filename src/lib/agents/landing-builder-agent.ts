@@ -85,7 +85,7 @@ export async function executeLandingBuilderAgent(
   // Load system prompt from database
   let systemPrompt: string;
   try {
-    let dbPrompt = await getAgentSystemPrompt('landing_builder');
+    const dbPrompt = await getAgentSystemPrompt('landing_builder');
     if (!dbPrompt) {
       console.warn('No landing_builder prompt found in DB, using fallback');
       systemPrompt = getLandingBuilderFallbackPrompt(productContext);

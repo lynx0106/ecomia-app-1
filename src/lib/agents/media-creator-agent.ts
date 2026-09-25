@@ -152,7 +152,7 @@ export async function executeMediaCreatorAgent(
   // Load system prompt from database
   let systemPrompt: string;
   try {
-    let dbPrompt = await getAgentSystemPrompt('media_creator');
+    const dbPrompt = await getAgentSystemPrompt('media_creator');
     if (!dbPrompt) {
       console.warn('No media_creator prompt found in DB, using fallback');
       systemPrompt = getMediaCreatorFallbackPrompt(productName);

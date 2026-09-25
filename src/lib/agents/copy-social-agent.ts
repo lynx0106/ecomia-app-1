@@ -101,7 +101,7 @@ export async function executeCopySocialAgent(
   // Load system prompt from database
   let systemPrompt: string;
   try {
-    let dbPrompt = await getAgentSystemPrompt('copy_social');
+    const dbPrompt = await getAgentSystemPrompt('copy_social');
     if (!dbPrompt) {
       console.warn('No copy_social prompt found in DB, using fallback');
       systemPrompt = getCopySocialFallbackPrompt(productName);
