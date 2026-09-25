@@ -65,27 +65,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Landing no publicada' }, { status: 403 });
     }
 
-    if (!landing.store_id) {
-      return NextResponse.json({ error: 'Landing sin tienda para pagos' }, { status: 400 });
-    }
-
-    const { data: store, error: storeError } = await supabase
-      .from('stores')
-      .select('id, meta')
-      .eq('id', landing.store_id)
-      .maybeSingle();
-
-    if (storeError || !store) {
-      return NextResponse.json({ error: 'No se pudo cargar la tienda' }, { status: 500 });
-    }
-
-    const storeMeta = (store.meta || {}) as Record<string, unknown>;
-    const storePayments = (storeMeta.payments || {}) as Record<string, unknown>;
-    const mp = (storePayments.mercadopago || {}) as Record<string, unknown>;
+    const content = (landing.content || {}) as Record<string, unknown>;
+    const payments = (content.payments || {}) as Record<string, unknown>;
+    const mp = (payments.mercadopago || {}) as Record<string, unknown>;
     const accessTokenEnc = getString(mp.access_token_enc);
 
     if (!accessTokenEnc) {
-      return NextResponse.json({ error: 'La tienda no tiene token de MercadoPago' }, { status: 400 });
+      return NextResponse.json({ error: 'Esta landing no tiene token de Mercado Pago' }, { status: 400 });
     }
 
     let token = '';
@@ -95,13 +81,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No se pudo descifrar el token' }, { status: 500 });
     }
 
-    const content = (landing.content || {}) as Record<string, unknown>;
     const checkout = (content.checkout || {}) as Record<string, unknown>;
     const product = (content.product || {}) as Record<string, unknown>;
-
-    if (!checkout.enabled) {
-      return NextResponse.json({ error: 'Checkout no activo' }, { status: 400 });
-    }
 
     const price = toNumber(checkout.price_cop) || 0;
     if (price <= 0) {
@@ -111,8 +92,11 @@ export async function POST(request: Request) {
     const productName = getString(checkout.product_name) || getString(product.name) || landing.title;
     const slug = landing.slug || '';
     const backUrl = slug ? `${origin}/l/${slug}` : origin;
+    const notificationUrl = origin
+      ? `${origin.replace(/\/$/, '')}/api/webhooks/mercadopago?landing_id=${landing.id}`
+      : undefined;
 
-    const preference = {
+    const preference: Record<string, unknown> = {
       items: [
         {
           title: productName,
@@ -133,6 +117,9 @@ export async function POST(request: Request) {
         source: 'landing',
       },
     };
+    if (notificationUrl) {
+      preference.notification_url = notificationUrl;
+    }
 
     const mpResponse = await fetch('https://api.mercadopago.com/checkout/preferences', {
       method: 'POST',
@@ -146,6 +133,24 @@ export async function POST(request: Request) {
     const mpPayload = await mpResponse.json();
     if (!mpResponse.ok) {
       return NextResponse.json({ error: 'No se pudo crear el checkout' }, { status: 500 });
+    }
+
+    if (mpPayload?.collector_id && !mp.user_id) {
+      await supabase
+        .from('landing_pages')
+        .update({
+          content: {
+            ...content,
+            payments: {
+              ...payments,
+              mercadopago: {
+                ...mp,
+                user_id: String(mpPayload.collector_id),
+              },
+            },
+          },
+        })
+        .eq('id', landing.id);
     }
 
     return NextResponse.json({ init_point: mpPayload?.init_point });

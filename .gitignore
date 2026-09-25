@@ -32,7 +32,11 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
-# .env.local - Ignorado por seguridad, usar generate-env.js en cloud
+!.env.example
+
+# logs locales
+startup.log
+/logs/
 
 
 # vercel

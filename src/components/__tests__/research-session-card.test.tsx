@@ -19,6 +19,10 @@ jest.mock('@/components/ui/ToastProvider', () => ({
   useToast: jest.fn(() => ({ toast: jest.fn() })),
 }));
 
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push: jest.fn(), refresh: jest.fn() }),
+}));
+
 const mockSession = {
   id: 'session-1',
   goal: 'Vender productos de belleza',

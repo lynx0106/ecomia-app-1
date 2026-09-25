@@ -15,7 +15,7 @@ Para que los workflows de GitHub Actions funcionen correctamente, debes configur
 ```
 NEXT_PUBLIC_SUPABASE_URL      # Tu URL de Supabase
 NEXT_PUBLIC_SUPABASE_ANON_KEY # Tu clave anónima de Supabase
-GROQ_API_KEY                   # (Opcional) API key de Groq
+XAI_API_KEY                    # API key de xAI
 TAVILY_API_KEY                 # (Opcional) API key de Tavily
 ```
 

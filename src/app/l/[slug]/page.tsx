@@ -15,12 +15,6 @@ type LandingRow = {
   updated_at: string;
 };
 
-type StoreRow = {
-  id: string;
-  name: string;
-  slug: string | null;
-};
-
 function extractLandingText(content: Record<string, unknown>) {
   const raw = (content as { raw?: unknown }).raw;
   const text = (content as { text?: unknown }).text;
@@ -91,7 +85,6 @@ export default async function PublicLandingPage({
 
   const content = (landing.content || {}) as Record<string, unknown>;
   const hero = (content.hero || {}) as Record<string, unknown>;
-  const theme = (content.theme || {}) as Record<string, unknown>;
   const media = (content.media || {}) as Record<string, unknown>;
   const legal = (content.legal || {}) as Record<string, unknown>;
   const checkout = (content.checkout || {}) as Record<string, unknown>;
@@ -103,11 +96,9 @@ export default async function PublicLandingPage({
   const heroCta = typeof hero.cta === 'string' && hero.cta.trim()
     ? hero.cta.trim()
     : 'Comprar ahora';
-  const accent = typeof theme.accent === 'string' ? theme.accent : '';
   const heroImage = typeof media.hero_image_url === 'string' ? media.hero_image_url : '';
-  const checkoutEnabled = Boolean(checkout.enabled);
   const checkoutPrice = typeof checkout.price_cop === 'number' ? checkout.price_cop : 0;
-  const hasCheckout = checkoutEnabled && checkoutPrice > 0;
+  const hasCheckout = isPublished && checkoutPrice > 0;
   const legalBusiness = typeof legal.business_name === 'string' ? legal.business_name : '';
   const legalEmail = typeof legal.contact_email === 'string' ? legal.contact_email : '';
   const legalTermsUrl = typeof legal.terms_url === 'string' ? legal.terms_url : '';
@@ -118,15 +109,6 @@ export default async function PublicLandingPage({
   const landingText = extractLandingText(content);
   const highlights = extractHighlights(landingText);
 
-  const store = landing.store_id
-    ? await supabase
-        .from('stores')
-        .select('id, name, slug')
-        .eq('id', landing.store_id)
-        .maybeSingle()
-        .then(({ data }) => data as StoreRow | null)
-    : null;
-
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.18),_transparent_55%)]" />
@@ -134,15 +116,9 @@ export default async function PublicLandingPage({
       <div className="absolute -bottom-40 left-10 h-80 w-80 rounded-full bg-indigo-500/20 blur-3xl" />
 
       <header className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-        <div className="text-xs uppercase tracking-[0.3em] text-slate-400">Preview</div>
-        {store?.slug && (
-          <Link
-            href={`/s/${store.slug}`}
-            className="text-xs font-semibold text-slate-200 hover:text-white"
-          >
-            Ver tienda
-          </Link>
-        )}
+        <div className="text-xs uppercase tracking-[0.3em] text-slate-400">
+          {isPublished ? 'Oferta' : 'Vista previa'}
+        </div>
       </header>
 
       <main className="relative z-10 mx-auto max-w-6xl px-6 pb-16">
@@ -169,17 +145,10 @@ export default async function PublicLandingPage({
                   label={heroCta}
                   className="rounded-full bg-emerald-400 px-6 py-2 text-sm font-semibold text-slate-900"
                 />
-              ) : (
-                <button
-                  className="rounded-full bg-emerald-400 px-6 py-2 text-sm font-semibold text-slate-900"
-                  style={accent ? { backgroundColor: accent } : undefined}
-                >
-                  {heroCta}
-                </button>
-              )}
+              ) : null}
               {isOwner && (
                 <Link
-                  href="/landing"
+                  href={`/landing/${landing.id}`}
                   className="rounded-full border border-slate-700 px-5 py-2 text-sm font-semibold text-slate-200 hover:border-slate-500"
                 >
                   Editar landing

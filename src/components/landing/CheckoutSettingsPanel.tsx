@@ -38,6 +38,7 @@ export default function CheckoutSettingsPanel({ landingId, content }: CheckoutSe
       title="Activa el pago en esta landing"
       defaultSourceOptions={['research', 'manual']}
       error={state?.error}
+      showAccessToken
     />
   );
 }

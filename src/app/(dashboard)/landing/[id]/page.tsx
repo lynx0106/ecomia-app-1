@@ -28,15 +28,6 @@ export default async function LandingDetailPage({
     notFound();
   }
 
-  const { data: store } = landing.store_id
-    ? await supabase
-        .from('stores')
-        .select('id, name')
-        .eq('id', landing.store_id)
-        .eq('user_id', user.id)
-        .maybeSingle()
-    : { data: null };
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -73,17 +64,6 @@ export default async function LandingDetailPage({
             {new Date(landing.updated_at).toLocaleDateString()}
           </p>
         </div>
-      </div>
-
-      <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 space-y-2">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Store</h2>
-        {store ? (
-          <PillLink href={`/stores/${store.id}`} variant="neutral" size="sm">
-            {store.name}
-          </PillLink>
-        ) : (
-          <p className="text-sm text-gray-500">Sin tienda asociada.</p>
-        )}
       </div>
 
       <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 space-y-2">

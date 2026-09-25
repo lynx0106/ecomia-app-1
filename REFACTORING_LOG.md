@@ -1,3 +1,5 @@
+> **Histórico.** Este documento no describe el MVP vigente. La operación actual está en README.md, SETUP_LOCAL.md, INSTRUCCIONES_WEBHOOK_SETUP.md y GUIA_DE_USUARIO.md.
+
 # Refactoring Summary - Feb 13, 2026
 
 ## Overview

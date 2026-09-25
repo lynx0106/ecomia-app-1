@@ -123,9 +123,8 @@ export async function executeLandingBuilderAgent(
       },
     };
 
-    // SIEMPRE hacer pausa después de landing
-    // El usuario decide si quiere continuar con copys
-    const nextAgent = 'copy_social';
+    // Copy y media no son paso obligatorio para publicar.
+    const nextAgent = 'complete';
 
     return {
       response: response.text,

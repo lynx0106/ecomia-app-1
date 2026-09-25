@@ -8,16 +8,11 @@ import Image from "next/image";
 import { 
   MessageSquare, 
   LayoutDashboard, 
-  Store, 
   Settings, 
-  Bot,
   ArrowLeft,
   Menu, 
   X, 
   LogOut, 
-  User,
-  BookOpen,
-  LifeBuoy,
   Search
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -28,114 +23,35 @@ import { ToastProvider } from "@/components/ui/ToastProvider";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import PillLink from "@/components/ui/PillLink";
 import { logger } from "@/lib/logging";
-import { HelpBubble } from "@/components/ui/HelpBubble";
 
 function cn(...inputs: (string | undefined | null | false)[]) {
   return twMerge(clsx(inputs));
 }
 
-const sidebarItemsUser = [
+const sidebarItems = [
   {
-    title: "Chat IA",
+    title: "Chat",
     href: "/chat",
     icon: MessageSquare,
-    description: "Guía paso a paso con IA",
+    requiresResearch: false,
   },
   {
-    title: "Mis Investigaciones",
+    title: "Investigaciones",
     href: "/research-history",
     icon: LayoutDashboard,
-    description: "Historial de investigaciones",
+    requiresResearch: true,
   },
   {
-    title: "Mis Creaciones",
-    href: "/creations",
-    icon: LayoutDashboard,
-    description: "Tiendas y landings creadas",
-  },
-  {
-    title: "Mis Tickets",
-    href: "/tickets",
-    icon: LifeBuoy,
-    description: "Solicitudes de soporte",
-  },
-  {
-    title: "Tutoriales",
-    href: "/tutorials",
-    icon: BookOpen,
-    description: "Aprende a usar todas las features",
-  },
-  {
-    title: "Configuración",
-    href: "/settings",
-    icon: Settings,
-  },
-];
-
-const sidebarItemsAdmin = [
-  {
-    title: "Chat IA",
-    href: "/chat",
-    icon: MessageSquare,
-  },
-  {
-    title: "Mis Investigaciones",
-    href: "/research-history",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Mis Tiendas",
-    href: "/stores",
-    icon: Store,
-  },
-  {
-    title: "Landing Generator",
+    title: "Landings",
     href: "/landing",
     icon: LayoutDashboard,
-  },
-  {
-    title: "Investigacion",
-    href: "/research",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Agentes",
-    href: "/agents",
-    icon: Bot,
-  },
-  {
-    title: "Tutoriales",
-    href: "/tutorials",
-    icon: BookOpen,
+    requiresResearch: false,
   },
   {
     title: "Configuración",
     href: "/settings",
     icon: Settings,
-  },
-  {
-    title: "Tickets",
-    href: "/admin/tickets",
-    icon: LifeBuoy,
-    adminOnly: true,
-  },
-  {
-    title: "Búsquedas Asignadas",
-    href: "/admin/searches",
-    icon: Search,
-    adminOnly: true,
-  },
-  {
-    title: "Admin Agentes",
-    href: "/admin/agents",
-    icon: Bot,
-    adminOnly: true,
-  },
-  {
-    title: "Admin Roles",
-    href: "/admin/roles",
-    icon: User,
-    adminOnly: true,
+    requiresResearch: false,
   },
 ];
 
@@ -146,11 +62,12 @@ export default function DashboardLayout({
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [hasResearch, setHasResearch] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
-    const loadAdminStatus = async () => {
+    const loadNav = async () => {
       try {
         const res = await fetch('/api/admin/me');
         const data = await res.json();
@@ -158,9 +75,29 @@ export default function DashboardLayout({
       } catch {
         setIsAdmin(false);
       }
+
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        const { count } = await supabase
+          .from('research_sessions')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id);
+        setHasResearch((count || 0) > 0);
+      } catch {
+        setHasResearch(false);
+      }
     };
-    loadAdminStatus();
+    loadNav();
   }, []);
+
+  const navItems = [
+    ...sidebarItems.filter((item) => !item.requiresResearch || hasResearch),
+    ...(isAdmin
+      ? [{ title: 'Cupo', href: '/admin/searches', icon: Search, requiresResearch: false }]
+      : []),
+  ];
 
   const handleSignOut = async () => {
     const supabase = createClient();
@@ -213,7 +150,7 @@ export default function DashboardLayout({
         </div>
 
         <nav className="flex-1 px-4 py-4 space-y-2">
-          {(isAdmin ? sidebarItemsAdmin : sidebarItemsUser).map((item) => {
+          {navItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
             
             return (
@@ -292,7 +229,7 @@ export default function DashboardLayout({
         </div>
 
         <nav className="flex-1 px-4 py-4 space-y-2">
-          {(isAdmin ? sidebarItemsAdmin : sidebarItemsUser).map((item) => {
+          {navItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
             
             // Map hrefs to tour attributes
@@ -373,8 +310,6 @@ export default function DashboardLayout({
             });
           }}
         >
-          {/* Help Bubble */}
-          <HelpBubble />
           <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-black p-4 md:p-8">
             <div className="max-w-7xl mx-auto">
               <div className="hidden md:flex items-center justify-end mb-4">

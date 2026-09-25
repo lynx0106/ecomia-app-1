@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
-import { isUserAdmin, hasActiveResearchSession } from '@/lib/auth/server';
+import { encryptString } from '@/lib/crypto';
 
 type LandingPageRow = {
   id: string;
@@ -66,75 +66,14 @@ export async function createLandingPage(input: {
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-
   if (!user) return { error: 'Unauthorized' } as const;
 
-  // Validación: usuarios finales solo pueden crear a través de Chat (con sesión de investigación)
-  const isAdmin = await isUserAdmin(user.id, user.email);
-  if (!isAdmin) {
-    const hasSession = await hasActiveResearchSession(user.id);
-    if (!hasSession) {
-      return {
-        error: 'Debes completar una investigación en Chat IA primero. Los formularios directos son solo para administradores.',
-      } as const;
-    }
-  }
-
   const title = input.title.trim();
-  if (!title) return { error: 'Missing title' } as const;
-
-  const slug = normalizeSlug(input.slug);
-  if (input.slug && !slug) {
-    return { error: 'Invalid slug format' } as const;
-  }
-
-  const status = input.status?.trim().toLowerCase() || 'draft';
-  if (!LANDING_STATUSES.has(status)) {
-    return { error: 'Invalid status' } as const;
-  }
-
-  const content = input.content ? asRecord(input.content) : null;
-  if (input.content && !content) return { error: 'Invalid content' } as const;
-
-  const storeId = input.store_id?.trim() || null;
-  if (storeId) {
-    const { data: store, error: storeError } = await supabase
-      .from('stores')
-      .select('id')
-      .eq('id', storeId)
-      .eq('user_id', user.id)
-      .maybeSingle();
-    if (storeError) return { error: 'Failed to validate store' } as const;
-    if (!store) return { error: 'Store not found' } as const;
-  }
-
-  if (slug) {
-    const { data: existing, error: slugError } = await supabase
-      .from('landing_pages')
-      .select('id')
-      .eq('slug', slug)
-      .maybeSingle();
-    if (slugError) return { error: 'Failed to validate slug' } as const;
-    if (existing) return { error: 'Slug already in use' } as const;
-  }
-
-  const { data, error } = await supabase
-    .from('landing_pages')
-    .insert({
-      user_id: user.id,
-      store_id: storeId,
-      title,
-      slug,
-      status,
-      content: content || {},
-    })
-    .select('id, user_id, store_id, title, slug, content, status, created_at, updated_at')
-    .single();
-
-  if (error) return { error: 'Failed to create landing page' } as const;
-
-  revalidatePath('/landing');
-  return { landingPage: data as LandingPageRow } as const;
+  return {
+    error: title
+      ? `«${title}» no se crea desde el formulario. La landing la crea el chat; edítala y publícala en /landing.`
+      : 'La landing la crea el chat. Edítala y publícala en /landing.',
+  } as const;
 }
 
 export async function updateLandingPage(input: {
@@ -515,6 +454,7 @@ export async function updateLandingCheckoutFromForm(
   const priceRaw = String(formData.get('checkout_price') || '').trim();
   const productName = String(formData.get('checkout_product') || '').trim();
   const source = String(formData.get('checkout_source') || '').trim();
+  const mpAccessTokenRaw = String(formData.get('mp_access_token') || '').trim();
 
   const price = priceRaw ? normalizePrice(priceRaw) : null;
   if (priceRaw && !price) {
@@ -539,6 +479,29 @@ export async function updateLandingCheckoutFromForm(
   const existingContent = asRecord(landing.content) || {};
   const existingProduct = asRecord(existingContent.product) || {};
   const existingCheckout = asRecord(existingContent.checkout) || {};
+  const existingPayments = asRecord(existingContent.payments) || {};
+  const existingMp = asRecord(existingPayments.mercadopago) || {};
+
+  let accessTokenEnc = typeof existingMp.access_token_enc === 'string' ? existingMp.access_token_enc : null;
+  let mpUserId = typeof existingMp.user_id === 'string' ? existingMp.user_id : null;
+  if (mpAccessTokenRaw) {
+    try {
+      accessTokenEnc = encryptString(mpAccessTokenRaw);
+    } catch {
+      return { error: 'No se pudo cifrar el token. Configura APP_ENCRYPTION_KEY.' } as GuidedLandingFormState;
+    }
+    try {
+      const me = await fetch('https://api.mercadopago.com/users/me', {
+        headers: { Authorization: `Bearer ${mpAccessTokenRaw}` },
+      });
+      if (me.ok) {
+        const profile = await me.json() as { id?: string | number };
+        if (profile?.id != null) mpUserId = String(profile.id);
+      }
+    } catch {
+      mpUserId = existingMp.user_id ? String(existingMp.user_id) : null;
+    }
+  }
 
   const nextContent = {
     ...existingContent,
@@ -553,6 +516,15 @@ export async function updateLandingCheckoutFromForm(
       price_cop: price ?? existingCheckout.price_cop ?? null,
       product_name: productName || existingCheckout.product_name || existingProduct.name || '',
       source: source || existingCheckout.source || 'research',
+    },
+    payments: {
+      ...existingPayments,
+      mercadopago: {
+        ...existingMp,
+        access_token_enc: accessTokenEnc,
+        user_id: mpUserId,
+        updated_at: new Date().toISOString(),
+      },
     },
   };
 

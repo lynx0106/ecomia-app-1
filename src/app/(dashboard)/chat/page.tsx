@@ -57,28 +57,11 @@ export default function ChatPage() {
         const isNewUser = !onboarding?.completed_tour && !onboarding?.tour_skipped_at;
 
         if (isNewUser) {
-          welcomeMessage = `¡Hola! 👋 Soy tu asesor de e-commerce impulsado por IA.
+          welcomeMessage = `Hola. Investigo un producto físico para vender en Colombia y dejo la landing en borrador.
 
-**Aquí puedo ayudarte con:**
-• 🔍 **Investigación de Mercado** - Busca productos rentables y analiza la competencia
-• 📄 **Landing Pages** - Crea páginas para promover tus productos
-• 💬 **Copys para Redes** - Genera contenido persuasivo para Instagram, TikTok y Facebook
-• 🏪 **Tiendas Online** - Construye tu ecommerce paso a paso
-• 💡 **Estrategia** - Consejos sobre e-commerce y emprendimiento
-
-**¿En qué te puedo ayudar hoy?** Describeme tu idea o producto y yo te guío en cada paso. 
-
-Recuerda: puedes hacer clic en el botón **?** (Ayuda) si necesitas ver nuevamente la guía de bienvenida.`;
+Cuéntame qué quieres vender. Cuando cerremos la investigación, podrás editar el precio en COP, pegar tu access token de Mercado Pago y publicar. El comprador abre el enlace sin cuenta y el pago entra a tu Mercado Pago.`;
         } else {
-          welcomeMessage = `¡Bienvenido de vuelta! 👋 
-
-¿Qué te traes hoy? 
-• 🔍 ¿Buscas un nuevo producto?
-• 📄 ¿Necesitas crear una landing?
-• 💬 ¿Quieres copys para redes?
-• 🏪 ¿Trabajamos en tu tienda?
-
-Cuéntame tu idea y yo me encargo del resto.`;
+          welcomeMessage = `¿Qué producto investigamos? Al cerrar la investigación queda una landing en borrador para que publiques /l/ con tu Mercado Pago.`;
         }
 
         const welcomeMsg: Message = {
@@ -138,7 +121,7 @@ Cuéntame tu idea y yo me encargo del resto.`;
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || 'Error en el chat');
+        throw new Error(data?.message || data?.error || 'Error en el chat');
       }
 
       const data = await res.json();
@@ -165,12 +148,7 @@ Cuéntame tu idea y yo me encargo del resto.`;
 
       // Si hay agentState, solo mostrar mensaje simple en el chat
       // Los detalles se ven en el centro
-      let chatMessage = assistantText;
-      if (data.state && (data.state.sourcingResult || data.state.currentStep)) {
-        // Es un flujo multi-agente, mostrar solo confirmación en el chat
-        const currentStep = data.state.currentStep || 'análisis';
-        chatMessage = `✅ Procesando ${currentStep}... Revisa el panel central para ver el progreso.`;
-      }
+      const chatMessage = assistantText;
 
       const assistantMessage: Message = {
         id: crypto.randomUUID(),
